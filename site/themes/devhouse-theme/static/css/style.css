@@ -62,6 +62,10 @@ div.主要 div.内容 {
     vertical-align: top;
 }
 
+div.主要 div.内容 img {
+    max-width: 100%;
+}
+
 div.主要 div.右-ナビ {
     display: inline-block;
     width: 200px;
