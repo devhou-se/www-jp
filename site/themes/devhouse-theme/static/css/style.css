@@ -22,6 +22,15 @@ a:hover, a:active {
     color: #f00;
 }
 
+table {
+    border: 1px solid #333;
+}
+
+td, th {
+    border: 1px solid #333;
+    padding: 0 .2em;
+}
+
 div.コンテナ {
     width: 960px;
     margin: 10px auto;
