@@ -43,14 +43,14 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global push.autosetupremote true
           git add site/content/${{ github.event.issue.number }}.md
-          git commit -m "Add post for PR #${{ github.event.issue.number }}"
+          git commit -m "Add post for post ${{ github.event.issue.number }}"
           git push
       - name: "merge branch"
         if: steps.check-comment.outputs.valid == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr create --title "Add post for PR #${{ github.event.issue.number }}" --body "Add post for PR #${{ github.event.issue.number }}" --base main --head "post/${{ github.event.issue.number }}"
+          gh pr create --title "Add post for post ${{ github.event.issue.number }}" --body "Add post for PR #${{ github.event.issue.number }}" --base main --head "post/${{ github.event.issue.number }}"
           gh pr merge --auto --squash --delete-branch
       - name: "install hugo"
         uses: peaceiris/actions-hugo@v2
@@ -67,3 +67,11 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEVHOUSE_80936 }}'
           channelId: live
           projectId: devhouse-80936
+      - name: "react success"
+        if: steps.check-comment.outputs.valid == 'true' && success()
+        run: |
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"content":"+1"}' "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions"
+      - name: "react failure"
+        if: steps.check-comment.outputs.valid == 'true' && failure()
+        run: |
+            curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"content":"-1"}' "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions"
