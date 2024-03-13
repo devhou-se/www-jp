@@ -1,0 +1,69 @@
+on:
+  issue_comment:
+
+
+jobs:
+  post:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'post')
+    steps:
+      - name: "checkout"
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: "check comment"
+        id: check-comment
+        run: |
+          echo "Comment: ${{ github.event.comment.body }}"
+          if [[ "${{ github.event.comment.body }}" == "/post" ]]; then
+            echo "::set-output name=valid::true"
+          else
+            echo "::set-output name=valid::false"
+          fi
+      - name: "create branch"
+        if: steps.check-comment.outputs.valid == 'true'
+        run: |
+          git checkout "post/${{ github.event.issue.number }}" || git checkout -b "post/${{ github.event.issue.number }}"
+      - name: "create post"
+        if: steps.check-comment.outputs.valid == 'true'
+        run: |
+          echo "---
+          title: ${{ github.event.issue.title }}
+          date: ${{ github.event.issue.created_at }}
+          author: ${{ github.event.issue.user.login }}
+          ---
+          ${{ github.event.issue.body }}
+          " > site/content/${{ github.event.issue.number }}.md
+          cat site/content/${{ github.event.issue.number }}.md
+      - name: "commit post"
+        if: steps.check-comment.outputs.valid == 'true'
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global push.autosetupremote true
+          git add site/content/${{ github.event.issue.number }}.md
+          git commit -m "Add post for PR #${{ github.event.issue.number }}"
+          git push
+      - name: "merge branch"
+        if: steps.check-comment.outputs.valid == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create --title "Add post for PR #${{ github.event.issue.number }}" --body "Add post for PR #${{ github.event.issue.number }}" --base main --head "post/${{ github.event.issue.number }}"
+          gh pr merge --auto --squash --delete-branch
+      - name: "install hugo"
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: "0.123.0"
+      - name: "build"
+        run: |
+          cd site
+          hugo --minify
+      - name: "deploy"
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEVHOUSE_80936 }}'
+          channelId: live
+          projectId: devhouse-80936

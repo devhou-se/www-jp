@@ -1,0 +1,9 @@
+<p>ブログ投稿</p>
+{{ range .Site.RegularPages.GroupByParam "author" }}
+{{ .Key }}
+<ul>
+    {{ range .Pages.ByPublishDate.Reverse }}
+    <li><a href="{{ .RelPermalink }}">{{ .PublishDate | time.Format "20060102" }}: {{ .LinkTitle }}</a></li>
+    {{ end }}
+</ul>
+{{ end }}

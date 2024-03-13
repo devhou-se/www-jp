@@ -1,0 +1,7 @@
+{{ define "main" }}
+<h2>{{ .Title }}</h2>
+<p>投稿日:{{ .Date.Format "2006年01月02日15時04分" }}</p>
+<p>投稿者{{ .Params.Author }}</p>
+<hr>
+{{ .Content }}
+{{ end }}

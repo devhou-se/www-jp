@@ -1,0 +1,28 @@
+name: "Commenter"
+
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+
+env:
+  MSG_INSTRUCTION: "\"/post\" to publish the blog post"
+
+jobs:
+  comment:
+    name: "Comment instructions"
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: "checkout"
+        uses: actions/checkout@v4
+      - name: "comment on issue"
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COMMENT_COUNT=$(gh issue view ${{ github.event.issue.number }} --json comments -q " .[][] | select(.author.login==\"github-actions\") | .id" | wc -l)
+          if [ $COMMENT_COUNT -eq 0 ]; then
+            gh issue comment ${{ github.event.issue.number }} -b "$MSG_INSTRUCTION"
+          fi
