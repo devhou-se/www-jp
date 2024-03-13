@@ -22,6 +22,15 @@ a:hover, a:active {
     color: #f00;
 }
 
+table {
+    border: 1px solid #333;
+}
+
+td, th {
+    border: 1px solid #333;
+    padding: 0 .2em;
+}
+
 div.コンテナ {
     width: 960px;
     margin: 10px auto;
@@ -60,6 +69,10 @@ div.主要 div.内容 {
     display: inline-block;
     width: 425px;
     vertical-align: top;
+}
+
+div.主要 div.内容 img {
+    max-width: 100%;
 }
 
 div.主要 div.右-ナビ {
