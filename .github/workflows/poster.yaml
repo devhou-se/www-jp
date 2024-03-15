@@ -21,6 +21,10 @@ jobs:
           else
             echo "::set-output name=valid::false"
           fi
+      - name: "eyes react"
+        if: steps.check-comment.outputs.valid == 'true'
+        run: |
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"content":"eyes"}' "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions"
       - name: "setup python"
         if: steps.check-comment.outputs.valid == 'true'
         uses: actions/setup-python@v5
@@ -80,6 +84,11 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEVHOUSE_80936 }}'
           channelId: live
           projectId: devhouse-80936
+      - name: "reset reaction"
+        if: steps.check-comment.outputs.valid == 'true'
+        run: |
+          REACTION_ID=$(curl -X GET -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions" | jq " .[] | select(.user.login == \"github-actions[bot]\") | .id ")
+          curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions/$REACTION_ID"
       - name: "react success"
         if: steps.check-comment.outputs.valid == 'true' && success()
         run: |
