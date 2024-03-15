@@ -42,7 +42,7 @@ def translate_md(inp: str) -> str:
             thread_id=thread.id
         )
 
-        # print(messages.data)
+        print(messages.data[0].content[0].text.value)
 
         return messages.data[0].content[0].text.value
 
