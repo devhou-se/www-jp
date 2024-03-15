@@ -44,7 +44,7 @@ def translate_md(inp: str) -> str:
 
         # print(messages.data)
 
-        return messages.data[0].content
+        return messages.data[0].content[0].text.value
 
     else:
         print(run.status)
