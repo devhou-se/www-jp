@@ -1,3 +1,5 @@
+import json
+
 from openai import OpenAI
 
 import os
@@ -38,6 +40,9 @@ def translate_md(inp: str) -> str:
         messages = client.beta.threads.messages.list(
             thread_id=thread.id
         )
+
+        print(json.loads(messages))
+
         return messages[0].content
 
     else:
