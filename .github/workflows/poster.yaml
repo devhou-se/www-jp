@@ -21,6 +21,14 @@ jobs:
           else
             echo "::set-output name=valid::false"
           fi
+      - name: "setup python"
+        if: steps.check-comment.outputs.valid == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: "install dependencies"
+        if: steps.check-comment.outputs.valid == 'true'
+        run: pip install -r translator/requirements.txt
       - name: "create branch"
         if: steps.check-comment.outputs.valid == 'true'
         run: |
@@ -36,6 +44,11 @@ jobs:
           ${{ github.event.issue.body }}
           " > site/content/${{ github.event.issue.number }}.md
           cat site/content/${{ github.event.issue.number }}.md
+      - name: "translate"
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python translator/app.py ${{ github.event.issue.number }}
       - name: "commit post"
         if: steps.check-comment.outputs.valid == 'true'
         run: |

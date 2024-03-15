@@ -1,0 +1,67 @@
+import json
+
+from openai import OpenAI
+
+import os
+import sys
+import time
+
+OPENAI_KEY = os.getenv("OPENAI_API_KEY")
+ASSISTANT_ID = "asst_IK9udKO5TJSVcCyBoL56TdiE"
+
+
+def main():
+    filename = f"{sys.argv[1]}.md"
+    full_filename = os.path.join(os.getcwd(), "site", "content", filename)
+
+    with open(full_filename, "r") as f:
+        content = f.read()
+
+    translated_text = translate_md(content)
+
+    translated_text = fix_new_lines(translated_text)
+
+    with open(full_filename, "w") as f:
+        f.write(translated_text)
+
+
+def translate_md(inp: str) -> str:
+    client = OpenAI(api_key=OPENAI_KEY)
+    thread = client.beta.threads.create()
+    _ = client.beta.threads.messages.create(thread.id, role="user", content=inp)
+    run = client.beta.threads.runs.create(thread.id, assistant_id=ASSISTANT_ID, model="gpt-4")
+
+    while run.status in ["queued", "in_progress", "cancelling"]:
+        print(f"waiting for run {run.id} to complete. status: {run.status}")
+        time.sleep(1)
+        run = client.beta.threads.runs.retrieve(
+            thread_id=thread.id,
+            run_id=run.id
+        )
+
+    if run.status == "completed":
+        messages = client.beta.threads.messages.list(
+            thread_id=thread.id
+        )
+
+        print(messages.data[0].content[0].text.value)
+
+        return messages.data[0].content[0].text.value
+
+    else:
+        print(f"run {run.id} failed with status: {run.status}")
+        sys.exit(0)
+
+
+def fix_new_lines(inp: str) -> str:
+    lines = inp.split("\n")
+    meta_start = lines.index("---")
+    meta_end = lines.index("---", meta_start + 1)
+    metas = lines[meta_start:meta_end + 1]
+    content = lines[meta_end + 1:]
+    page = "\n".join(metas) + "\n\n" + "\n\n".join(content)
+    return page
+
+
+if __name__ == '__main__':
+    main()
