@@ -30,6 +30,7 @@ def translate_md(inp: str) -> str:
     run = client.beta.threads.runs.create(thread.id, assistant_id=ASSISTANT_ID, model="gpt-4")
 
     while run.status in ["queued", "in_progress", "cancelling"]:
+        print(f"waiting for run {run.id} to complete. status: {run.status}")
         time.sleep(1)
         run = client.beta.threads.runs.retrieve(
             thread_id=thread.id,
