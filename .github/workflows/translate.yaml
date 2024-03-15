@@ -18,7 +18,6 @@ jobs:
           run: pip install -r translator/requirements.txt
         - name: "translate"
           env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           run: |
             python translator/app.py 1
