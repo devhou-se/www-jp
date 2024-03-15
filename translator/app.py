@@ -42,9 +42,9 @@ def translate_md(inp: str) -> str:
             thread_id=thread.id
         )
 
-        print(messages.data)
+        # print(messages.data)
 
-        return messages[0].content
+        return messages.data[0].content
 
     else:
         print(run.status)
