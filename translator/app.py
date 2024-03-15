@@ -19,6 +19,8 @@ def main():
 
     translated_text = translate_md(content)
 
+    translated_text = fix_new_lines(translated_text)
+
     with open(full_filename, "w") as f:
         f.write(translated_text)
 
@@ -49,6 +51,16 @@ def translate_md(inp: str) -> str:
     else:
         print(f"run {run.id} failed with status: {run.status}")
         sys.exit(0)
+
+
+def fix_new_lines(inp: str) -> str:
+    lines = inp.split("\n")
+    meta_start = lines.index("---")
+    meta_end = lines.index("---", meta_start + 1)
+    metas = lines[meta_start:meta_end + 1]
+    content = lines[meta_end + 1:]
+    page = "\n".join(metas) + "\n\n" + "\n\n".join(content)
+    return page
 
 
 if __name__ == '__main__':
