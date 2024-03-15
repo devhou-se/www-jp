@@ -47,8 +47,8 @@ def translate_md(inp: str) -> str:
         return messages.data[0].content[0].text.value
 
     else:
-        print(run.status)
-        sys.exit(1)
+        print(f"run {run.id} failed with status: {run.status}")
+        sys.exit(0)
 
 
 if __name__ == '__main__':
