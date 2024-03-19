@@ -80,3 +80,7 @@ div.主要 div.右-ナビ {
     width: 200px;
     vertical-align: top;
 }
+
+div.主要 div.右-ナビ img {
+    max-width: 100%;
+}
