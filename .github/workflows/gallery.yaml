@@ -1,0 +1,52 @@
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  gallery:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+    - name: "checkout"
+      uses: actions/checkout@v4
+      with:
+        ref: main
+    - name: "setup python"
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+    - name: "install dependencies"
+      run: pip install -r python/requirements.txt
+    - name: "create branch"
+      run: |
+       git checkout "post/image-of-the-day" || git checkout -b "post/image-of-the-day"
+    - name: "update image of the day"
+      run: |
+          python python/dailyimage.py
+    - name: "commit post"
+      run: |
+        git config --global push.autosetupremote true
+        git add site/themes/devhouse-theme/layouts/partials/gallery.html
+        git commit -m "Add post for post ${{ github.event.issue.number }}"
+        git push
+    - name: "merge branch"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh pr create --title "Add post for post ${{ github.event.issue.number }}" --body "Add post for PR #${{ github.event.issue.number }}" --base main --head "post/${{ github.event.issue.number }}"
+        gh pr merge --auto --squash --delete-branch
+    - name: "install hugo"
+      uses: peaceiris/actions-hugo@v2
+      with:
+        hugo-version: "0.123.0"
+    - name: "build"
+      run: |
+        cd site
+        hugo --minify
+    - name: "deploy"
+      uses: FirebaseExtended/action-hosting-deploy@v0
+      with:
+        repoToken: '${{ secrets.GITHUB_TOKEN }}'
+        firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEVHOUSE_80936 }}'
+        channelId: live
+        projectId: devhouse-80936
