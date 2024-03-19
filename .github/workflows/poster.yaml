@@ -53,9 +53,6 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           python python/translator.py ${{ github.event.issue.number }}
-      - name: "collect images"
-        run: |
-          python python/gallery.py
       - name: "commit post"
         if: steps.check-comment.outputs.valid == 'true'
         run: |
