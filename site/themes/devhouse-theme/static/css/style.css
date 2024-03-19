@@ -1,9 +1,21 @@
+/* Palette
+#E83761
+#BD2B4C
+#A2354C
+#FAA800
+#2B1005
+ */
+
 html, body {
     margin: 0;
     padding: 0;
-    background-color: #cbd7f1;
+    background-color: #FAA800;
     min-width: 960px;
     font-family: sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #A2354C;
 }
 
 div.章 {
@@ -14,8 +26,8 @@ div.章 {
 }
 
 a, a:visited, a:link {
-    color: #000;
-    text-decoration: none;
+    color: inherit;
+    text-decoration: underline;
 }
 
 a:hover, a:active {
@@ -37,7 +49,19 @@ div.コンテナ {
 }
 
 div.ヘッダ {
+    background: none;
+    border: none;
+    color: #E83761;
+    font-size: 1.25em;
+}
 
+div.ヘッダ h2 {
+    color: #E83761;
+}
+
+div.ヘッダ img {
+    height: 64px;
+    margin: -16px 8px;
 }
 
 div.ヘッダ h2 {

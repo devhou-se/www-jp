@@ -37,25 +37,21 @@ jobs:
         if: steps.check-comment.outputs.valid == 'true'
         run: |
           git checkout "post/${{ github.event.issue.number }}" || git checkout -b "post/${{ github.event.issue.number }}"
-      - name: "create post"
+      - name: "post creator"
         if: steps.check-comment.outputs.valid == 'true'
+        env:
+          POST_TITLE: ${{ github.event.issue.title }}
+          POST_BODY: ${{ github.event.issue.body }}
+          POST_NUMBER: ${{ github.event.issue.number }}
+          POST_AUTHOR: ${{ github.event.issue.user.login }}
+          POST_DATE: ${{ github.event.issue.created_at }}
         run: |
-          echo "---
-          title: ${{ github.event.issue.title }}
-          date: ${{ github.event.issue.created_at }}
-          author: ${{ github.event.issue.user.login }}
-          ---
-          ${{ github.event.issue.body }}
-          " > site/content/${{ github.event.issue.number }}.md
-          cat site/content/${{ github.event.issue.number }}.md
+          python python/poster.py ${{ github.event.issue.number }}
       - name: "translate"
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           python python/translator.py ${{ github.event.issue.number }}
-      - name: "collect images"
-        run: |
-          python python/gallery.py
       - name: "commit post"
         if: steps.check-comment.outputs.valid == 'true'
         run: |
