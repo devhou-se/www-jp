@@ -40,6 +40,7 @@ def main():
         return
 
     images = [IMG_TEMPLATE.format(img[2], img[1]) for img in images]
+    images = "[\"" + "\", \"".join(images) + "\"]"
     js = HTML_TEMPLATE.format(choices=images)
 
     with open(GALLERY_HTML, "w") as f:
