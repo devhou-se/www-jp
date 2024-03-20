@@ -24,21 +24,23 @@ jobs:
       run: pip install -r python/requirements.txt
     - name: "create branch"
       run: |
-       git checkout "post/image-of-the-day" || git checkout -b "post/image-of-the-day"
+       git checkout "post/gallery" || git checkout -b "post/gallery"
     - name: "update image of the day"
       run: |
           python python/dailyimage.py
     - name: "commit post"
       run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
         git config --global push.autosetupremote true
         git add site/themes/devhouse-theme/layouts/partials/gallery.html
-        git commit -m "Add post for post ${{ github.event.issue.number }}"
+        git commit -m "Update gallery"
         git push
     - name: "merge branch"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh pr create --title "Add post for post ${{ github.event.issue.number }}" --body "Add post for PR #${{ github.event.issue.number }}" --base main --head "post/${{ github.event.issue.number }}"
+        gh pr create --title "Update gallery" --body "" --base main --head "post/gallery"
         gh pr merge --auto --squash --delete-branch
 
   deploy:
