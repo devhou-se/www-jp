@@ -5,6 +5,7 @@ on:
 
 jobs:
   post:
+    name: "Create Post"
     permissions: write-all
     runs-on: ubuntu-latest
     if: contains(github.event.issue.labels.*.name, 'post')
@@ -69,19 +70,26 @@ jobs:
         run: |
           gh pr create --title "Add post for post ${{ github.event.issue.number }}" --body "Add post for PR #${{ github.event.issue.number }}" --base main --head "post/${{ github.event.issue.number }}"
           gh pr merge --auto --squash --delete-branch
-      - name: "deploy"
-        if: steps.check-comment.outputs.valid == 'true'
-        uses: ./.github/workflows/deploy.yaml
+
+  deploy:
+    name: "Deploy"
+    uses: ./.github/workflows/deploy.yaml
+    needs: gallery
+    secrets: inherit
+    permissions: write-all
+
+  reactions:
+    name: "React"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "checkout"
+        uses: actions/checkout@v4
+        with:
+          ref: main
       - name: "reset reaction"
-        if: steps.check-comment.outputs.valid == 'true'
         run: |
           REACTION_ID=$(curl -X GET -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions" | jq " .[] | select(.user.login == \"github-actions[bot]\") | .id ")
           curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions/$REACTION_ID"
       - name: "react success"
-        if: steps.check-comment.outputs.valid == 'true' && success()
         run: |
           curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"content":"+1"}' "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions"
-      - name: "react failure"
-        if: steps.check-comment.outputs.valid == 'true' && failure()
-        run: |
-            curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"content":"-1"}' "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions"

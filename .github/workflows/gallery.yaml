@@ -8,6 +8,7 @@ on:
 
 jobs:
   gallery:
+    name: "Update Gallery"
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
@@ -39,18 +40,10 @@ jobs:
       run: |
         gh pr create --title "Add post for post ${{ github.event.issue.number }}" --body "Add post for PR #${{ github.event.issue.number }}" --base main --head "post/${{ github.event.issue.number }}"
         gh pr merge --auto --squash --delete-branch
-    - name: "install hugo"
-      uses: peaceiris/actions-hugo@v2
-      with:
-        hugo-version: "0.123.0"
-    - name: "build"
-      run: |
-        cd site
-        hugo --minify
-    - name: "deploy"
-      uses: FirebaseExtended/action-hosting-deploy@v0
-      with:
-        repoToken: '${{ secrets.GITHUB_TOKEN }}'
-        firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEVHOUSE_80936 }}'
-        channelId: live
-        projectId: devhouse-80936
+
+  deploy:
+    name: "Deploy"
+    uses: ./.github/workflows/deploy.yaml
+    needs: gallery
+    secrets: inherit
+    permissions: write-all

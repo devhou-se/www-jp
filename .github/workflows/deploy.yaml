@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: "checkout"
         uses: actions/checkout@v4
+        with:
+          ref: main
       - name: "install hugo"
         uses: peaceiris/actions-hugo@v2
         with:
