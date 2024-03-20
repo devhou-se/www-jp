@@ -4,3 +4,4 @@ on:
 jobs:
   deploy:
     uses: ./.github/workflows/deploy.yaml
+    secrets: inherit
