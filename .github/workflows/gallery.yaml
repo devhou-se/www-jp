@@ -33,19 +33,21 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
         git config --global push.autosetupremote true
+        git add site/content/gallery.md
         git add site/themes/devhouse-theme/layouts/partials/gallery.html
-        git commit -m "Update gallery"
+        git commit -m "Update gallery" || echo "No changes to commit"
         git push
     - name: "merge branch"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         gh pr create --title "Update gallery" --body "" --base main --head "post/gallery"
-        gh pr merge --auto --squash --delete-branch
+        gh pr merge --auto --squash --delete-branch || echo "No changes to merge"
 
   deploy:
     name: "Deploy"
     uses: ./.github/workflows/deploy.yaml
+    if: ${{ !github.event_name == 'workflow_call' }}
     needs: gallery
     secrets: inherit
     permissions: write-all
