@@ -1,17 +1,16 @@
 import datetime
 import os
-import random
 import re
 
-MAX_AGE = 2 # days
+MAX_AGE = 2  # days
 
 GALLERY_MD = os.path.join(os.getcwd(), "site", "content", "gallery.md")
 GALLERY_HTML = os.path.join(os.getcwd(), "site", "themes", "devhouse-theme", "layouts", "partials", "gallery.html")
 IMG_PATTERN = r"(\!\[(.*)\]\((.*)\))"
 
 IMG_TEMPLATE = "<img src=\"{}\" alt=\"{}\" />"
-HTML_TEMPLATE = """
-<span id="daily-image"></span>
+IMG_MD_TEMPLATE = "![{}]({})"
+HTML_TEMPLATE = """<span id="daily-image"></span>
 <script>
 const choices = {choices};
 const choice = choices[Math.floor(Math.random() * choices.length)];
@@ -24,32 +23,41 @@ imgSpan.innerHTML = choice;
 def main():
     content_dir = os.path.join(os.getcwd(), "site", "content")
 
-    images = []
+    all_images = []
+    valid_images = []
 
     for filename in os.listdir(content_dir):
         if filename.endswith(".md"):
             full_filename = os.path.join(content_dir, filename)
             with open(full_filename, "r") as f:
                 content = f.read()
-            images += collect_images(content)
+            images, valid = collect_images(content)
+            all_images += images
+            if valid:
+                valid_images += images
 
-    if len(images) == 0:
+    if len(valid_images) == 0:
         print("No images found")
         with open(GALLERY_HTML, "w") as f:
             f.write("最近の画像はありません")
-        return
+    else:
+        images = [IMG_TEMPLATE.format(img[2], img[1]) for img in valid_images]
+        images = "['" + "', '".join(images) + "']"
+        js = HTML_TEMPLATE.format(choices=images)
 
-    images = [IMG_TEMPLATE.format(img[2], img[1]) for img in images]
-    images = "[\"" + "\", \"".join(images) + "\"]"
-    js = HTML_TEMPLATE.format(choices=images)
+        with open(GALLERY_HTML, "w") as f:
+            f.write(js)
 
-    with open(GALLERY_HTML, "w") as f:
-        f.write(js)
+    with open(GALLERY_MD, "w") as f:
+        f.write("""---
+title: Gallery
+---
+""" + "\n".join([IMG_MD_TEMPLATE.format(img[1], img[2]) for img in all_images]))
 
 
-def collect_images(data: str) -> list[str]:
+def collect_images(data: str) -> tuple[list[str], bool]:
     if not data.startswith("---"):
-        return []
+        return [], False
 
     end = data[3:].index("---")
     meta = data[3:end].split("\n")
@@ -60,11 +68,12 @@ def collect_images(data: str) -> list[str]:
         key, value = line.split(": ")
         kv[key] = value
 
-    if not post_validator(kv):
-        return []
-
     imgs = re.findall(IMG_PATTERN, data)
-    return imgs
+
+    if not post_validator(kv):
+        return imgs, False
+
+    return imgs, True
 
 
 def post_validator(meta: dict[str, str]) -> bool:
