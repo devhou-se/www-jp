@@ -1,0 +1,14 @@
+on:
+  pull_request:
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: "checkout"
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: "deploy"
+        uses: ./.github/workflows/deploy.yaml
