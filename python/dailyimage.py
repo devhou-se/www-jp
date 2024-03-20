@@ -43,7 +43,7 @@ def main():
     if len(valid_images) == 0:
         print("No images found")
         with open(GALLERY_HTML, "w") as f:
-            f.write("最近の画像はありません")
+            f.write("最近の写真はありません")
     else:
         images = [IMG_TEMPLATE.format(img[2], img[1]) for img in valid_images]
         images = "['" + "', '".join(images) + "']"
