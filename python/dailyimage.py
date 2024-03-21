@@ -54,7 +54,7 @@ def main():
 
     with open(GALLERY_MD, "w") as f:
         f.write("""---
-title: 画像ギャラリー
+title: 写真ギャラリー
 ---
 """ + "\n".join([IMG_MD_TEMPLATE.format(img[1], img[2]) for img in valid_images]))
 
