@@ -43,6 +43,7 @@ jobs:
       run: |
         gh pr create --title "Update gallery" --body "" --base main --head "post/gallery" || echo "No changes to commit"
         gh pr merge --auto --squash --delete-branch || echo "No changes to merge"
+        git push -d origin "post/gallery" || echo "No branch to delete"
 
   deploy:
     name: "Deploy"
