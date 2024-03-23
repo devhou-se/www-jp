@@ -1,6 +1,8 @@
 ---
 title: 写真ギャラリー
 ---
+![image](https://github.com/devhou-se/www-jp/assets/1495031/71964323-7cb1-44b0-84da-a4067598a52d)
+![image](https://github.com/devhou-se/www-jp/assets/1495031/e37f29ee-421b-44d2-9a02-9696e82436e0)
 ![20240321_203600.jpg](https://github.com/devhou-se/www-jp/assets/12438044/a93f673d-0fcc-4adc-963e-64c6d382383b)
 ![image](https://github.com/devhou-se/www-jp/assets/5674656/e609bcc8-f1d7-4e1f-9ce6-300bea2d2015)
 ![image](https://github.com/devhou-se/www-jp/assets/5674656/adb39286-d102-4b5a-9c39-0f4d23ee4db0)
