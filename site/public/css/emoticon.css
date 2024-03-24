@@ -1,0 +1,12 @@
+img.絵文字 {
+    height: 15px;
+    width: 15px;
+    background-image: url("/images/smile.png");
+    background-repeat: no-repeat;
+}
+
+img.絵文字.絵文字-ピエロ {background-position: -90px -45px;}
+img.絵文字.絵文字-目 {background-position: -15px -45px;}
+img.絵文字.絵文字-ピンク {background-position: -60px -60px;}
+img.絵文字.絵文字-虹 {background-position: -60px -105px;}
+img.絵文字.絵文字-頭蓋骨 {background-position: -15px -15px;}
