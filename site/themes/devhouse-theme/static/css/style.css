@@ -117,7 +117,8 @@ footer {
     text-align: center;
 }
 
-.reaction-badge {
+a.reaction-badge {
+    text-decoration: none;
     border: none;
     display: flex;
     justify-content: center;
@@ -131,6 +132,10 @@ footer {
     text-align: center;
     white-space: nowrap;
     vertical-align: baseline;
+}
+
+a.reaction-badge:hover {
+    background-color: #d0d0d0;
 }
 
 .reaction-badge td {
