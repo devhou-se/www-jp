@@ -1,5 +1,6 @@
 ---
 title: 写真ギャラリー
+layout: gallery
 ---
 ![image](https://github.com/devhou-se/www-jp/assets/1495031/71964323-7cb1-44b0-84da-a4067598a52d)
 ![image](https://github.com/devhou-se/www-jp/assets/1495031/e37f29ee-421b-44d2-9a02-9696e82436e0)
