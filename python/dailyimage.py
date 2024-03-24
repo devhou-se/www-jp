@@ -90,10 +90,9 @@ def post_validator(meta: dict[str, str]) -> Validity:
         return Validity.DRAFT
 
     if meta.get("date"):
-    
         date = datetime.datetime.fromisoformat(meta.get("date"))
-
-        if (datetime.datetime.now() - date).days >= MAX_AGE:
+        tzinfo = datetime.timezone(datetime.timedelta(hours=9))
+        if (datetime.datetime.now().astimezone(tzinfo) - date).days >= MAX_AGE:
             return Validity.OLD
 
     return Validity.VALID
