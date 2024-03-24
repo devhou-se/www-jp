@@ -18,7 +18,7 @@ author: {author}
 
 def convert_date(date: str) -> str:
     # check if date already contains timezone
-    if not date.endswith("Z"):
+    if not date[-1] == "Z":
         return date
 
     timestamp = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
