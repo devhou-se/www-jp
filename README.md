@@ -1,5 +1,7 @@
 # www jp
 
+visit the live site: [devhou.se](https://devhou.se)
+
 ## Create blog post
 
 Click here: [new blog post](https://github.com/devhou-se/www-jp/issues/new?labels=post)
