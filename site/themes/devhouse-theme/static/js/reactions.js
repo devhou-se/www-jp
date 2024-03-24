@@ -17,8 +17,10 @@ if (Number.isInteger(postIDNumber)) {
 
 function generateReactionsElement(postId) {
     const parentElement = document.getElementById('reactions');
-    const badge = document.createElement('div');
+    const badge = document.createElement('a');
     badge.className = 'reaction-badge';
+    badge.href = `https://github.com/devhou-se/www-jp/issues/${postId}`;
+
     parentElement.appendChild(badge)
 
     fetch(`https://api.github.com/repos/devhou-se/www-jp/issues/${postId}/reactions`, {
@@ -36,8 +38,6 @@ function generateReactionsElement(postId) {
                 reactionsCount[reaction.content]++;
             });
 
-
-
             // 反応がなかった場合は、ユーザーにこのことを知らせるメッセージを表示するだけです。
             if (Object.keys(reactionsCount).length === 0) {
                 badge.textContent = 'この記事にはまだリアクションがありません';
@@ -50,8 +50,7 @@ function generateReactionsElement(postId) {
                 reactionCell.textContent = `${reactionToEmoji[reaction]} ${reactionsCount[reaction]}`;
                 reactionRow.appendChild(reactionCell);
             }
-            badge.appendChild(reactionRow);``
-            console.log("done")
+            badge.appendChild(reactionRow);
         })
         .catch(error => {
             console.error(error)
