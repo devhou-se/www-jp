@@ -17,10 +17,13 @@ author: {author}
 
 
 def convert_date(date: str) -> str:
+    # check if date already contains timezone
+    if not date.endswith("Z"):
+        return date
+
     timestamp = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
-    timestamp = timestamp + datetime.timedelta(hours=9)
     timestamp = timestamp.astimezone(datetime.timezone(datetime.timedelta(hours=9)))
-    return timestamp.strftime("%Y-%m-%dT%H:%M:%SZ%z")
+    return timestamp.strftime("%Y-%m-%dT%H:%M:%SZ%:z")
 
 
 def main():
