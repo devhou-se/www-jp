@@ -10,7 +10,7 @@ GALLERY_HTML = os.path.join(os.getcwd(), "site", "themes", "devhouse-theme", "la
 IMAGES_HTML = os.path.join(os.getcwd(), "site", "themes", "devhouse-theme", "layouts", "partials", "images.html")
 IMG_PATTERN = r"(\!\[(.*)\]\((.*)\))"
 
-IMG_TEMPLATE = "<a href=\"{}\"><img src=\"{}\" alt=\"{}\" /></a>"
+IMG_TEMPLATE = "<a href=\"/{}\"><img src=\"{}\" alt=\"{}\" /></a>"
 IMG_MD_TEMPLATE = "![{}]({})"
 HTML_TEMPLATE = """<span id="daily-image"></span>
 <script>
