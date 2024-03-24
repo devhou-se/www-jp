@@ -10,7 +10,7 @@ GALLERY_HTML = os.path.join(os.getcwd(), "site", "themes", "devhouse-theme", "la
 IMAGES_HTML = os.path.join(os.getcwd(), "site", "themes", "devhouse-theme", "layouts", "partials", "images.html")
 IMG_PATTERN = r"(\!\[(.*)\]\((.*)\))"
 
-IMG_TEMPLATE = "<img src=\"{}\" alt=\"{}\" />"
+IMG_TEMPLATE = "<a href=\"{}\"><img src=\"{}\" alt=\"{}\" /></a>"
 IMG_MD_TEMPLATE = "![{}]({})"
 HTML_TEMPLATE = """<span id="daily-image"></span>
 <script>
@@ -43,6 +43,7 @@ def main():
             with open(full_filename, "r") as f:
                 content = f.read()
             images, valid = collect_images(content)
+            images = [(img, filename.removesuffix(".md")) for img in images]
             images_validity[valid].extend(images)
 
     sidebar_images = images_validity[Validity.VALID]
@@ -53,7 +54,7 @@ def main():
         with open(GALLERY_HTML, "w") as f:
             f.write("最近の写真はありません")
     else:
-        images = [IMG_TEMPLATE.format(img[2], img[1]) for img in sidebar_images]
+        images = [IMG_TEMPLATE.format(img[1], img[0][2], img[0][1]) for img in sidebar_images]
         images = "['" + "', '".join(images) + "']"
         js = HTML_TEMPLATE.format(choices=images)
 
@@ -61,7 +62,7 @@ def main():
             f.write(js)
 
     with open(IMAGES_HTML, "w") as f:
-        f.write("\n".join([IMG_TEMPLATE.format(img[2], img[1]) for img in gallery_images]))
+        f.write("\n".join([IMG_TEMPLATE.format(img[1], img[0][2], img[0][1]) for img in gallery_images]))
 
 
 def collect_images(data: str) -> tuple[list[str], Validity]:
