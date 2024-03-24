@@ -89,6 +89,10 @@ div.主要 div.左-ナビ {
     vertical-align: top;
 }
 
+div.主要 div.左-ナビ ul {
+    padding-left: 15px;
+}
+
 div.主要 div.内容 {
     display: inline-block;
     width: 425px;

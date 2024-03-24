@@ -1,3 +1,5 @@
+from enum import Enum
+
 import datetime
 import os
 import re
@@ -20,14 +22,19 @@ imgSpan.innerHTML = choice;
 """
 
 
+class Validity(Enum):
+    VALID = "Valid"
+    DRAFT = "Draft"
+    OLD = "Old"
+    MISFORMATTED = "Misformatted"
+
+
 def main():
     content_dir = os.path.join(os.getcwd(), "site", "content")
 
-    all_images = []
-    valid_images = []
+    images_validity = {v: [] for v in Validity}
 
     for filename in os.listdir(content_dir):
-        # ignore gallery.md
         if filename == "gallery.md":
             continue
 
@@ -36,16 +43,17 @@ def main():
             with open(full_filename, "r") as f:
                 content = f.read()
             images, valid = collect_images(content)
-            all_images += images
-            if valid:
-                valid_images += images
+            images_validity[valid].extend(images)
 
-    if len(valid_images) == 0:
+    sidebar_images = images_validity[Validity.VALID]
+    gallery_images = images_validity[Validity.VALID] + images_validity[Validity.OLD]
+
+    if len(sidebar_images) == 0:
         print("No images found")
         with open(GALLERY_HTML, "w") as f:
             f.write("最近の写真はありません")
     else:
-        images = [IMG_TEMPLATE.format(img[2], img[1]) for img in valid_images]
+        images = [IMG_TEMPLATE.format(img[2], img[1]) for img in sidebar_images]
         images = "['" + "', '".join(images) + "']"
         js = HTML_TEMPLATE.format(choices=images)
 
@@ -56,12 +64,12 @@ def main():
         f.write("""---
 title: 写真ギャラリー
 ---
-""" + "\n".join([IMG_MD_TEMPLATE.format(img[1], img[2]) for img in valid_images]))
+""" + "\n".join([IMG_MD_TEMPLATE.format(img[1], img[2]) for img in gallery_images]))
 
 
-def collect_images(data: str) -> tuple[list[str], bool]:
+def collect_images(data: str) -> tuple[list[str], Validity]:
     if not data.startswith("---"):
-        return [], False
+        return [], Validity.MISFORMATTED
 
     end = data[3:].index("---")
     meta = data[3:end].split("\n")
@@ -74,23 +82,20 @@ def collect_images(data: str) -> tuple[list[str], bool]:
 
     imgs = re.findall(IMG_PATTERN, data)
 
-    if not post_validator(kv):
-        return imgs, False
-
-    return imgs, True
+    return imgs, post_validator(kv)
 
 
-def post_validator(meta: dict[str, str]) -> bool:
+def post_validator(meta: dict[str, str]) -> Validity:
     if meta.get("draft") == "true":
-        return False
+        return Validity.DRAFT
 
     if meta.get("date"):
         date = datetime.datetime.strptime(meta.get("date"), "%Y-%m-%dT%H:%M:%SZ")
 
         if (datetime.datetime.now() - date).days >= MAX_AGE:
-            return False
+            return Validity.OLD
 
-    return True
+    return Validity.VALID
 
 
 if __name__ == '__main__':

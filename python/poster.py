@@ -1,3 +1,4 @@
+import datetime
 import os
 
 POST_TITLE = os.getenv("POST_TITLE")
@@ -15,6 +16,13 @@ author: {author}
 """
 
 
+def convert_date(date: str) -> str:
+    timestamp = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
+    timestamp = timestamp + datetime.timedelta(hours=9)
+    timestamp = timestamp.astimezone(datetime.timezone(datetime.timedelta(hours=9)))
+    return timestamp.strftime("%Y-%m-%dT%H:%M:%SZ%z")
+
+
 def main():
     content_dir = os.path.join(os.getcwd(), "site", "content")
 
@@ -22,7 +30,7 @@ def main():
 
     content = BODY_FORMAT.format(
         title=POST_TITLE,
-        date=POST_DATE,
+        date=convert_date(POST_DATE),
         author=POST_AUTHOR,
         body=POST_BODY,
     )
