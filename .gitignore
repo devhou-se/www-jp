@@ -67,5 +67,5 @@ node_modules/
 
 .idea/
 
-# ingore generated content from running hugo server
+# ignore generated content from running hugo server
 site/public
