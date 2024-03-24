@@ -14,7 +14,6 @@ def convert_date(date: str) -> str:
         return date
 
     timestamp = datetime.datetime.fromisoformat(date[:-1])
-    timestamp = timestamp + datetime.timedelta(hours=9)
     timestamp = timestamp.astimezone(datetime.timezone(datetime.timedelta(hours=9)))
     return timestamp.isoformat()
 
