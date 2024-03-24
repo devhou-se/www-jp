@@ -6,8 +6,8 @@ import re
 
 MAX_AGE = 2  # days
 
-GALLERY_MD = os.path.join(os.getcwd(), "site", "content", "gallery.md")
 GALLERY_HTML = os.path.join(os.getcwd(), "site", "themes", "devhouse-theme", "layouts", "partials", "gallery.html")
+IMAGES_HTML = os.path.join(os.getcwd(), "site", "themes", "devhouse-theme", "layouts", "partials", "images.html")
 IMG_PATTERN = r"(\!\[(.*)\]\((.*)\))"
 
 IMG_TEMPLATE = "<img src=\"{}\" alt=\"{}\" />"
@@ -60,11 +60,8 @@ def main():
         with open(GALLERY_HTML, "w") as f:
             f.write(js)
 
-    with open(GALLERY_MD, "w") as f:
-        f.write("""---
-title: 写真ギャラリー
----
-""" + "\n".join([IMG_MD_TEMPLATE.format(img[1], img[2]) for img in gallery_images]))
+    with open(IMAGES_HTML, "w") as f:
+        f.write("\n".join([IMG_TEMPLATE.format(img[2], img[1]) for img in gallery_images]))
 
 
 def collect_images(data: str) -> tuple[list[str], Validity]:
@@ -72,7 +69,7 @@ def collect_images(data: str) -> tuple[list[str], Validity]:
         return [], Validity.MISFORMATTED
 
     end = data[3:].index("---")
-    meta = data[3:end].split("\n")
+    meta = data[3:end+3].split("\n")
     kv = {}
     for line in meta:
         if not line:
