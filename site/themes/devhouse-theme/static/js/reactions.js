@@ -39,7 +39,7 @@ function generateReactionsElement(postId) {
 
 
             // 反応がなかった場合は、ユーザーにこのことを知らせるメッセージを表示するだけです。
-            if (reactionsCount === 0) {
+            if (Object.keys(reactionsCount).length === 0) {
                 badge.textContent = 'この記事にはまだリアクションがありません';
                 return;
             }
