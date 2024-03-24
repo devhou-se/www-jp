@@ -23,7 +23,7 @@ def convert_date(date: str) -> str:
 
     timestamp = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
     timestamp = timestamp.astimezone(datetime.timezone(datetime.timedelta(hours=9)))
-    return timestamp.strftime("%Y-%m-%dT%H:%M:%SZ%:z")
+    return timestamp.strftime("%Y-%m-%dT%H:%M:%S%:z")
 
 
 def main():
