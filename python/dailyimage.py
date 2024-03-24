@@ -90,7 +90,7 @@ def post_validator(meta: dict[str, str]) -> Validity:
         return Validity.DRAFT
 
     if meta.get("date"):
-        date = datetime.datetime.strptime(meta.get("date"), "%Y-%m-%dT%H:%M:%SZ")
+        date = datetime.datetime.strptime(meta.get("date"), "%Y-%m-%dT%H:%M:%S%:z")
 
         if (datetime.datetime.now() - date).days >= MAX_AGE:
             return Validity.OLD
