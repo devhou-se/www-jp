@@ -7,14 +7,7 @@ POST_NUMBER = os.getenv("POST_NUMBER")
 POST_AUTHOR = os.getenv("POST_AUTHOR")
 POST_DATE = os.getenv("POST_DATE")
 
-BODY_FORMAT = """---
-title: {title}
-date: {date}
-author: {author}
----
-{body}
-"""
-
+HEADER_DELIMITER = "---"
 
 def convert_date(date: str) -> str:
     if not date[-1] == "Z":
@@ -25,22 +18,30 @@ def convert_date(date: str) -> str:
     timestamp = timestamp.astimezone(datetime.timezone(datetime.timedelta(hours=9)))
     return timestamp.isoformat()
 
+def extract_header(body: str):
+    lines = body.split('\n')
+    if lines[0].strip() == HEADER_DELIMITER and HEADER_DELIMITER in lines[1:]:
+        end_index = lines[1:].index(HEADER_DELIMITER) + 1
+        return '\n'.join(lines[:end_index + 1]), '\n'.join(lines[end_index + 1:])
+    return None, body
 
 def main():
     content_dir = os.path.join(os.getcwd(), "site", "content")
-
     md_filename = f"{POST_NUMBER}.md"
 
-    content = BODY_FORMAT.format(
-        title=POST_TITLE,
-        date=convert_date(POST_DATE),
-        author=POST_AUTHOR,
-        body=POST_BODY,
-    )
+    header, content_body = extract_header(POST_BODY)
+    
+    if not header:
+        header = f"""---
+title: {POST_TITLE}
+date: {convert_date(POST_DATE)}
+author: {POST_AUTHOR}
+---"""
+
+    content = f"{header}\n{content_body}"
 
     with open(os.path.join(content_dir, md_filename), "w") as f:
         f.write(content)
-
 
 if __name__ == '__main__':
     main()
