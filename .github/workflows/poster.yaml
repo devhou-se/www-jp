@@ -82,10 +82,17 @@ jobs:
     secrets: inherit
     permissions: write-all
 
+  imager:
+    name: "Imager"
+    uses: ./.github/workflows/imager.yaml
+    needs: update-gallery
+    secrets: inherit
+    permissions: write-all
+
   deploy:
     name: "Deploy"
     uses: ./.github/workflows/deploy.yaml
-    needs: update-gallery
+    needs: imager
     secrets: inherit
     permissions: write-all
 
