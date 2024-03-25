@@ -19,6 +19,7 @@ def main():
         content = f.read()
 
     jp = analyze_text(content)
+    print(f"Japanese text score: {(jp*100):.2f}%")
     if jp > 0.5:
         return
 
@@ -80,7 +81,7 @@ def translate_md(inp: str) -> str:
             thread_id=thread.id
         )
 
-        print(messages.data[0].content[0].text.value)
+        # print(messages.data[0].content[0].text.value)
 
         return messages.data[0].content[0].text.value
 
