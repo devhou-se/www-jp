@@ -58,6 +58,7 @@ func main() {
 
 				err = cacheimage(image, "site/content/static/"+local)
 				if err != nil {
+					fmt.Println(err.Error())
 					return nil
 				}
 
@@ -99,6 +100,10 @@ func cacheimage(from, local string) error {
 	for i, size := range s {
 		resized := resize.Resize(size[0], size[1], image, resize.Lanczos3)
 
+		err = os.MkdirAll("site/content/static", os.ModePerm)
+		if err != nil {
+			return err
+		}
 		file, err := os.Create(local + []string{"_0", "_1", "_2", ""}[i] + ".jpeg")
 		if err != nil {
 			return err
