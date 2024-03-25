@@ -117,11 +117,16 @@ footer {
     text-align: center;
 }
 
+.reaction-badge-parent {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
 a.reaction-badge {
     text-decoration: none;
     border: none;
     display: flex;
-    justify-content: center;
     padding: 1em 0.6em;
     margin-right: 0.5em;
     border-radius: 1em;
