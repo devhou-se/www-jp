@@ -1,6 +1,9 @@
 name: Imager
 
 on:
+  push:
+    branches:
+      - main
   workflow_call:
 
 jobs:
@@ -16,6 +19,24 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version-file: go.mod
+      - name: Setup git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global push.autosetupremote true
+          git switch -C post/images
       - name: Cache Images
         run: |
           go run go/imager/imager.go
+      - name: Commit Images
+        run: |
+          git add site/content
+          git commit -m "cache images" || echo "No changes to commit"
+          git push
+      - name: Merge Branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create --title "Cache Images" --body "" --base main --head post/images || echo "No changes to commit"
+          gh pr merge --auto --squash --delete-branch || echo "No changes to merge"
+          git push -d origin "post/images" || echo "No branch to delete"
