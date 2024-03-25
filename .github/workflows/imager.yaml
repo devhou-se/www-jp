@@ -9,12 +9,11 @@ on:
 jobs:
   imager:
     name: Imager
+    permissions: write-all
     runs-on: [ubuntu-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: main
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
