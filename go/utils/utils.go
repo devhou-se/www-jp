@@ -22,6 +22,7 @@ type Image struct {
 	Alt           string
 
 	FullMarkdown string
+	InFile       string
 }
 
 // Images finds all images an all content markdown files
@@ -43,6 +44,7 @@ func Images() ([]Image, error) {
 				LocalLocation: findings[4],
 				Alt:           findings[1],
 				FullMarkdown:  findings[0],
+				InFile:        markdown,
 			})
 		}
 	}

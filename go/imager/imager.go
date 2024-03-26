@@ -8,13 +8,10 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"regexp"
 	"strings"
 	"sync"
 
 	jis "github.com/dsoprea/go-jpeg-image-structure/v2"
-	"golang.org/x/sync/errgroup"
-
 	"github.com/nfnt/resize"
 
 	"github.com/devhou-se/www-jp/go/utils"
@@ -24,80 +21,63 @@ const (
 	imageStorePath = utils.ContentDirectory + "/images"
 )
 
-var (
-	// Find filename in url
-	rFilename = regexp.MustCompile("[^/]*$")
-)
-
 const imgtemplate = `{{< lazyimage %s 425 >}}`
 
 func main() {
-	// Find all files in content directory
-	files, err := utils.Markdowns()
+	images, err := utils.WebImages()
 	if err != nil {
 		panic(err.Error())
 	}
 
-	eg := &errgroup.Group{}
-	for _, file := range files {
-		// Only check markdown files
-		if !strings.Contains(file, ".md") {
-			continue
+	imageWidths := []int{240, 480, 960, 0}
+
+	fileLocks := map[string]*sync.Mutex{}
+	wg := sync.WaitGroup{}
+
+	for _, image := range images {
+		wg.Add(1)
+		if _, ok := fileLocks[image.InFile]; !ok {
+			fileLocks[image.InFile] = &sync.Mutex{}
 		}
 
-		fileBytes, err := os.ReadFile(file)
-		if err != nil {
-			panic(err.Error())
-		}
+		go func() {
+			webLocationParts := strings.Split(image.WebLocation, "/")
+			filenameBase := webLocationParts[len(webLocationParts)-1]
 
-		var images []string
+			_, _, err = resizeAndStore(image.WebLocation, filenameBase, imageWidths)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
 
-		// Find all markdown images on page
-		fImages := utils.MarkdownImageR.FindAllSubmatch(fileBytes, -1)
-		for _, fImage := range fImages {
-			images = append(images, string(fImage[1]))
-		}
+			// y := newY(width, height, 425)
+			// todo: aspect ratio is inverted for exif rotated images
 
-		fLock := &sync.Mutex{}
-		fWait := &sync.WaitGroup{}
+			fileLocks[image.InFile].Lock()
+			defer fileLocks[image.InFile].Unlock()
 
-		for i, image := range images {
-			fWait.Add(1)
-			local := rFilename.FindString(image)
+			fileBytes, err := os.ReadFile(image.InFile)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
 
-			eg.Go(func() error {
-				defer fWait.Done()
+			oldImage := image.FullMarkdown
+			newImage := fmt.Sprintf(imgtemplate, filenameBase)
 
-				// Resize and store locally each image
-				_, _, err = resizeAndStore(image, imageStorePath+"/"+local, []int{240, 480, 960, 0})
-				if err != nil {
-					fmt.Println(err.Error())
-					return nil
-				}
+			fileBytes = bytes.ReplaceAll(fileBytes, []byte(oldImage), []byte(newImage))
 
-				// y := newY(width, height, 425)
-				// todo: aspect ratio is inverted for exif rotated images
+			err = os.WriteFile(image.InFile, fileBytes, os.ModePerm)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
 
-				fLock.Lock()
-				// Replace image tags with lazyimage shortcode
-				fileBytes = bytes.ReplaceAll(fileBytes, fImages[i][0], []byte(fmt.Sprintf(imgtemplate, local)))
-				fLock.Unlock()
-
-				return nil
-			})
-		}
-
-		eg.Go(func() error {
-			// Write final markdown file back to disk after all images have been processed
-			fWait.Wait()
-			return os.WriteFile(file, fileBytes, os.ModePerm)
-		})
+			fmt.Printf("Updated %s in %s\n", image.Location, image.InFile)
+		}()
 	}
 
-	err = eg.Wait()
-	if err != nil {
-		panic(err.Error())
-	}
+	wg.Wait()
 }
 
 // resizeAndStore downloads an image from a url and stores a resized version for
