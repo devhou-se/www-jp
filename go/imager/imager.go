@@ -16,26 +16,24 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/nfnt/resize"
+
+	"github.com/devhou-se/www-jp/go/utils"
 )
 
 const (
-	markdownRoot   = "site/content"
-	imageStorePath = "site/content/images"
+	imageStorePath = utils.ContentDirectory + "/images"
 )
 
 var (
-	// Find image in markdown file
-	rMarkdownImage = regexp.MustCompile("!\\[[^]]*]\\((https?://[^)]*)\\)")
-
 	// Find filename in url
 	rFilename = regexp.MustCompile("[^/]*$")
 )
 
-const imgtemplate = `{{< lazyimage %s >}}`
+const imgtemplate = `{{< lazyimage %s 425 >}}`
 
 func main() {
 	// Find all files in content directory
-	files, err := flatFiles(markdownRoot)
+	files, err := utils.Markdowns()
 	if err != nil {
 		panic(err.Error())
 	}
@@ -55,7 +53,7 @@ func main() {
 		var images []string
 
 		// Find all markdown images on page
-		fImages := rMarkdownImage.FindAllSubmatch(fileBytes, -1)
+		fImages := utils.MarkdownImageR.FindAllSubmatch(fileBytes, -1)
 		for _, fImage := range fImages {
 			images = append(images, string(fImage[1]))
 		}
@@ -210,29 +208,4 @@ func resizeAndStore(url, filenameBase string, widths []int) (int, int, error) {
 func newY(oldX, oldY, newX int) int {
 	aspectRatio := float64(oldX) / float64(oldY)
 	return int(float64(newX) / aspectRatio)
-}
-
-// flatFiles returns a list of all files inside directory and all subdirectories
-func flatFiles(name string) ([]string, error) {
-	var entries []string
-	readEntries, err := os.ReadDir(name)
-	if err != nil {
-		return nil, err
-	}
-	for _, readEntry := range readEntries {
-		fileinfo, err := readEntry.Info()
-		if err != nil {
-			return nil, err
-		}
-		if fileinfo.IsDir() {
-			nextRead, err := flatFiles(name + "/" + readEntry.Name())
-			if err != nil {
-				return nil, err
-			}
-			entries = append(entries, nextRead...)
-			continue
-		}
-		entries = append(entries, name+"/"+readEntry.Name())
-	}
-	return entries, nil
 }

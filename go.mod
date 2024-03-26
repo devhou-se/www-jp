@@ -1,4 +1,4 @@
-module github.com/devhou-se/www-jp/go
+module github.com/devhou-se/www-jp
 
 go 1.22.0
 
