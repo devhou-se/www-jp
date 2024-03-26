@@ -154,8 +154,6 @@ func resizeAndStore(url, filenameBase string, widths []int) (int, int, error) {
 		// Resize image
 		resized := resize.Resize(uint(x2), uint(y2), img, resize.Lanczos3)
 
-		fmt.Println(resized.Bounds().Size())
-
 		// Create file for resized image
 		suffix := ""
 		if width > 0 {
