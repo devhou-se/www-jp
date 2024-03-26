@@ -1,1 +1,1 @@
-<img width="425px" id="{{ .Get 0 }}" /><script>loadImageInStages(document.getElementById('{{ .Get 0 }}'), '/static/{{ .Get 0 }}_0.jpeg', '/static/{{ .Get 0 }}_1.jpeg', '/static/{{ .Get 0 }}_2.jpeg', '/static/{{ .Get 0 }}.jpeg');</script>
+<img width="{{ .Get 1 }}" height="{{ .Get 2 }}" id="{{ .Get 0 }}" /><script>loadImageInStages(document.getElementById('{{ .Get 0 }}'), '/images/{{ .Get 0 }}_0.jpeg', '/images/{{ .Get 0 }}_1.jpeg', '/images/{{ .Get 0 }}_2.jpeg', '/images/{{ .Get 0 }}.jpeg');</script>

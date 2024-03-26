@@ -25,7 +25,7 @@ const (
 
 var (
 	// Find image in markdown file
-	rMarkdownImage = regexp.MustCompile("!\\[[^]]*]\\(([^)]*)\\)")
+	rMarkdownImage = regexp.MustCompile("!\\[[^]]*]\\((https?://[^)]*)\\)")
 
 	// Find filename in url
 	rFilename = regexp.MustCompile("[^/]*$")
@@ -34,6 +34,7 @@ var (
 const imgtemplate = `{{< lazyimage %s >}}`
 
 func main() {
+	// Find all files in content directory
 	files, err := flatFiles(markdownRoot)
 	if err != nil {
 		panic(err.Error())
@@ -41,6 +42,7 @@ func main() {
 
 	eg := &errgroup.Group{}
 	for _, file := range files {
+		// Only check markdown files
 		if !strings.Contains(file, ".md") {
 			continue
 		}
@@ -52,6 +54,7 @@ func main() {
 
 		var images []string
 
+		// Find all markdown images on page
 		fImages := rMarkdownImage.FindAllSubmatch(fileBytes, -1)
 		for _, fImage := range fImages {
 			images = append(images, string(fImage[1]))
@@ -67,13 +70,18 @@ func main() {
 			eg.Go(func() error {
 				defer fWait.Done()
 
-				err = resizeAndStore(image, imageStorePath+"/"+local, []int{240, 480, 960, 0})
+				// Resize and store locally each image
+				_, _, err = resizeAndStore(image, imageStorePath+"/"+local, []int{240, 480, 960, 0})
 				if err != nil {
 					fmt.Println(err.Error())
 					return nil
 				}
 
+				// y := newY(width, height, 425)
+				// todo: aspect ratio is inverted for exif rotated images
+
 				fLock.Lock()
+				// Replace image tags with lazyimage shortcode
 				fileBytes = bytes.ReplaceAll(fileBytes, fImages[i][0], []byte(fmt.Sprintf(imgtemplate, local)))
 				fLock.Unlock()
 
@@ -82,6 +90,7 @@ func main() {
 		}
 
 		eg.Go(func() error {
+			// Write final markdown file back to disk after all images have been processed
 			fWait.Wait()
 			return os.WriteFile(file, fileBytes, os.ModePerm)
 		})
@@ -95,11 +104,11 @@ func main() {
 
 // resizeAndStore downloads an image from a url and stores a resized version for
 // each of the widths defined. A width of 0 will keep the original width.
-func resizeAndStore(url, filenameBase string, widths []int) error {
+func resizeAndStore(url, filenameBase string, widths []int) (int, int, error) {
 	// Fetch image
 	response, err := http.Get(url)
 	if err != nil {
-		return err
+		return 0, 0, err
 	}
 	defer response.Body.Close()
 
@@ -109,66 +118,94 @@ func resizeAndStore(url, filenameBase string, widths []int) error {
 	// Load image data
 	img, _, err := image.Decode(imageReader)
 	if err != nil {
-		return err
+		return 0, 0, err
 	}
 
 	// Load exif data
 	mc, err := jis.NewJpegMediaParser().ParseBytes(exifReader.Bytes())
 	if err != nil {
-		return err
+		return 0, 0, err
 	}
 	sl := mc.(*jis.SegmentList)
+
+	eb, err := sl.ConstructExifBuilder()
+	if err != nil {
+		return 0, 0, err
+	}
 
 	// Ensure images directory exists
 	err = os.MkdirAll(imageStorePath, os.ModePerm)
 	if err != nil {
-		return err
+		return 0, 0, err
 	}
 
+	// Find original image dimensions
+	x1 := img.Bounds().Size().X
+	y1 := img.Bounds().Size().Y
+
 	for i, width := range widths {
-		x1 := img.Bounds().Size().X
-		y1 := img.Bounds().Size().Y
-
-		if width == 0 {
-			x1 = width
-		}
-
+		// Calculate new dimensions
 		x2 := width
+		if x2 == 0 {
+			x2 = x1
+		}
 		y2 := newY(x1, y1, x2)
 
 		// Resize image
 		resized := resize.Resize(uint(x2), uint(y2), img, resize.Lanczos3)
 
-		// Create file for size
+		fmt.Println(resized.Bounds().Size())
+
+		// Create file for resized image
 		suffix := ""
 		if width > 0 {
 			suffix = fmt.Sprintf("_%d", i)
 		}
-		file, err := os.Create(filenameBase + suffix)
+		file, err := os.Create(filenameBase + suffix + ".jpeg")
 		if err != nil {
-			return err
+			return 0, 0, err
 		}
 
 		// Write image data to file
 		err = jpeg.Encode(file, resized, nil)
 		if err != nil {
-			return err
+			return 0, 0, err
+		}
+
+		// todo: this could be redundant? can we remove reading back from disk
+		// Read new files bytes
+		bytes, err := os.ReadFile(file.Name())
+		if err != nil {
+			return 0, 0, err
+		}
+
+		// Extract new exif data
+		mc2, err := jis.NewJpegMediaParser().ParseBytes(bytes)
+		if err != nil {
+			return 0, 0, err
+		}
+		sl2 := mc2.(*jis.SegmentList)
+
+		// Replace new exif data with previous
+		err = sl2.SetExif(eb)
+		if err != nil {
+			return 0, 0, err
 		}
 
 		// Reset write pointer
 		_, err = file.Seek(0, 0)
 		if err != nil {
-			return err
+			return 0, 0, err
 		}
 
-		// Write exif data to file
-		err = sl.Write(file)
+		// Write new exif data to file
+		err = sl2.Write(file)
 		if err != nil {
-			return err
+			return 0, 0, err
 		}
 	}
 
-	return nil
+	return x1, y1, nil
 }
 
 // newY calculates the new height for an image, maintaining aspect ratio
