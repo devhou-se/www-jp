@@ -41,6 +41,8 @@ func main() {
 		}
 
 		go func() {
+			defer wg.Done()
+
 			webLocationParts := strings.Split(image.WebLocation, "/")
 			filenameBase := webLocationParts[len(webLocationParts)-1]
 
