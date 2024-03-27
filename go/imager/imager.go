@@ -139,7 +139,7 @@ func resizeAndStore(url, filenameBase string, widths []int) (int, int, error) {
 		if width > 0 {
 			suffix = fmt.Sprintf("_%d", i)
 		}
-		file, err := os.Create(filenameBase + suffix + ".jpeg")
+		file, err := os.Create(imageStorePath + "/" + filenameBase + suffix + ".jpeg")
 		if err != nil {
 			return 0, 0, err
 		}
