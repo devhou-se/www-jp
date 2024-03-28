@@ -47,6 +47,5 @@ img.devtrain.p4 {
 }
 
 .animated-train {
-    animation-delay: 15s;
     animation: moveTrain 60s linear infinite;
 }
