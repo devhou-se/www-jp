@@ -1,0 +1,52 @@
+img.devtrain {
+    height: 15px;
+    width: 15px;
+    background-image: url("/images/train_sprites.jpeg");
+    background-repeat: no-repeat;
+}
+
+img.devtrain.p1 {
+    height: 52px;
+    width: 218px;
+    background-position: 0px -1px;
+}
+img.devtrain.p2 {
+    height: 52px;
+    width: 218px;
+    background-position: 0px -59px;
+}
+img.devtrain.p3 {
+    height: 5px;
+    width: 218px;
+    background-position: 0px -111px;
+}
+img.devtrain.p4 {
+    height: 52px;
+    width: 218px;
+    background-position: 0px -117px;
+}
+
+@keyframes moveTrain {
+    0% {
+        transform: translateX(-100vw);
+    }
+    50% {
+        transform: translateX(100vw);
+    }
+    50.01% {
+        transform: translateX(-100vw);
+    }
+    100% {
+        transform: translateX(-100vw);
+    }
+}
+
+.bottom {
+    position: fixed;
+    bottom: 0;
+}
+
+.animated-train {
+    animation-delay: 15s;
+    animation: moveTrain 60s linear infinite;
+}
