@@ -7,11 +7,12 @@ import re
 MAX_AGE = 2  # days
 
 GALLERY_HTML = os.path.join(os.getcwd(), "site", "themes", "devhouse-theme", "layouts", "partials", "gallery.html")
-IMAGES_HTML = os.path.join(os.getcwd(), "site", "themes", "devhouse-theme", "layouts", "partials", "images.html")
+IMAGES_HTML = os.path.join(os.getcwd(), "site", "content", "gallery.md")
 IMG_PATTERN = r"(\!\[(.*)\]\((.*)\))"
 
 IMG_TEMPLATE = "<a href=\"/{}\"><img src=\"{}\" alt=\"{}\" /></a>"
 IMG_MD_TEMPLATE = "![{}]({})"
+IMG_MD_LINK_TEMPLATE = "[![{}]({})]({})"
 HTML_TEMPLATE = """<span id="daily-image"></span>
 <script>
 const choices = {choices};
@@ -19,6 +20,11 @@ const choice = choices[Math.floor(Math.random() * choices.length)];
 const imgSpan = document.getElementById("daily-image");
 imgSpan.innerHTML = choice;
 </script>
+"""
+HTML_PAGE_TEMPLATE = """---
+type: gallery
+---
+{}
 """
 
 
@@ -62,7 +68,7 @@ def main():
             f.write(js)
 
     with open(IMAGES_HTML, "w") as f:
-        f.write("\n".join([IMG_TEMPLATE.format(img[1], img[0][2], img[0][1]) for img in gallery_images]))
+        f.write(HTML_PAGE_TEMPLATE.format("\n".join([IMG_MD_LINK_TEMPLATE.format(img[0][1], img[0][2], img[1]) for img in gallery_images])))
 
 
 def collect_images(data: str) -> tuple[list[str], Validity]:
