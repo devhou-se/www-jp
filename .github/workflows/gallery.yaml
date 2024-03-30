@@ -33,7 +33,6 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
         git config --global push.autosetupremote true
-        git add site/themes/devhouse-theme/layouts/partials/images.html
         git add site/themes/devhouse-theme/layouts/partials/gallery.html
         git commit -m "Update gallery" || echo "No changes to commit"
         git push
