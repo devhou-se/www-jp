@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	ContentDirectory = "site/content"
+	SiteDirectory = "site"
 )
 
 var (
@@ -73,9 +73,14 @@ func LocalImages() ([]Image, error) {
 	}), nil
 }
 
+func HTMLs() ([]string, error) {
+	files, err := FlatFiles(SiteDirectory)
+	return FilterFiletype(files, "html"), err
+}
+
 // Markdowns returns all markdown files in the content directory
 func Markdowns() ([]string, error) {
-	files, err := FlatFiles(ContentDirectory)
+	files, err := FlatFiles(SiteDirectory)
 	return FilterFiletype(files, "md"), err
 }
 
