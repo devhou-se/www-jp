@@ -36,6 +36,11 @@ img.devtrain.p4 {
         transform: translateX(100vw);
     }
     50.01% {
+        transform: translateX(100vw);
+        display: none;
+    }
+    50.02% {
+        display: block;
         transform: translateX(-100vw);
     }
     100% {
