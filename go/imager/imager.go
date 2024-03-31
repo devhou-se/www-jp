@@ -209,7 +209,7 @@ func (f *fileLocker) Lock(file string) {
 	if _, ok := f.fl[file]; !ok {
 		f.fl[file] = &sync.Mutex{}
 	}
-	defer f.mu.Unlock()
+	f.mu.Unlock()
 	f.fl[file].Lock()
 }
 
