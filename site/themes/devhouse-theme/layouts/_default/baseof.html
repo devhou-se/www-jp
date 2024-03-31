@@ -2,6 +2,7 @@
 <html>
 {{- partial "head.html" . -}}
 <body>
+<div id="アンチアンドロイド" style="display: none;">
 <div class="コンテナ">
     <div class="ヘッダ 章">
         {{- partial "header.html" . -}}
@@ -41,6 +42,17 @@
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
+</script>
+</div>
+<div id="ジャワ脚本通知">
+    <p>Please enable javascript to use this website</p>
+</div>
+<script>
+    document.getElementById("ジャワ脚本通知").style.display = "none"
+    document.getElementById("アンチアンドロイド").style.display = "block"
+    if (!window.navigator.userAgent.includes("Apple")) {
+        alert("You experience will be significantly degraded if you do not use an Apple device.");
+    }
 </script>
 </body>
 </html>
