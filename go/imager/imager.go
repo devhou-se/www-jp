@@ -31,14 +31,11 @@ func main() {
 
 	imageWidths := []int{240, 480, 960, 0}
 
-	fileLocks := map[string]*sync.Mutex{}
+	fl := &fileLocker{fl: make(map[string]*sync.Mutex)}
 	wg := sync.WaitGroup{}
 
 	for _, image := range images {
 		wg.Add(1)
-		if _, ok := fileLocks[image.InFile]; !ok {
-			fileLocks[image.InFile] = &sync.Mutex{}
-		}
 
 		go func() {
 			defer wg.Done()
@@ -46,7 +43,7 @@ func main() {
 			webLocationParts := strings.Split(image.WebLocation, "/")
 			filenameBase := webLocationParts[len(webLocationParts)-1]
 
-			_, _, err = resizeAndStore(image.WebLocation, filenameBase, imageWidths)
+			_, _, err = resizeAndStore(image.WebLocation, filenameBase, imageWidths, fl)
 			if err != nil {
 				fmt.Println(err.Error())
 				return
@@ -55,8 +52,8 @@ func main() {
 			// y := newY(width, height, 425)
 			// todo: aspect ratio is inverted for exif rotated images
 
-			fileLocks[image.InFile].Lock()
-			defer fileLocks[image.InFile].Unlock()
+			fl.Lock(image.InFile)
+			defer fl.Unlock(image.InFile)
 
 			fileBytes, err := os.ReadFile(image.InFile)
 			if err != nil {
@@ -84,7 +81,7 @@ func main() {
 
 // resizeAndStore downloads an image from a url and stores a resized version for
 // each of the widths defined. A width of 0 will keep the original width.
-func resizeAndStore(url, filenameBase string, widths []int) (int, int, error) {
+func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int, int, error) {
 	// Fetch image
 	response, err := http.Get(url)
 	if err != nil {
@@ -139,7 +136,17 @@ func resizeAndStore(url, filenameBase string, widths []int) (int, int, error) {
 		if width > 0 {
 			suffix = fmt.Sprintf("_%d", i)
 		}
-		file, err := os.Create(imageStorePath + "/" + filenameBase + suffix + ".jpeg")
+
+		filename := imageStorePath + "/" + filenameBase + suffix + ".jpeg"
+
+		fl.Lock(filename)
+		defer fl.Unlock(filename)
+		if _, err = os.Stat(filename); err == nil {
+			fmt.Printf("Already completed %s\n", filename)
+			continue
+		}
+
+		file, err := os.Create(filename)
 		if err != nil {
 			return 0, 0, err
 		}
@@ -190,4 +197,22 @@ func resizeAndStore(url, filenameBase string, widths []int) (int, int, error) {
 func newY(oldX, oldY, newX int) int {
 	aspectRatio := float64(oldX) / float64(oldY)
 	return int(float64(newX) / aspectRatio)
+}
+
+type fileLocker struct {
+	mu sync.Mutex
+	fl map[string]*sync.Mutex
+}
+
+func (f *fileLocker) Lock(file string) {
+	f.mu.Lock()
+	if _, ok := f.fl[file]; !ok {
+		f.fl[file] = &sync.Mutex{}
+	}
+	defer f.mu.Unlock()
+	f.fl[file].Lock()
+}
+
+func (f *fileLocker) Unlock(file string) {
+	f.fl[file].Unlock()
 }
