@@ -23,7 +23,7 @@ function generateReactionsElement(postId) {
 
     parentElement.appendChild(badge)
 
-    fetch(`https://api.github.com/repos/devhou-se/www-jp/issues/${postId}/reactions`, {
+    fetch(`https://api.devhou.se/${postId}/reactions`, {
         headers: {
             'Accept': 'application/vnd.github.squirrel-girl-preview'
         }
