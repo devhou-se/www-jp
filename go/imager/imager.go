@@ -205,14 +205,20 @@ type fileLocker struct {
 }
 
 func (f *fileLocker) Lock(file string) {
+	fmt.Printf("Locking fl\n")
 	f.mu.Lock()
+	fmt.Printf("Locked fl\n")
 	if _, ok := f.fl[file]; !ok {
 		f.fl[file] = &sync.Mutex{}
 	}
 	defer f.mu.Unlock()
+	fmt.Printf("Unlocked fl\n")
+	fmt.Printf("Locking %s...\n", file)
 	f.fl[file].Lock()
+	fmt.Printf("Locked %s\n", file)
 }
 
 func (f *fileLocker) Unlock(file string) {
 	f.fl[file].Unlock()
+	fmt.Printf("Unlocked %s\n", file)
 }
