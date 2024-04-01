@@ -1,31 +1,16 @@
 img.devtrain {
-    margin-right: -6px;
-    margin-bottom: -6px;
+    margin-bottom: -61px;
     height: 15px;
     width: 15px;
-    background-image: url("/images/train_sprites.jpeg");
+    background-image: url("/images/devtrain.png");
     background-repeat: no-repeat;
+    transform: scale(-1, 1);
 }
 
 img.devtrain.p1 {
-    height: 52px;
-    width: 218px;
-    background-position: 0px -1px;
-}
-img.devtrain.p2 {
-    height: 52px;
-    width: 218px;
-    background-position: 0px -59px;
-}
-img.devtrain.p3 {
-    height: 5px;
-    width: 218px;
-    background-position: 0px -111px;
-}
-img.devtrain.p4 {
-    height: 52px;
-    width: 218px;
-    background-position: 0px -117px;
+    height: 153px;
+    width: 400px;
+    background-position: 0px 1px;
 }
 
 @keyframes moveTrain {
