@@ -18,11 +18,7 @@ jobs:
         id: check-comment
         run: |
           echo "Comment: ${{ github.event.comment.body }}"
-          if [[ "${{ github.event.comment.body }}" == "/post" ]]; then
-            echo "::set-output name=valid::true"
-          else
-            echo "::set-output name=valid::false"
-          fi
+          echo ${{ github.event.comment.body }} | python3 python/comment-parser.py
       - name: "eyes react"
         if: steps.check-comment.outputs.valid == 'true'
         run: |
@@ -50,7 +46,7 @@ jobs:
         run: |
           python python/poster.py ${{ github.event.issue.number }}
       - name: "translate"
-        if: steps.check-comment.outputs.valid == 'true'
+        if: steps.check-comment.outputs.valid == 'true' && steps.check-comment.outputs.translate == 'true'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
