@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -13,6 +14,7 @@ import (
 
 	jis "github.com/dsoprea/go-jpeg-image-structure/v2"
 	"github.com/nfnt/resize"
+	"golang.org/x/sync/semaphore"
 
 	"github.com/devhou-se/www-jp/go/utils"
 )
@@ -34,11 +36,20 @@ func main() {
 	fl := &fileLocker{fl: make(map[string]*sync.Mutex)}
 	wg := sync.WaitGroup{}
 
+	sem := semaphore.NewWeighted(10)
+
 	for _, image := range images {
 		wg.Add(1)
 
 		go func() {
 			defer wg.Done()
+
+			err = sem.Acquire(context.Background(), 1)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+			defer sem.Release(1)
 
 			webLocationParts := strings.Split(image.WebLocation, "/")
 			filenameBase := webLocationParts[len(webLocationParts)-1]
