@@ -17,5 +17,6 @@ require (
 	github.com/go-xmlfmt/xmlfmt v1.1.2 // indirect
 	github.com/golang/geo v0.0.0-20230421003525-6adc56603217 // indirect
 	golang.org/x/net v0.22.0 // indirect
+	golang.org/x/sync v0.7.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
