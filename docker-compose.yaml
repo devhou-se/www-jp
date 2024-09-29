@@ -9,7 +9,7 @@ services:
       context: .
       dockerfile: Dockerfile
     networks:
-      - cowardscloud_web
+      - cowardscloud_local-web
     deploy:
       mode: global
       labels:
