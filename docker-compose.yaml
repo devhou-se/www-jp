@@ -5,6 +5,7 @@ networks:
 
 services:
   web:
+    image: devhouse-web
     build:
       context: .
       dockerfile: Dockerfile
