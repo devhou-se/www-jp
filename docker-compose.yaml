@@ -5,7 +5,7 @@ networks:
 
 services:
   web:
-    image: devhouse-web
+    image: registry.baileys.dev/devhouse:latest
     build:
       context: .
       dockerfile: Dockerfile
