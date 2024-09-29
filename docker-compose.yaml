@@ -1,6 +1,6 @@
 networks:
-  cowardscloud_local-web:
-    name: cowardscloud_local-web
+  cowardscloud_web:
+    name: cowardscloud_web
     external: true
 
 services:
@@ -9,11 +9,11 @@ services:
       context: .
       dockerfile: Dockerfile
     networks:
-      - cowardscloud_local-web
+      - cowardscloud_web
     deploy:
       mode: global
       labels:
-        traefik.enable: true
-        traefik.docker.network: cowardscloud_local-web
+        traefik.enable: "true"
+        traefik.docker.network: cowardscloud_web
         traefik.http.routers.devhouse.rule: Host(`devhou.se`)
         traefik.http.services.devhouse.loadbalancer.server.port: 80
