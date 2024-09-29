@@ -13,6 +13,9 @@ services:
       - cowardscloud_web
     deploy:
       mode: global
+      placement:
+        constraints:
+          - node.labels.arch == amd
       labels:
         traefik.enable: "true"
         traefik.docker.network: cowardscloud_web
