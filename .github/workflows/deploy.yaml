@@ -38,3 +38,16 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEVHOUSE_80936 }}'
           channelId: live
           projectId: devhouse-80936
+
+  push-image:
+    name: "Build and push image"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "checkout"
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: "build"
+        run: |
+          docker build -t registry.baileys.dev/devhouse:latest .
+          docker push registry.baileys.dev/devhouse:latest

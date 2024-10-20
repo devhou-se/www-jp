@@ -1,0 +1,23 @@
+networks:
+  cowardscloud_web:
+    name: cowardscloud_web
+    external: true
+
+services:
+  web:
+    image: registry.baileys.dev/devhouse:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - cowardscloud_web
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.labels.arch == amd
+      labels:
+        traefik.enable: "true"
+        traefik.docker.network: cowardscloud_web
+        traefik.http.routers.devhouse.rule: Host(`devhou.se`)
+        traefik.http.services.devhouse.loadbalancer.server.port: 80
