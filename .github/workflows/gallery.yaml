@@ -1,9 +1,9 @@
 name: "Update Gallery"
 
-on:
+# on:
 #   schedule:
 #     - cron: '0 0 * * *'
-  workflow_dispatch:
+#   workflow_dispatch:
 #   workflow_call:
 
 jobs:
