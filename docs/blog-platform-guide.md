@@ -1,6 +1,6 @@
-# Dev House Blog Platform
+# devhouse Blog Platform
 
-This document provides a comprehensive guide to the Dev House blogging platform. The platform uses GitHub Issues as the primary content source for blog posts, with an automated workflow that converts issues into Hugo-compatible Markdown files, optionally translates them to Japanese, and deploys the static site.
+This document provides a comprehensive guide to the devhouse blogging platform. The platform uses GitHub Issues as the primary content source for blog posts, with an automated workflow that converts issues into Hugo-compatible Markdown files, optionally translates them to Japanese, and deploys the static site.
 
 ## Table of Contents
 
@@ -17,7 +17,7 @@ This document provides a comprehensive guide to the Dev House blogging platform.
 
 ## System Overview
 
-The Dev House blog platform consists of several components:
+The devhouse blog platform consists of several components:
 
 1. **Content Creation**: Blog posts are written as GitHub Issues with the "post" label
 2. **Automated Workflows**: GitHub Actions that process issues into blog posts
@@ -27,7 +27,7 @@ The Dev House blog platform consists of several components:
 6. **Game Integration**: Connection to a Godot-based game that uses blog content
 7. **Deployment**: Automatic building and deployment to Firebase Hosting
 
-The platform is built on [Hugo](https://gohugo.io/), a fast static site generator, with a custom theme designed for Dev House.
+The platform is built on [Hugo](https://gohugo.io/), a fast static site generator, with a custom theme designed for devhouse.
 
 ## Content Creation
 
