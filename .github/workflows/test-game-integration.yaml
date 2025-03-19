@@ -1,0 +1,75 @@
+name: Test Game Integration
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Test issue number to use'
+        required: true
+        default: '1'
+        type: string
+
+jobs:
+  test-notification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          
+      - name: Get post content
+        id: get-content
+        run: |
+          POST_BODY=$(gh issue view ${{ inputs.issue_number }} --json body -q .body)
+          POST_AUTHOR=$(gh issue view ${{ inputs.issue_number }} --json author -q .author.login)
+          POST_TITLE=$(gh issue view ${{ inputs.issue_number }} --json title -q .title)
+          POST_DATE=$(gh issue view ${{ inputs.issue_number }} --json createdAt -q .createdAt)
+          
+          # Clean content for JSON
+          POST_BODY_ESCAPED=$(echo "$POST_BODY" | jq -aRs .)
+          POST_TITLE_ESCAPED=$(echo "$POST_TITLE" | jq -aRs .)
+          
+          echo "Found issue #${{ inputs.issue_number }}"
+          echo "Title: $POST_TITLE"
+          echo "Author: $POST_AUTHOR"
+          echo "Date: $POST_DATE"
+          echo "Content first 100 chars: ${POST_BODY:0:100}..."
+          
+          # Create payload file
+          cat > payload.json << EOF
+          {
+            "client_payload": {
+              "post_id": "${{ inputs.issue_number }}",
+              "title": $POST_TITLE_ESCAPED,
+              "author": "$POST_AUTHOR",
+              "date": "$POST_DATE",
+              "content": $POST_BODY_ESCAPED
+            }
+          }
+          EOF
+          
+          # Show sanitized payload (without showing full content)
+          jq '.client_payload.content = "<CONTENT TRUNCATED>"' payload.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Test webhook (dry run)
+        run: |
+          echo "Would send webhook to: https://api.github.com/repos/${{ secrets.GAME_REPO_OWNER }}/${{ secrets.GAME_REPO_NAME }}/dispatches"
+          echo "With event_type: new_post"
+          echo "Secret GAME_REPO_TOKEN available: ${{ secrets.GAME_REPO_TOKEN != '' }}"
+          echo "Secret GAME_REPO_OWNER available: ${{ secrets.GAME_REPO_OWNER != '' }}"
+          echo "Secret GAME_REPO_NAME available: ${{ secrets.GAME_REPO_NAME != '' }}"
+          
+      - name: Send test webhook
+        if: github.event.inputs.send_webhook == 'true'
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GAME_REPO_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ secrets.GAME_REPO_OWNER }}/${{ secrets.GAME_REPO_NAME }}/dispatches \
+            --data @payload.json
