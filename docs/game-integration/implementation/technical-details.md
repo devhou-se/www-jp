@@ -153,30 +153,6 @@ The notification to the game repository includes:
 }
 ```
 
-## Required Secrets
-
-To enable the integration, add these secrets to the www-jp repository:
-
-- `GAME_REPO_TOKEN`: GitHub Personal Access Token with permission to trigger workflows
-- `GAME_REPO_OWNER`: GitHub username or organization that owns the game repo
-- `GAME_REPO_NAME`: Name of the game repository
-
-## Testing the Integration
-
-To test the integration:
-
-1. Go to Actions → "Test Game Integration"
-2. Click "Run workflow"
-3. Enter an issue number to test with
-4. Review the logs to ensure post content is correctly extracted
-
-You can also test with a real post:
-
-1. Create a new GitHub issue with the "post" label
-2. Add a comment "/post" to trigger the workflow
-3. Check the GitHub Actions tab to verify the Game Content Notifier runs
-4. Verify in the game repository that the webhook was received
-
 ## Error Handling
 
 The workflow will fail if:

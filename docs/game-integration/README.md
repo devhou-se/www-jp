@@ -2,6 +2,14 @@
 
 This system automatically converts blog posts into interactive characters for our pixel art game, complete with personality traits, dialogue options, and voice synthesis in both English and Japanese.
 
+## Table of Contents
+
+- [How It Works](#how-it-works)
+- [Setup Requirements](#setup-requirements)
+- [Documentation](#documentation)
+- [Testing](#testing)
+- [Troubleshooting](#troubleshooting)
+
 ## How It Works
 
 When a new blog post is created in this repository:
@@ -13,6 +21,8 @@ When a new blog post is created in this repository:
    - Dialogue options in both English and Japanese
    - Audio clips using ElevenLabs voice synthesis
 4. The game is automatically built and deployed with the new character
+
+See the [system architecture diagram](./diagrams/architecture.md) for a visual overview.
 
 ## Setup Requirements
 
@@ -33,9 +43,15 @@ When a new blog post is created in this repository:
 
 ### In the Game Repository
 
-See the [Game Implementation Guide](../../game-docs/complete-implementation-guide.md) for complete setup instructions.
+See the [Game Implementation Guide](./implementation/game-repo-guide.md) for complete setup instructions.
 
-## Testing the Integration
+## Documentation
+
+- [Technical Implementation Details](./implementation/technical-details.md) - Complete system details
+- [Secrets Setup Guide](./implementation/secrets-setup.md) - How to configure required secrets
+- [System Architecture Diagram](./diagrams/architecture.md) - Visual overview of the system
+
+## Testing
 
 Use the test workflow to verify your setup:
 
@@ -43,11 +59,6 @@ Use the test workflow to verify your setup:
 2. Run the workflow with a valid issue number
 3. Check that post content is correctly extracted
 4. Verify the webhook would be sent correctly
-
-## Documentation
-
-- [Detailed Integration Overview](./game-integration.md) - Complete system details
-- [Secrets Setup Guide](./secrets-setup.md) - How to configure required secrets
 
 ## Troubleshooting
 
@@ -59,25 +70,4 @@ Use the test workflow to verify your setup:
 
 ### Game Repository Issues
 
-For issues in the game repository, refer to the [Game Implementation Guide](../../game-docs/complete-implementation-guide.md).
-
-## Data Flow Diagram
-
-```
-Blog Post (GitHub Issue with "post" label)
-    ↓
-Comment "/post" triggers Post Workflow
-    ↓
-Game Content Notifier extracts raw content 
-    ↓
-Webhook sent to game repository
-    ↓
-Game Data Processor generates:
-  - Character attributes
-  - Dialogue options (English & Japanese)
-  - Audio via ElevenLabs
-    ↓
-Game Build & Deploy
-    ↓
-Player experiences NPCs based on blog posts
-```
+For issues in the game repository, refer to the [Game Implementation Guide](./implementation/game-repo-guide.md).

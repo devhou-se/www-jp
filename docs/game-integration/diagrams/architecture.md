@@ -1,4 +1,6 @@
-# Game Integration System Architecture
+# System Architecture Diagram
+
+This diagram illustrates the flow of data from blog post creation to game integration.
 
 ```mermaid
 graph TD
@@ -82,13 +84,13 @@ graph TD
 #### In www-jp repo:
 - **Post Workflow**: Main workflow triggered by "/post" comment
 - **Post Processor**: Processes issue content
-- **Game Data Processor**: NEW - Extracts raw post data early in the process
+- **Game Data Processor**: Extracts raw post data early in the process
 - **Translator Process**: Translates content to Japanese using OpenAI
 - **Deploy Site**: Deploys the updated blog with new content
-- **Game Data Generator**: NEW - Converts raw post data to structured game data
-- **Voice Synthesis**: NEW - Creates audio files from dialogue text
-- **Data Storage Updater**: NEW - Updates GCS with audio assets
-- **Game Content Repository Update**: NEW - Pushes game data to game repo
+- **Game Data Generator**: Converts raw post data to structured game data
+- **Voice Synthesis**: Creates audio files from dialogue text
+- **Data Storage Updater**: Updates GCS with audio assets
+- **Game Content Repository Update**: Pushes game data to game repo
 
 #### In game repo:
 - **Game Content Trigger**: Triggered by content repo updates
@@ -106,10 +108,6 @@ graph TD
 - **WASM Game Build**: Browser-compatible build of the Godot game
 - **Web Browser**: Platform where the game runs
 - **NPC Characters**: In-game representations of blog authors
-
-### User Interaction
-- **Player**: End user interacting with the game
-- **NPC Interaction**: Dialogue and behavior systems in the game
 
 ## Data Flow Sequence
 
@@ -136,27 +134,3 @@ graph TD
     - Loads character data directly from game code
     - Lazy loads audio assets from GCS as needed
 11. Player interacts with NPCs representing blog authors
-
-## Integration Points
-
-### www-jp repo → game repo
-- Structured JSON data for character attributes and dialogue
-- Asset references for audio files in GCS
-- Webhook or workflow_dispatch trigger for build
-
-### GitHub Actions → AI Services
-- Structured API calls with appropriate context and prompts
-- Authentication using API keys stored as GitHub Secrets
-
-### GitHub Actions → GCS
-- Direct upload of audio files to Cloud Storage
-- Generation of public URLs for game access
-
-### Game → GCS
-- Lazy loading of audio assets during gameplay
-- Caching mechanisms for frequently accessed assets
-
-### Game → Player
-- Character behavior systems driven by generated data
-- Dialogue UI with language selection
-- Audio playback for immersive experience
