@@ -12,7 +12,7 @@ IMG_PATTERN = r"(\!\[(.*)\]\((.*)\))"
 
 IMG_TEMPLATE = "<a href=\"/{}\"><img src=\"{}\" alt=\"{}\" /></a>"
 IMG_MD_TEMPLATE = "![{}]({})"
-IMG_MD_LINK_TEMPLATE = "[![{}]({})]({})"
+IMG_MD_LINK_TEMPLATE = "[![{}]({})](/{})"
 HTML_TEMPLATE = """<span id="daily-image"></span>
 <script>
 const choices = {choices};

@@ -3,6 +3,9 @@
 <p>投稿日{{ .Date.Format "2006年01月02日15時04分" }}</p>
 <p>投稿者{{ .Params.Author }}</p>
 <hr>
-{{ .Content }}
+<div class="コンテンツ">
+{{ replaceRE `\[([^\]]*)\]{([^\}]*)}` `<ruby lang="ja"><rb>$1</rb><rp>(</rp><rt>$2</rt><rp>)</rp></ruby>` .Content | safeHTML }}
+</div>
 {{- partial "reactions.html" . -}}
 {{ end }}
+
