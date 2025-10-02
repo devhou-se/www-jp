@@ -4,8 +4,13 @@ title = 'devhou.se'
 theme = 'devhouse-theme'
 copyright = '© 2025 devhou.se'
 
+[taxonomies]
+  author = 'authors'
+
 [outputs]
   home = ["HTML", "RSS"]
+  taxonomy = ["HTML", "RSS"]
+  term = ["HTML", "RSS"]
 
 [params]
   description = "A multilingual blog about travel and experiences in Japan"

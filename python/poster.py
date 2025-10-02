@@ -34,7 +34,7 @@ def main():
         header = f"""---
 title: {POST_TITLE}
 date: {convert_date(POST_DATE)}
-author: {POST_AUTHOR}
+authors: [{POST_AUTHOR}]
 ---"""
 
     content = f"{header}\n{content_body}"
