@@ -1,7 +1,7 @@
 name: "Post"
 
-# on:
-#   issue_comment:
+on:
+  issue_comment:
 
 jobs:
   post:
