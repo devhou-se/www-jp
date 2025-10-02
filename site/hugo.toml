@@ -1,4 +1,23 @@
-baseURL = 'http://example.org/'
-languageCode = 'en-us'
-title = 'My New Hugo Site'
+baseURL = 'https://devhou.se/'
+languageCode = 'ja'
+title = 'devhou.se'
 theme = 'devhouse-theme'
+copyright = '© 2025 devhou.se'
+
+[outputs]
+  home = ["HTML", "RSS"]
+
+[params]
+  description = "A multilingual blog about travel and experiences in Japan"
+  author = "devhou.se"
+
+[author]
+  name = "devhou.se"
+  email = "blog@devhou.se"
+
+[services.rss]
+  limit = 20  # Number of posts in RSS feed (0 = unlimited)
+
+[outputFormats.RSS]
+  mediatype = "application/rss+xml"
+  baseName = "feed"
