@@ -57,12 +57,12 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           python python/furigana.py ${{ github.event.issue.number }}
-      - name: "notify game repo"
-        if: steps.check-comment.outputs.valid == 'true'
-        uses: ./.github/workflows/game-content-notifier.yaml
-        with:
-          issue_number: ${{ github.event.issue.number }}
-        secrets: inherit
+      # - name: "notify game repo"
+      #   if: steps.check-comment.outputs.valid == 'true'
+      #   uses: ./.github/workflows/game-content-notifier.yaml
+      #   with:
+      #     issue_number: ${{ github.event.issue.number }}
+      #   secrets: inherit
       - name: "commit post"
         if: steps.check-comment.outputs.valid == 'true'
         run: |
