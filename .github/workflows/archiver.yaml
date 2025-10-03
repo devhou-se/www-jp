@@ -34,7 +34,7 @@ jobs:
       - name: "create branch"
         if: steps.check-comment.outputs.valid == 'true'
         run: |
-          git checkout "post/${{ github.event.issue.number }}" || git checkout -b "post/${{ github.event.issue.number }}"
+          git checkout "archive/${{ github.event.issue.number }}" || git checkout -b "archive/${{ github.event.issue.number }}"
       - name: "post creator"
         if: steps.check-comment.outputs.valid == 'true'
         env:
@@ -55,7 +55,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr create --title "Archive post #${{ github.event.issue.number }}" --body "Archive post ${{ github.event.issue.number }}" --base main --head "post/${{ github.event.issue.number }}"
+          gh pr create --title "Archive post #${{ github.event.issue.number }}" --body "Archive post ${{ github.event.issue.number }}" --base main --head "archive/${{ github.event.issue.number }}"
           gh pr merge --auto --squash --delete-branch
       - name: "just fail lol"
         if: steps.check-comment.outputs.valid == 'false'
