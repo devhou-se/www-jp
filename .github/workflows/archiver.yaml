@@ -56,7 +56,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr create --title "Archive post #${{ github.event.issue.number }}" --body "Archive post ${{ github.event.issue.number }}" --base main --head "archive/${{ github.event.issue.number }}"
-          gh pr merge --auto --squash --delete-branch
+          gh pr merge --squash --delete-branch
       - name: "just fail lol"
         if: steps.check-comment.outputs.valid == 'false'
         run: exit 1
