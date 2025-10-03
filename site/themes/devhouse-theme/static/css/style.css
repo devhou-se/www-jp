@@ -1,46 +1,60 @@
-/* Palette
-#E83761
-#BD2B4C
-#A2354C
-#FAA800
-#2B1005
+/* Dark Theme Palette - Pixelated Gaming Aesthetic
+Primary: #1a1a1a (Dark background)
+Secondary: #0a0a0a (Darker sections)
+Accent: #FF0000 (Red from logo)
+Text: #ffffff (White)
+Border: #333333 (Dark gray)
  */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 html, body {
     margin: 0;
     padding: 0;
-    background-color: #FAA800;
+    background-color: #0a0a0a;
     min-width: 960px;
-    font-family: sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+    color: #ffffff;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: #A2354C;
+    color: #FF0000;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+    letter-spacing: 1px;
+    font-weight: 700;
 }
 
 div.章 {
-    background-color: #fff;
-    border: 1px solid #777;
+    background-color: #1a1a1a;
+    border: 2px solid #333333;
     margin: 5px;
     padding: 15px;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.1);
 }
 
 a, a:visited, a:link {
-    color: inherit;
-    text-decoration: underline;
+    color: #FF0000;
+    text-decoration: none;
+    transition: all 0.2s;
 }
 
 a:hover, a:active {
-    color: #f00;
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
 }
 
 table {
-    border: 1px solid #333;
+    border: 2px solid #333;
+    background-color: #1a1a1a;
 }
 
 td, th {
     border: 1px solid #333;
-    padding: 0 .2em;
+    padding: 0.5em;
+    color: #ffffff;
 }
 
 div.コンテナ {
@@ -49,26 +63,31 @@ div.コンテナ {
 }
 
 div.ヘッダ {
-    background: none;
-    border: none;
-    color: #E83761;
+    background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+    border: 2px solid #333333;
+    border-bottom: 3px solid #FF0000;
+    color: #ffffff;
     font-size: 1.25em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 5px;
+    margin-bottom: 0;
 }
 
 div.ヘッダ h2 {
-    color: #E83761;
-}
-
-div.ヘッダ img {
-    height: 64px;
-    margin: -22px 8px;
-}
-
-div.ヘッダ h2 {
-    font-family: monospace;
+    color: #FF0000;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.8em;
     display: inline-block;
     margin: 0;
     padding: 0;
+}
+
+div.ヘッダ img {
+    height: 80px;
+    margin-right: 15px;
+    filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.3));
 }
 
 div.ヘッダ ul.リンク {
@@ -81,45 +100,154 @@ div.ヘッダ ul.リンク {
 div.ヘッダ ul.リンク li {
     display: inline;
     margin-left: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+div.ヘッダ ul.リンク a {
+    padding: 8px 16px;
+    background-color: #1a1a1a;
+    border: 2px solid #FF0000;
+    display: inline-block;
+}
+
+div.ヘッダ ul.リンク a:hover {
+    background-color: #FF0000;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
 }
 
 div.主要 div.左-ナビ {
     display: inline-block;
-    width: 200px;
+    width: 168px;
     vertical-align: top;
+    white-space: normal;
+    margin-right: 5px;
 }
 
 div.主要 div.左-ナビ ul {
     padding-left: 15px;
 }
 
+div.主要 div.左-ナビ h3 {
+    font-size: 0.6em;
+    margin: 10px 0 5px 0;
+    color: #FF0000;
+    border-bottom: 1px solid #333;
+    padding-bottom: 5px;
+}
+
+div.主要 div.左-ナビ li {
+    margin: 5px 0;
+    font-size: 0.85em;
+    line-height: 1.4;
+}
+
+div.主要 div.左-ナビ li[style*="background-color"] {
+    background-color: #FF0000 !important;
+    color: #ffffff !important;
+    padding: 5px;
+    border: 2px solid #FF0000;
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+}
+
+div.主要 {
+    white-space: nowrap;
+    margin: 5px;
+    margin-top: 15px;
+}
+
+div.主要 div.章 {
+    background-color: #1a1a1a;
+    border: 2px solid #333333;
+    margin: 0;
+    margin-right: 15px;
+    padding: 15px;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.1);
+}
+
 div.主要 div.内容 {
     display: inline-block;
-    width: 530px;
-    vertical-align: top
+    width: 598px;
+    vertical-align: top;
+    white-space: normal;
+    /*margin-right: 15px;*/
 }
 
 div.主要 div.内容 div.コンテンツ {
-    font-size: 1.4em;
-    line-height: 1.6em;
+    font-size: 1.2em;
+    line-height: 1.8em;
+}
+
+div.主要 div.内容 h2 {
+    border-left: 4px solid #FF0000;
+    padding-left: 10px;
+    margin-top: 20px;
+}
+
+div.主要 div.内容 p {
+    margin: 1em 0;
+}
+
+div.主要 div.内容 code {
+    background-color: #0a0a0a;
+    border: 1px solid #333;
+    padding: 2px 6px;
+    font-family: 'Courier New', Consolas, monospace;
+    color: #FF0000;
+}
+
+div.主要 div.内容 pre {
+    background-color: #0a0a0a;
+    border: 2px solid #333;
+    padding: 15px;
+    overflow-x: auto;
+    box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.1);
+}
+
+div.主要 div.内容 pre code {
+    background: none;
+    border: none;
+    color: #ffffff;
+    padding: 0;
 }
 
 div.主要 div.内容 img {
     max-width: 100%;
+    border: 2px solid #333;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.1);
 }
 
 div.主要 div.右-ナビ {
     display: inline-block;
-    width: 209px;
+    width: 183px;
     vertical-align: top;
+    white-space: normal;
 }
 
 div.主要 div.右-ナビ img {
     max-width: 100%;
+    border: 2px solid #333;
+}
+
+li.アクティブ a, li.アクティブ a:visited {
+    background-color: #FF0000;
+    color: #ffffff;
+    padding: 2px;
+}
+
+li.アクティブ a:hover {
+    background-color: #cc0000;
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
 }
 
 footer {
     text-align: center;
+    color: #666;
+    font-size: 0.85em;
+    padding: 20px;
+    background-color: #0a0a0a;
+    border-top: 2px solid #333;
 }
 
 .reaction-badge-parent {
@@ -130,22 +258,25 @@ footer {
 
 a.reaction-badge {
     text-decoration: none;
-    border: none;
+    border: 2px solid #333;
     display: flex;
     padding: 1em 0.6em;
     margin-right: 0.5em;
-    border-radius: 1em;
-    background-color: #efefef;
+    border-radius: 0;
+    background-color: #1a1a1a;
     font-size: 0.75em;
     line-height: 1;
-    color: #24292e;
+    color: #ffffff;
     text-align: center;
     white-space: nowrap;
     vertical-align: baseline;
+    transition: all 0.2s;
 }
 
 a.reaction-badge:hover {
-    background-color: #d0d0d0;
+    background-color: #FF0000;
+    border-color: #FF0000;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
 }
 
 .reaction-badge td {
@@ -159,4 +290,50 @@ ruby rt {
     -webkit-user-select: none; /* For Safari */
     -moz-user-select: none;    /* For Firefox */
     -ms-user-select: none;     /* For IE/Edge */
+}
+
+/* Pixelated accent effects */
+div.章::before {
+    content: '';
+    display: block;
+    height: 3px;
+    background: repeating-linear-gradient(
+        90deg,
+        #FF0000 0px,
+        #FF0000 3px,
+        transparent 3px,
+        transparent 6px
+    );
+    margin: -15px -15px 15px -15px;
+}
+
+/* Scrollbar styling for dark theme */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0a0a0a;
+    border: 1px solid #333;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #FF0000;
+    border: 1px solid #333;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #cc0000;
+}
+
+/* Selection styling */
+::selection {
+    background: #FF0000;
+    color: #ffffff;
+}
+
+::-moz-selection {
+    background: #FF0000;
+    color: #ffffff;
 }

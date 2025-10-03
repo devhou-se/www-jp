@@ -3,7 +3,7 @@
 <h3>{{ .Key }}</h3>
 <ul>
 {{ range .Pages }}
-    <li {{ if eq $.Page.RelPermalink .RelPermalink }}style="background-color: #000; color: #fff;"{{ end }}>{{ delimit (.Param "authors") ", " }}：<a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></li>
+    <li {{ if eq $.Page.RelPermalink .RelPermalink }}class="アクティブ"{{ end }}>{{ delimit (.Param "authors") ", " }}：<a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></li>
 {{ end }}
 </ul>
 {{ end }}
