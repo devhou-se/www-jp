@@ -51,12 +51,12 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           python python/translator.py ${{ github.event.issue.number }}
-      - name: "add furigana"
-        if: steps.check-comment.outputs.valid == 'true'
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          python python/furigana.py ${{ github.event.issue.number }}
+      # - name: "add furigana"
+      #   if: steps.check-comment.outputs.valid == 'true'
+      #   env:
+      #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      #   run: |
+      #     python python/furigana.py ${{ github.event.issue.number }}
       # - name: "notify game repo"
       #   if: steps.check-comment.outputs.valid == 'true'
       #   uses: ./.github/workflows/game-content-notifier.yaml

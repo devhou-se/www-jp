@@ -4,7 +4,7 @@
 <p>投稿者{{ .Params.Author }}</p>
 <hr>
 <div class="コンテンツ">
-{{ replaceRE `\[([^\]]*)\]{([^\}]*)}` `<ruby lang="ja"><rb>$1</rb><rp>(</rp><rt>$2</rt><rp>)</rp></ruby>` .Content | safeHTML }}
+{{ replaceRE `\[([^\]]*)\]{[^\}]*}` `$1` .Content | safeHTML }}
 </div>
 {{- partial "reactions.html" . -}}
 {{ end }}
