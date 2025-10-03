@@ -2,3 +2,4 @@ openai
 flask
 flask-cors
 requests
+pyyaml

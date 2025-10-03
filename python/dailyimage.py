@@ -3,6 +3,7 @@ from enum import Enum
 import datetime
 import os
 import re
+import yaml
 
 MAX_AGE = 2  # days
 
@@ -75,14 +76,19 @@ def collect_images(data: str) -> tuple[list[str], Validity]:
     if not data.startswith("---"):
         return [], Validity.MISFORMATTED
 
-    end = data[3:].index("---")
-    meta = data[3:end+3].split("\n")
-    kv = {}
-    for line in meta:
-        if not line:
-            continue
-        key, value = line.split(": ")
-        kv[key] = value
+    try:
+        end = data[3:].index("---")
+    except ValueError:
+        # No closing frontmatter delimiter
+        return [], Validity.MISFORMATTED
+
+    frontmatter = data[3:3+end]
+
+    try:
+        kv = yaml.safe_load(frontmatter) or {}
+    except yaml.YAMLError:
+        # Invalid YAML in frontmatter
+        return [], Validity.MISFORMATTED
 
     imgs = re.findall(IMG_PATTERN, data)
 
@@ -90,11 +96,19 @@ def collect_images(data: str) -> tuple[list[str], Validity]:
 
 
 def post_validator(meta: dict[str, str]) -> Validity:
-    if meta.get("draft") == "true":
+    if meta.get("draft") == "true" or meta.get("draft") is True:
         return Validity.DRAFT
 
     if meta.get("date"):
-        date = datetime.datetime.fromisoformat(meta.get("date"))
+        date_value = meta.get("date")
+        # Handle both string and datetime objects from YAML
+        if isinstance(date_value, str):
+            date = datetime.datetime.fromisoformat(date_value)
+        elif isinstance(date_value, datetime.datetime):
+            date = date_value
+        else:
+            return Validity.VALID
+
         tzinfo = datetime.timezone(datetime.timedelta(hours=9))
         if (datetime.datetime.now().astimezone(tzinfo) - date).days >= MAX_AGE:
             return Validity.OLD
