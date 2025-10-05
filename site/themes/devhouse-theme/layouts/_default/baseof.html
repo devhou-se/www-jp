@@ -20,8 +20,48 @@
 </div>
 {{ partial "footer.html" . }}
 <script>
+    // Theme toggle functionality
+    function updateLogo(theme) {
+        const logo = document.getElementById('site-logo');
+        if (logo) {
+            logo.src = theme === 'light' ? '/images/logo-dark.svg' : '/images/logo-white.svg';
+        }
+    }
+
+    function toggleTheme() {
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        const darkStylesheet = document.getElementById('theme-dark');
+        const lightStylesheet = document.getElementById('theme-light');
+
+        if (newTheme === 'light') {
+            darkStylesheet.disabled = true;
+            lightStylesheet.disabled = false;
+        } else {
+            darkStylesheet.disabled = false;
+            lightStylesheet.disabled = true;
+        }
+
+        localStorage.setItem('theme', newTheme);
+        updateLogo(newTheme);
+    }
+
     // Mobile collapsible sidebar
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize logo based on current theme
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        updateLogo(currentTheme);
+
+        // Theme toggle button
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleTheme();
+            });
+        }
+
         if (window.innerWidth <= 1400) {
             const sidebar = document.querySelector('div.左-ナビ');
             if (sidebar) {

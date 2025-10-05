@@ -1,0 +1,663 @@
+/* Light Theme Palette - Pixelated Gaming Aesthetic
+Primary: #f5f5f5 (Light background)
+Secondary: #ffffff (White sections)
+Accent: #FF0000 (Red from logo)
+Text: #1a1a1a (Dark text)
+Border: #d0d0d0 (Light gray)
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    min-width: 960px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+    color: #1a1a1a;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #FF0000;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+div.章 {
+    background-color: #ffffff;
+    border: 2px solid #d0d0d0;
+    margin: 5px;
+    padding: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+a, a:visited, a:link {
+    color: #FF0000;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+a:hover, a:active {
+    color: #1a1a1a;
+    text-shadow: 0 0 8px rgba(255, 0, 0, 0.3);
+}
+
+table {
+    border: 2px solid #d0d0d0;
+    background-color: #ffffff;
+}
+
+td, th {
+    border: 1px solid #d0d0d0;
+    padding: 0.5em;
+    color: #1a1a1a;
+}
+
+div.コンテナ {
+    width: 1100px;
+    margin: 10px auto;
+}
+
+div.ヘッダ {
+    background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
+    border: 2px solid #d0d0d0;
+    border-bottom: 3px solid #FF0000;
+    color: #1a1a1a;
+    font-size: 1.25em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 5px;
+    margin-bottom: 0;
+}
+
+div.ヘッダ h2 {
+    color: #FF0000;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.8em;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+div.ヘッダ img {
+    height: 80px;
+    margin-right: 15px;
+    filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.2));
+}
+
+div.ヘッダ ul.リンク {
+    display: inline-block;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0 20px;
+}
+
+div.ヘッダ ul.リンク li {
+    display: inline;
+    margin-left: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+div.ヘッダ ul.リンク a {
+    padding: 8px 16px;
+    background-color: #ffffff;
+    border: 2px solid #FF0000;
+    display: inline-block;
+}
+
+div.ヘッダ ul.リンク a:hover {
+    background-color: #FF0000;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+}
+
+div.主要 div.左-ナビ {
+    display: inline-block;
+    width: 168px;
+    vertical-align: top;
+    white-space: normal;
+    margin-right: 5px;
+}
+
+div.主要 div.左-ナビ ul {
+    padding-left: 15px;
+}
+
+div.主要 div.左-ナビ h3 {
+    font-size: 0.6em;
+    margin: 10px 0 5px 0;
+    color: #FF0000;
+    border-bottom: 1px solid #d0d0d0;
+    padding-bottom: 5px;
+}
+
+div.主要 div.左-ナビ li {
+    margin: 5px 0;
+    font-size: 0.85em;
+    line-height: 1.4;
+}
+
+div.主要 div.左-ナビ li[style*="background-color"] {
+    background-color: #FF0000 !important;
+    color: #ffffff !important;
+    padding: 5px;
+    border: 2px solid #FF0000;
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.3);
+}
+
+div.主要 {
+    white-space: nowrap;
+    margin: 5px;
+    margin-top: 15px;
+}
+
+div.主要 div.章 {
+    background-color: #ffffff;
+    border: 2px solid #d0d0d0;
+    margin: 0;
+    margin-right: 15px;
+    padding: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+div.主要 div.内容 {
+    display: inline-block;
+    width: 598px;
+    vertical-align: top;
+    white-space: normal;
+    /*margin-right: 15px;*/
+}
+
+div.主要 div.内容 div.コンテンツ {
+    font-size: 1.2em;
+    line-height: 1.8em;
+}
+
+div.主要 div.内容 h2 {
+    border-left: 4px solid #FF0000;
+    padding-left: 10px;
+    margin-top: 20px;
+}
+
+div.主要 div.内容 p {
+    margin: 1em 0;
+}
+
+div.主要 div.内容 code {
+    background-color: #f5f5f5;
+    border: 1px solid #d0d0d0;
+    padding: 2px 6px;
+    font-family: 'Courier New', Consolas, monospace;
+    color: #FF0000;
+}
+
+div.主要 div.内容 pre {
+    background-color: #f5f5f5;
+    border: 2px solid #d0d0d0;
+    padding: 15px;
+    overflow-x: auto;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+div.主要 div.内容 pre code {
+    background: none;
+    border: none;
+    color: #1a1a1a;
+    padding: 0;
+}
+
+div.主要 div.内容 img {
+    max-width: 100%;
+    border: 2px solid #d0d0d0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+div.主要 div.右-ナビ {
+    display: inline-block;
+    width: 183px;
+    vertical-align: top;
+    white-space: normal;
+}
+
+div.主要 div.右-ナビ img {
+    max-width: 100%;
+    border: 2px solid #d0d0d0;
+}
+
+li.アクティブ a, li.アクティブ a:visited {
+    background-color: #FF0000;
+    color: #ffffff;
+    padding: 2px;
+}
+
+li.アクティブ a:hover {
+    background-color: #cc0000;
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.3);
+}
+
+footer {
+    text-align: center;
+    color: #999;
+    font-size: 0.85em;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-top: 2px solid #d0d0d0;
+}
+
+.reaction-badge-parent {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+a.reaction-badge {
+    text-decoration: none;
+    border: 2px solid #d0d0d0;
+    display: flex;
+    padding: 1em 0.6em;
+    margin-right: 0.5em;
+    border-radius: 0;
+    background-color: #ffffff;
+    font-size: 0.75em;
+    line-height: 1;
+    color: #1a1a1a;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    transition: all 0.2s;
+}
+
+a.reaction-badge:hover {
+    background-color: #FF0000;
+    color: #ffffff;
+    border-color: #FF0000;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+}
+
+.reaction-badge td {
+    padding-left: 10px;
+    padding-right: 10px;
+    border: none;
+}
+
+ruby rt {
+    user-select: none;
+    -webkit-user-select: none; /* For Safari */
+    -moz-user-select: none;    /* For Firefox */
+    -ms-user-select: none;     /* For IE/Edge */
+}
+
+/* Pixelated accent effects */
+div.章::before {
+    content: '';
+    display: block;
+    height: 3px;
+    background: repeating-linear-gradient(
+        90deg,
+        #FF0000 0px,
+        #FF0000 3px,
+        transparent 3px,
+        transparent 6px
+    );
+    margin: -15px -15px 15px -15px;
+}
+
+/* Scrollbar styling for light theme */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border: 1px solid #d0d0d0;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #FF0000;
+    border: 1px solid #d0d0d0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #cc0000;
+}
+
+/* Selection styling */
+::selection {
+    background: #FF0000;
+    color: #ffffff;
+}
+
+::-moz-selection {
+    background: #FF0000;
+    color: #ffffff;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 1400px) {
+    html, body {
+        min-width: 100%;
+        overflow-x: hidden;
+    }
+
+    div.コンテナ {
+        width: 100%;
+        margin: 0;
+        overflow-x: hidden;
+    }
+
+    div.ヘッダ {
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+        margin: 0;
+    }
+
+    div.ヘッダ img {
+        width: 100%;
+        height: auto;
+        margin: 0 0 10px 0;
+    }
+
+    div.ヘッダ h2 {
+        font-size: 0.6em;
+        margin-bottom: 10px;
+    }
+
+    div.ヘッダ ul.リンク {
+        margin: 0;
+        width: 100%;
+    }
+
+    div.ヘッダ ul.リンク li {
+        margin: 5px 0;
+        display: block;
+    }
+
+    div.ヘッダ ul.リンク a {
+        display: block;
+        text-align: center;
+    }
+
+    div.主要 {
+        white-space: normal;
+        margin: 0;
+    }
+
+    div.主要 div.左-ナビ,
+    div.主要 div.内容,
+    div.主要 div.右-ナビ {
+        display: block;
+        width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    div.主要 div.章 {
+        margin: 5px;
+        box-sizing: border-box;
+    }
+
+    div.主要 div.内容 {
+        margin-right: 0;
+        overflow-x: hidden;
+        word-wrap: break-word;
+    }
+
+    div.主要 div.内容 div.コンテンツ {
+        font-size: 1em;
+        line-height: 1.6em;
+        overflow-x: hidden;
+    }
+
+    div.主要 div.内容 pre {
+        overflow-x: auto;
+        max-width: 100%;
+    }
+
+    div.主要 div.内容 img,
+    div.主要 div.内容 table {
+        max-width: 100%;
+        overflow-x: auto;
+        display: block;
+    }
+
+    div.章 {
+        margin: 5px;
+        padding: 10px;
+        overflow-x: hidden;
+    }
+
+    div.章::before {
+        margin: -10px -10px 10px -10px;
+    }
+
+    /* Collapsible blog list on mobile */
+    div.主要 div.左-ナビ {
+        position: relative;
+    }
+
+    div.主要 div.左-ナビ > p {
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+        padding-right: 30px;
+        margin: 0 0 10px 0;
+        font-weight: bold;
+    }
+
+    div.主要 div.左-ナビ > p::after {
+        content: '▼';
+        position: absolute;
+        right: 0;
+        transition: transform 0.3s;
+    }
+
+    div.主要 div.左-ナビ.collapsed > p::after {
+        transform: rotate(-90deg);
+    }
+
+    div.主要 div.左-ナビ.collapsed h3,
+    div.主要 div.左-ナビ.collapsed ul {
+        display: none;
+    }
+
+    div.主要 div.左-ナビ h3,
+    div.主要 div.左-ナビ ul {
+        display: block;
+    }
+}
+
+/* Gallery Styles */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 15px 0;
+}
+
+.gallery-item {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    border: 2px solid #d0d0d0;
+    background-color: #ffffff;
+    transition: all 0.3s;
+    aspect-ratio: 1;
+}
+
+.gallery-item:hover {
+    border-color: #FF0000;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+    transform: scale(1.05);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border: none;
+}
+
+/* Lightbox Styles */
+.lightbox {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.95);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.lightbox.active {
+    display: flex;
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.lightbox-image {
+    max-width: 100%;
+    max-height: 90vh;
+    border: 3px solid #FF0000;
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+    object-fit: contain;
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 40px;
+    color: #FF0000;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid #FF0000;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    transition: all 0.3s;
+    z-index: 10000;
+}
+
+.lightbox-close:hover {
+    background-color: #FF0000;
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+}
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 50px;
+    color: #FF0000;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid #FF0000;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s;
+    user-select: none;
+    z-index: 10001;
+}
+
+.lightbox-nav:hover {
+    background-color: #FF0000;
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+}
+
+.lightbox-prev {
+    left: 20px;
+}
+
+.lightbox-next {
+    right: 20px;
+}
+
+.lightbox-counter {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #1a1a1a;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid #FF0000;
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+.lightbox-link {
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #FF0000;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid #FF0000;
+    padding: 10px 20px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s;
+    z-index: 10001;
+}
+
+.lightbox-link:hover {
+    background-color: #FF0000;
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+}
+
+/* Mobile gallery adjustments */
+@media (max-width: 1400px) {
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+
+    .lightbox-nav {
+        font-size: 30px;
+        width: 50px;
+        height: 50px;
+    }
+
+    .lightbox-prev {
+        left: 10px;
+    }
+
+    .lightbox-next {
+        right: 10px;
+    }
+
+    .lightbox-close {
+        top: 10px;
+        right: 10px;
+        font-size: 30px;
+        width: 40px;
+        height: 40px;
+    }
+}

@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	jis "github.com/dsoprea/go-jpeg-image-structure/v2"
 	"github.com/nfnt/resize"
@@ -23,6 +24,15 @@ const (
 	imageStorePath = utils.SiteDirectory + "/static/images"
 )
 
+var httpClient = &http.Client{
+	Timeout: 30 * time.Second,
+	Transport: &http.Transport{
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 50,
+		IdleConnTimeout:     90 * time.Second,
+	},
+}
+
 func main() {
 	images, err := utils.WebImages()
 	if err != nil {
@@ -34,15 +44,16 @@ func main() {
 	fl := &fileLocker{fl: make(map[string]*sync.Mutex)}
 	wg := sync.WaitGroup{}
 
-	sem := semaphore.NewWeighted(10)
+	sem := semaphore.NewWeighted(50)
 
 	for _, image := range images {
 		wg.Add(1)
+		image := image // Capture loop variable
 
 		go func() {
 			defer wg.Done()
 
-			err = sem.Acquire(context.Background(), 1)
+			err := sem.Acquire(context.Background(), 1)
 			if err != nil {
 				fmt.Println(err.Error())
 				return
@@ -69,7 +80,7 @@ func main() {
 // each of the widths defined. A width of 0 will keep the original width.
 func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int, int, error) {
 	// Fetch image
-	response, err := http.Get(url)
+	response, err := httpClient.Get(url)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -126,33 +137,24 @@ func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int
 		filename := imageStorePath + "/" + filenameBase + suffix + ".jpeg"
 
 		fl.Lock(filename)
-		defer fl.Unlock(filename)
 		if _, err = os.Stat(filename); err == nil {
 			fmt.Printf("Already completed %s\n", filename)
+			fl.Unlock(filename)
 			continue
 		}
 
-		file, err := os.Create(filename)
+		// Encode to buffer first
+		buf := &bytes.Buffer{}
+		err = jpeg.Encode(buf, resized, nil)
 		if err != nil {
+			fl.Unlock(filename)
 			return 0, 0, err
 		}
 
-		// Write image data to file
-		err = jpeg.Encode(file, resized, nil)
+		// Extract new exif data from buffer
+		mc2, err := jis.NewJpegMediaParser().ParseBytes(buf.Bytes())
 		if err != nil {
-			return 0, 0, err
-		}
-
-		// todo: this could be redundant? can we remove reading back from disk
-		// Read new files bytes
-		bytes, err := os.ReadFile(file.Name())
-		if err != nil {
-			return 0, 0, err
-		}
-
-		// Extract new exif data
-		mc2, err := jis.NewJpegMediaParser().ParseBytes(bytes)
-		if err != nil {
+			fl.Unlock(filename)
 			return 0, 0, err
 		}
 		sl2 := mc2.(*jis.SegmentList)
@@ -160,17 +162,21 @@ func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int
 		// Replace new exif data with previous
 		err = sl2.SetExif(eb)
 		if err != nil {
+			fl.Unlock(filename)
 			return 0, 0, err
 		}
 
-		// Reset write pointer
-		_, err = file.Seek(0, 0)
+		// Write to file with exif data
+		file, err := os.Create(filename)
 		if err != nil {
+			fl.Unlock(filename)
 			return 0, 0, err
 		}
 
-		// Write new exif data to file
 		err = sl2.Write(file)
+		file.Close()
+		fl.Unlock(filename)
+
 		if err != nil {
 			return 0, 0, err
 		}
