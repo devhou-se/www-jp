@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	imageStorePath = utils.SiteDirectory + "/content/images"
+	imageStorePath = utils.SiteDirectory + "/static/images"
 )
 
 const imgtemplate = `{{< lazyimage %s 425 >}}`
