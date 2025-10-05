@@ -1,0 +1,16 @@
+{{- $src := .Destination -}}
+{{- $alt := .Text -}}
+
+{{- if strings.Contains $src "github.com" -}}
+  {{- $parts := split $src "/" -}}
+  {{- $imageId := index $parts (sub (len $parts) 1) -}}
+
+  {{- /* Extract just the hash from the URL */ -}}
+  {{- if strings.Contains $imageId "?" -}}
+    {{- $imageId = index (split $imageId "?") 0 -}}
+  {{- end -}}
+
+  <img id="img-{{ $imageId }}" alt="{{ $alt }}" /><script>loadImageInStages(document.getElementById('img-{{ $imageId }}'), '/images/{{ $imageId }}_0.jpeg', '/images/{{ $imageId }}_1.jpeg', '/images/{{ $imageId }}_2.jpeg', '/images/{{ $imageId }}.jpeg');</script>
+{{- else -}}
+  <img src="{{ $src }}" alt="{{ $alt }}" />
+{{- end -}}

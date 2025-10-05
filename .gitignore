@@ -70,5 +70,9 @@ node_modules/
 # ignore generated content from running hugo server
 site/public
 
+# ignore generated images
+site/static/images/
+site/content/images/
+
 # Mac files
 .DS_Store

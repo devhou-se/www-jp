@@ -19,28 +19,38 @@
     </div>
 </div>
 {{ partial "footer.html" . }}
-<script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
+<script>
+    // Mobile collapsible sidebar
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.innerWidth <= 1400) {
+            const sidebar = document.querySelector('div.左-ナビ');
+            if (sidebar) {
+                // Start collapsed on mobile
+                sidebar.classList.add('collapsed');
 
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    const firebaseConfig = {
-        apiKey: "AIzaSyCEYRNG5BE0xiDW74JH_peGGvEkosd3ctw",
-        authDomain: "devhouse-80936.firebaseapp.com",
-        projectId: "devhouse-80936",
-        storageBucket: "devhouse-80936.appspot.com",
-        messagingSenderId: "796635651643",
-        appId: "1:796635651643:web:f6f0e84b18741b014ec61e",
-        measurementId: "G-8R0PSG1WH9"
-    };
+                const heading = sidebar.querySelector('p');
+                if (heading) {
+                    heading.addEventListener('click', function() {
+                        sidebar.classList.toggle('collapsed');
+                    });
+                }
+            }
+        }
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
+        // Re-check on window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.querySelector('div.左-ナビ');
+            if (sidebar) {
+                if (window.innerWidth <= 1400) {
+                    if (!sidebar.classList.contains('collapsed')) {
+                        sidebar.classList.add('collapsed');
+                    }
+                } else {
+                    sidebar.classList.remove('collapsed');
+                }
+            }
+        });
+    });
 </script>
 </body>
 </html>

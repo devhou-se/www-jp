@@ -20,10 +20,8 @@ import (
 )
 
 const (
-	imageStorePath = utils.SiteDirectory + "/content/images"
+	imageStorePath = utils.SiteDirectory + "/static/images"
 )
-
-const imgtemplate = `{{< lazyimage %s 425 >}}`
 
 func main() {
 	images, err := utils.WebImages()
@@ -60,30 +58,7 @@ func main() {
 				return
 			}
 
-			// y := newY(width, height, 425)
-			// todo: aspect ratio is inverted for exif rotated images
-
-			fl.Lock(image.InFile)
-			defer fl.Unlock(image.InFile)
-
-			fileBytes, err := os.ReadFile(image.InFile)
-			if err != nil {
-				fmt.Println(err.Error())
-				return
-			}
-
-			oldImage := image.FullMarkdown
-			newImage := fmt.Sprintf(imgtemplate, filenameBase)
-
-			fileBytes = bytes.ReplaceAll(fileBytes, []byte(oldImage), []byte(newImage))
-
-			err = os.WriteFile(image.InFile, fileBytes, os.ModePerm)
-			if err != nil {
-				fmt.Println(err.Error())
-				return
-			}
-
-			fmt.Printf("Updated %s in %s\n", image.Location, image.InFile)
+			fmt.Printf("Downloaded %s\n", image.Location)
 		}()
 	}
 
