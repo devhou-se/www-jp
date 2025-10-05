@@ -1,4 +1,161 @@
 {{ define "main" }}
-{{ .Content }}
+{{- $galleryContent := readFile "content/gallery.md" -}}
+<div class="gallery-container">
+    <div class="gallery-grid" id="galleryGrid"></div>
+    <textarea id="galleryData" style="display:none;">{{ $galleryContent }}</textarea>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+    <span class="lightbox-close" id="lightboxClose">&times;</span>
+    <span class="lightbox-nav lightbox-prev" id="lightboxPrev">‹</span>
+    <div class="lightbox-content">
+        <img class="lightbox-image" id="lightboxImage" src="" alt="">
+    </div>
+    <span class="lightbox-nav lightbox-next" id="lightboxNext">›</span>
+    <a class="lightbox-link" id="lightboxLink" href="#" style="display: none;">ブログ投稿を見る →</a>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+</div>
+
+<script>
+// Gallery items data - parse from content
+(function() {
+    const rawContent = document.getElementById('galleryData').value;
+    const items = [];
+
+    // Regex to match [![...](github-url)](post-url)
+    const regex = /\[!\[[^\]]*\]\(https:\/\/github\.com\/[^\/]+\/[^\/]+\/assets\/[^\/]+\/([a-f0-9-]+)\)\]\(([^)]+)\)/g;
+    let match;
+
+    while ((match = regex.exec(rawContent)) !== null) {
+        items.push({
+            thumbnailUrl: `/images/${match[1]}_0.jpeg`,
+            thumbnailFallback: `https://github.com/devhou-se/www-jp/assets/5674656/${match[1]}`,
+            fullUrl: `/images/${match[1]}.jpeg`,
+            fullFallback: `/images/${match[1]}_2.jpeg`,
+            postUrl: match[2]
+        });
+    }
+
+    const galleryGrid = document.getElementById('galleryGrid');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImage = document.getElementById('lightboxImage');
+    const lightboxClose = document.getElementById('lightboxClose');
+    const lightboxPrev = document.getElementById('lightboxPrev');
+    const lightboxNext = document.getElementById('lightboxNext');
+    const lightboxCounter = document.getElementById('lightboxCounter');
+    const lightboxLink = document.getElementById('lightboxLink');
+
+    let currentIndex = 0;
+
+    // Create thumbnail grid
+    items.forEach((item, index) => {
+        const gridItem = document.createElement('div');
+        gridItem.className = 'gallery-item';
+        gridItem.onclick = () => openLightbox(index);
+
+        const img = document.createElement('img');
+        img.src = item.thumbnailUrl;
+        img.alt = 'Gallery image ' + (index + 1);
+        img.loading = 'lazy';
+
+        // Fallback to GitHub URL if optimized image fails
+        img.onerror = () => {
+            if (img.src === item.thumbnailUrl) {
+                img.src = item.thumbnailFallback;
+            }
+        };
+
+        gridItem.appendChild(img);
+        galleryGrid.appendChild(gridItem);
+    });
+
+    function openLightbox(index) {
+        currentIndex = index;
+        updateLightbox();
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function updateLightbox() {
+        const item = items[currentIndex];
+
+        // Use GitHub thumbnail first, then try to lazy load optimized full image
+        lightboxImage.src = item.thumbnailFallback;
+
+        const fullImage = new Image();
+        fullImage.onload = () => {
+            lightboxImage.src = fullImage.src;
+        };
+        fullImage.onerror = () => {
+            // If optimized image fails, use medium size fallback
+            const fallback = new Image();
+            fallback.onload = () => {
+                lightboxImage.src = item.fullFallback;
+            };
+            fallback.onerror = () => {
+                // Keep GitHub URL if all else fails
+            };
+            fallback.src = item.fullFallback;
+        };
+        fullImage.src = item.fullUrl;
+
+        lightboxCounter.textContent = `${currentIndex + 1} / ${items.length}`;
+
+        // Update post link
+        if (item.postUrl) {
+            lightboxLink.href = item.postUrl;
+            lightboxLink.style.display = 'block';
+        } else {
+            lightboxLink.style.display = 'none';
+        }
+    }
+
+    function showNext() {
+        currentIndex = (currentIndex + 1) % items.length;
+        updateLightbox();
+    }
+
+    function showPrev() {
+        currentIndex = (currentIndex - 1 + items.length) % items.length;
+        updateLightbox();
+    }
+
+    // Event listeners
+    lightboxClose.onclick = closeLightbox;
+    lightboxNext.onclick = showNext;
+    lightboxPrev.onclick = showPrev;
+
+    // Close on background click
+    lightbox.onclick = (e) => {
+        if (e.target === lightbox) {
+            closeLightbox();
+        }
+    };
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (!lightbox.classList.contains('active')) return;
+
+        switch(e.key) {
+            case 'Escape':
+                closeLightbox();
+                break;
+            case 'ArrowLeft':
+                showPrev();
+                break;
+            case 'ArrowRight':
+                showNext();
+                break;
+        }
+    });
+})();
+</script>
+
 {{- partial "reactions.html" . -}}
 {{ end }}

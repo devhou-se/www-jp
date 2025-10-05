@@ -337,3 +337,326 @@ div.章::before {
     background: #FF0000;
     color: #ffffff;
 }
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+    html, body {
+        min-width: 100%;
+        overflow-x: hidden;
+    }
+
+    div.コンテナ {
+        width: 100%;
+        margin: 0;
+        overflow-x: hidden;
+    }
+
+    div.ヘッダ {
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+        margin: 0;
+    }
+
+    div.ヘッダ img {
+        width: 100%;
+        height: auto;
+        margin: 0 0 10px 0;
+    }
+
+    div.ヘッダ h2 {
+        font-size: 0.6em;
+        margin-bottom: 10px;
+    }
+
+    div.ヘッダ ul.リンク {
+        margin: 0;
+        width: 100%;
+    }
+
+    div.ヘッダ ul.リンク li {
+        margin: 5px 0;
+        display: block;
+    }
+
+    div.ヘッダ ul.リンク a {
+        display: block;
+        text-align: center;
+    }
+
+    div.主要 {
+        white-space: normal;
+        margin: 0;
+    }
+
+    div.主要 div.左-ナビ,
+    div.主要 div.内容,
+    div.主要 div.右-ナビ {
+        display: block;
+        width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    div.主要 div.章 {
+        margin: 5px;
+        box-sizing: border-box;
+    }
+
+    div.主要 div.内容 {
+        margin-right: 0;
+        overflow-x: hidden;
+        word-wrap: break-word;
+    }
+
+    div.主要 div.内容 div.コンテンツ {
+        font-size: 1em;
+        line-height: 1.6em;
+        overflow-x: hidden;
+    }
+
+    div.主要 div.内容 pre {
+        overflow-x: auto;
+        max-width: 100%;
+    }
+
+    div.主要 div.内容 img,
+    div.主要 div.内容 table {
+        max-width: 100%;
+        overflow-x: auto;
+        display: block;
+    }
+
+    div.章 {
+        margin: 5px;
+        padding: 10px;
+        overflow-x: hidden;
+    }
+
+    div.章::before {
+        margin: -10px -10px 10px -10px;
+    }
+
+    /* Collapsible blog list on mobile */
+    div.主要 div.左-ナビ {
+        position: relative;
+    }
+
+    div.主要 div.左-ナビ > p {
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+        padding-right: 30px;
+        margin: 0 0 10px 0;
+        font-weight: bold;
+    }
+
+    div.主要 div.左-ナビ > p::after {
+        content: '▼';
+        position: absolute;
+        right: 0;
+        transition: transform 0.3s;
+    }
+
+    div.主要 div.左-ナビ.collapsed > p::after {
+        transform: rotate(-90deg);
+    }
+
+    div.主要 div.左-ナビ.collapsed h3,
+    div.主要 div.左-ナビ.collapsed ul {
+        display: none;
+    }
+
+    div.主要 div.左-ナビ h3,
+    div.主要 div.左-ナビ ul {
+        display: block;
+    }
+}
+
+/* Gallery Styles */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 15px 0;
+}
+
+.gallery-item {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    border: 2px solid #333;
+    background-color: #1a1a1a;
+    transition: all 0.3s;
+    aspect-ratio: 1;
+}
+
+.gallery-item:hover {
+    border-color: #FF0000;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    transform: scale(1.05);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border: none;
+}
+
+/* Lightbox Styles */
+.lightbox {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.lightbox.active {
+    display: flex;
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.lightbox-image {
+    max-width: 100%;
+    max-height: 90vh;
+    border: 3px solid #FF0000;
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+    object-fit: contain;
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 40px;
+    color: #FF0000;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 2px solid #FF0000;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    transition: all 0.3s;
+    z-index: 10000;
+}
+
+.lightbox-close:hover {
+    background-color: #FF0000;
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 50px;
+    color: #FF0000;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 2px solid #FF0000;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s;
+    user-select: none;
+    z-index: 10001;
+}
+
+.lightbox-nav:hover {
+    background-color: #FF0000;
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+.lightbox-prev {
+    left: 20px;
+}
+
+.lightbox-next {
+    right: 20px;
+}
+
+.lightbox-counter {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 2px solid #FF0000;
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+.lightbox-link {
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #FF0000;
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 2px solid #FF0000;
+    padding: 10px 20px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s;
+    z-index: 10001;
+}
+
+.lightbox-link:hover {
+    background-color: #FF0000;
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+/* Mobile gallery adjustments */
+@media (max-width: 768px) {
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+
+    .lightbox-nav {
+        font-size: 30px;
+        width: 50px;
+        height: 50px;
+    }
+
+    .lightbox-prev {
+        left: 10px;
+    }
+
+    .lightbox-next {
+        right: 10px;
+    }
+
+    .lightbox-close {
+        top: 10px;
+        right: 10px;
+        font-size: 30px;
+        width: 40px;
+        height: 40px;
+    }
+}

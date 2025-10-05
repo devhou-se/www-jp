@@ -19,6 +19,39 @@
     </div>
 </div>
 {{ partial "footer.html" . }}
+<script>
+    // Mobile collapsible sidebar
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.innerWidth <= 768) {
+            const sidebar = document.querySelector('div.左-ナビ');
+            if (sidebar) {
+                // Start collapsed on mobile
+                sidebar.classList.add('collapsed');
+
+                const heading = sidebar.querySelector('p');
+                if (heading) {
+                    heading.addEventListener('click', function() {
+                        sidebar.classList.toggle('collapsed');
+                    });
+                }
+            }
+        }
+
+        // Re-check on window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.querySelector('div.左-ナビ');
+            if (sidebar) {
+                if (window.innerWidth <= 768) {
+                    if (!sidebar.classList.contains('collapsed')) {
+                        sidebar.classList.add('collapsed');
+                    }
+                } else {
+                    sidebar.classList.remove('collapsed');
+                }
+            }
+        });
+    });
+</script>
 <script type="module">
     // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";

@@ -1,1 +1,5 @@
-<img width="{{ .Get 1 }}" height="{{ .Get 2 }}" id="{{ .Get 0 }}" /><script>loadImageInStages(document.getElementById('{{ .Get 0 }}'), '/images/{{ .Get 0 }}_0.jpeg', '/images/{{ .Get 0 }}_1.jpeg', '/images/{{ .Get 0 }}_2.jpeg', '/images/{{ .Get 0 }}.jpeg');</script>
+{{- if .Get 2 -}}
+<img width="{{ .Get 1 }}" height="{{ .Get 2 }}" id="img-{{ .Get 0 }}" /><script>loadImageInStages(document.getElementById('img-{{ .Get 0 }}'), '/images/{{ .Get 0 }}_0.jpeg', '/images/{{ .Get 0 }}_1.jpeg', '/images/{{ .Get 0 }}_2.jpeg', '/images/{{ .Get 0 }}.jpeg');</script>
+{{- else -}}
+<img width="{{ .Get 1 }}" id="img-{{ .Get 0 }}" /><script>loadImageInStages(document.getElementById('img-{{ .Get 0 }}'), '/images/{{ .Get 0 }}_0.jpeg', '/images/{{ .Get 0 }}_1.jpeg', '/images/{{ .Get 0 }}_2.jpeg', '/images/{{ .Get 0 }}.jpeg');</script>
+{{- end -}}
