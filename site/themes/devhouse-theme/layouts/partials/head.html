@@ -10,11 +10,25 @@
     <script>
         // Load theme preference before page render to avoid flash
         (function() {
-            const theme = localStorage.getItem('theme') || 'light';
-            if (theme === 'dark') {
-                document.getElementById('theme-dark').disabled = false;
-                document.getElementById('theme-light').disabled = true;
+            function applyTheme(theme) {
+                document.getElementById('theme-dark').disabled = (theme !== 'dark');
+                document.getElementById('theme-light').disabled = (theme === 'dark');
             }
+
+            // Detect saved preference or system preference
+            let theme = localStorage.getItem('theme');
+            if (!theme) {
+                theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            applyTheme(theme);
+
+            // Listen for system preference changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                if (!localStorage.getItem('theme')) {
+                    applyTheme(e.matches ? 'dark' : 'light');
+                    if (window.updateLogo) updateLogo(e.matches ? 'dark' : 'light');
+                }
+            });
         })();
     </script>
 </head>

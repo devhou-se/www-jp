@@ -20,7 +20,17 @@
 </div>
 {{ partial "footer.html" . }}
 <script>
-    // Theme toggle functionality
+    // Theme functionality
+    function applyTheme(theme) {
+        const darkStylesheet = document.getElementById('theme-dark');
+        const lightStylesheet = document.getElementById('theme-light');
+        if (darkStylesheet && lightStylesheet) {
+            darkStylesheet.disabled = (theme !== 'dark');
+            lightStylesheet.disabled = (theme === 'dark');
+        }
+        updateLogo(theme);
+    }
+
     function updateLogo(theme) {
         const logo = document.getElementById('site-logo');
         if (logo) {
@@ -28,30 +38,35 @@
         }
     }
 
-    function toggleTheme() {
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-        const darkStylesheet = document.getElementById('theme-dark');
-        const lightStylesheet = document.getElementById('theme-light');
-
-        if (newTheme === 'light') {
-            darkStylesheet.disabled = true;
-            lightStylesheet.disabled = false;
-        } else {
-            darkStylesheet.disabled = false;
-            lightStylesheet.disabled = true;
+    function getPreferredTheme() {
+        // Returns localStorage preference or system preference
+        let theme = localStorage.getItem('theme');
+        if (!theme) {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
-
-        localStorage.setItem('theme', newTheme);
-        updateLogo(newTheme);
+        return theme;
     }
 
-    // Mobile collapsible sidebar
+    function toggleTheme() {
+        const currentTheme = getPreferredTheme();
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+    }
+
+    // Listen for system preference changes (if not manually set)
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (!localStorage.getItem('theme')) {
+            const newTheme = e.matches ? 'dark' : 'light';
+            applyTheme(newTheme);
+        }
+    });
+
+    // Mobile collapsible sidebar and theme initialization
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize logo based on current theme
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        updateLogo(currentTheme);
+        // Initialize theme and logo
+        const theme = getPreferredTheme();
+        applyTheme(theme);
 
         // Theme toggle button
         const themeToggle = document.getElementById('theme-toggle');
@@ -62,6 +77,7 @@
             });
         }
 
+        // Mobile sidebar behavior
         if (window.innerWidth <= 1400) {
             const sidebar = document.querySelector('div.左-ナビ');
             if (sidebar) {
