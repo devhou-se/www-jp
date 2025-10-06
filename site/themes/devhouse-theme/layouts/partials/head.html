@@ -2,18 +2,18 @@
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>devhou.se</title>
-    <link rel="stylesheet" href="/css/style.css" id="theme-dark">
-    <link rel="stylesheet" href="/css/style-light.css" id="theme-light" disabled>
+    <link rel="stylesheet" href="/css/style.css" id="theme-dark" disabled>
+    <link rel="stylesheet" href="/css/style-light.css" id="theme-light">
     <link rel="stylesheet" href="/css/emoticon.css">
     <script src="/js/lazy.js"></script>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <script>
         // Load theme preference before page render to avoid flash
         (function() {
-            const theme = localStorage.getItem('theme') || 'dark';
-            if (theme === 'light') {
-                document.getElementById('theme-dark').disabled = true;
-                document.getElementById('theme-light').disabled = false;
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') {
+                document.getElementById('theme-dark').disabled = false;
+                document.getElementById('theme-light').disabled = true;
             }
         })();
     </script>

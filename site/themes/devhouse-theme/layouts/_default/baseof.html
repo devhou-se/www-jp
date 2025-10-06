@@ -29,7 +29,7 @@
     }
 
     function toggleTheme() {
-        const currentTheme = localStorage.getItem('theme') || 'dark';
+        const currentTheme = localStorage.getItem('theme') || 'light';
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
         const darkStylesheet = document.getElementById('theme-dark');
@@ -50,7 +50,7 @@
     // Mobile collapsible sidebar
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize logo based on current theme
-        const currentTheme = localStorage.getItem('theme') || 'dark';
+        const currentTheme = localStorage.getItem('theme') || 'light';
         updateLogo(currentTheme);
 
         // Theme toggle button
