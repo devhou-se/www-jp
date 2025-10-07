@@ -5,6 +5,7 @@ go 1.22.0
 require (
 	github.com/dsoprea/go-jpeg-image-structure/v2 v2.0.0-20221012074422-4f3f7e934102
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+	golang.org/x/sync v0.7.0
 )
 
 require (
@@ -17,6 +18,5 @@ require (
 	github.com/go-xmlfmt/xmlfmt v1.1.2 // indirect
 	github.com/golang/geo v0.0.0-20230421003525-6adc56603217 // indirect
 	golang.org/x/net v0.22.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

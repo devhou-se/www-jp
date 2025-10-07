@@ -8,13 +8,39 @@
     <script src="/js/lazy.js"></script>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <script>
+        // Queueing stub for updateLogo to avoid race condition
+        if (!window.updateLogo) {
+            window.updateLogoQueue = [];
+            window.updateLogo = function(theme) {
+                window.updateLogoQueue.push(theme);
+            };
+        }
+
+        window.getPreferredTheme = function() {
+            let theme = localStorage.getItem('theme');
+            if (!theme) {
+                theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            return theme;
+        };
         // Load theme preference before page render to avoid flash
         (function() {
-            const theme = localStorage.getItem('theme') || 'light';
-            if (theme === 'dark') {
-                document.getElementById('theme-dark').disabled = false;
-                document.getElementById('theme-light').disabled = true;
+            function applyTheme(theme) {
+                document.getElementById('theme-dark').disabled = (theme !== 'dark');
+                document.getElementById('theme-light').disabled = (theme === 'dark');
             }
+
+            let theme = window.getPreferredTheme();
+            applyTheme(theme);
+
+            // Listen for system preference changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                if (!localStorage.getItem('theme')) {
+                    const newTheme = e.matches ? 'dark' : 'light';
+                    applyTheme(newTheme);
+                    if (window.updateLogo) window.updateLogo(newTheme);
+                }
+            });
         })();
     </script>
 </head>

@@ -20,38 +20,48 @@
 </div>
 {{ partial "footer.html" . }}
 <script>
-    // Theme toggle functionality
+    // Theme functionality
+    function applyTheme(theme) {
+        const darkStylesheet = document.getElementById('theme-dark');
+        const lightStylesheet = document.getElementById('theme-light');
+        if (darkStylesheet && lightStylesheet) {
+            darkStylesheet.disabled = (theme !== 'dark');
+            lightStylesheet.disabled = (theme === 'dark');
+        }
+        updateLogo(theme);
+    }
+
     function updateLogo(theme) {
+        // Process any queued logo updates from head.html
+        if (window.updateLogoQueue && window.updateLogoQueue.length > 0) {
+            while (window.updateLogoQueue.length > 0) {
+                const queuedTheme = window.updateLogoQueue.shift();
+                updateLogo(queuedTheme);
+            }
+        }
         const logo = document.getElementById('site-logo');
         if (logo) {
             logo.src = theme === 'light' ? '/images/logo-dark.svg' : '/images/logo-white.svg';
         }
     }
 
-    function toggleTheme() {
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-        const darkStylesheet = document.getElementById('theme-dark');
-        const lightStylesheet = document.getElementById('theme-light');
-
-        if (newTheme === 'light') {
-            darkStylesheet.disabled = true;
-            lightStylesheet.disabled = false;
-        } else {
-            darkStylesheet.disabled = false;
-            lightStylesheet.disabled = true;
-        }
-
-        localStorage.setItem('theme', newTheme);
-        updateLogo(newTheme);
+    function getPreferredTheme() {
+        return window.getPreferredTheme();
     }
 
-    // Mobile collapsible sidebar
+    function toggleTheme() {
+        const currentTheme = getPreferredTheme();
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+    }
+
+
+    // Mobile collapsible sidebar and theme initialization
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize logo based on current theme
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        updateLogo(currentTheme);
+        // Initialize theme and logo
+        const theme = getPreferredTheme();
+        applyTheme(theme);
 
         // Theme toggle button
         const themeToggle = document.getElementById('theme-toggle');
@@ -62,6 +72,7 @@
             });
         }
 
+        // Mobile sidebar behavior
         if (window.innerWidth <= 1400) {
             const sidebar = document.querySelector('div.左-ナビ');
             if (sidebar) {
