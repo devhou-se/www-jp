@@ -54,13 +54,6 @@
         applyTheme(newTheme);
     }
 
-    // Listen for system preference changes (if not manually set)
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-        if (!localStorage.getItem('theme')) {
-            const newTheme = e.matches ? 'dark' : 'light';
-            applyTheme(newTheme);
-        }
-    });
 
     // Mobile collapsible sidebar and theme initialization
     document.addEventListener('DOMContentLoaded', function() {
