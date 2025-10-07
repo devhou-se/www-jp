@@ -32,6 +32,13 @@
     }
 
     function updateLogo(theme) {
+        // Process any queued logo updates from head.html
+        if (window.updateLogoQueue && window.updateLogoQueue.length > 0) {
+            while (window.updateLogoQueue.length > 0) {
+                const queuedTheme = window.updateLogoQueue.shift();
+                updateLogo(queuedTheme);
+            }
+        }
         const logo = document.getElementById('site-logo');
         if (logo) {
             logo.src = theme === 'light' ? '/images/logo-dark.svg' : '/images/logo-white.svg';
