@@ -1,18 +1,23 @@
-import json
-
-from openai import OpenAI
+from google.cloud import translate_v3
 
 from enum import Enum
+import argparse
 import os
 import sys
-import time
 
-OPENAI_KEY = os.getenv("OPENAI_API_KEY")
-ASSISTANT_ID = "asst_IK9udKO5TJSVcCyBoL56TdiE"
+PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
+LOCATION = "global"
 
 
 def main():
-    filename = f"{sys.argv[1]}.md"
+    parser = argparse.ArgumentParser(description="Translate markdown files")
+    parser.add_argument("issue_number", help="Issue number for the markdown file")
+    parser.add_argument("--to-lang", default="ja", help="Target language code (default: ja)")
+    args = parser.parse_args()
+
+    target_lang = args.to_lang
+
+    filename = f"{args.issue_number}.md"
     full_filename = os.path.join(os.getcwd(), "site", "content", filename)
 
     with open(full_filename, "r") as f:
@@ -23,7 +28,7 @@ def main():
     if jp > 0.5:
         return
 
-    translated_text = translate_md(content)
+    translated_text = translate_md(content, target_lang)
 
     with open(full_filename, "w") as f:
         f.write(translated_text)
@@ -62,32 +67,28 @@ def analyze_text(t: str) -> float:
     return script_counts[Script.JAPANESE] / (script_counts[Script.JAPANESE] + script_counts[Script.LATIN])
 
 
-def translate_md(inp: str) -> str:
-    client = OpenAI(api_key=OPENAI_KEY)
-    thread = client.beta.threads.create()
-    _ = client.beta.threads.messages.create(thread.id, role="user", content=inp)
-    run = client.beta.threads.runs.create(thread.id, assistant_id=ASSISTANT_ID, model="gpt-4")
+def translate_md(inp: str, target_lang: str = "ja") -> str:
+    """Translate markdown text from English to target language using Google Cloud Translation API."""
+    client = translate_v3.TranslationServiceClient()
+    parent = f"projects/{PROJECT_ID}/locations/{LOCATION}"
 
-    while run.status in ["queued", "in_progress", "cancelling"]:
-        print(f"waiting for run {run.id} to complete. status: {run.status}")
-        time.sleep(1)
-        run = client.beta.threads.runs.retrieve(
-            thread_id=thread.id,
-            run_id=run.id
-        )
+    print(f"Translating text using project: {PROJECT_ID} to language: {target_lang}")
 
-    if run.status == "completed":
-        messages = client.beta.threads.messages.list(
-            thread_id=thread.id
-        )
+    response = client.translate_text(
+        contents=[inp],
+        parent=parent,
+        mime_type="text/plain",
+        source_language_code="en",
+        target_language_code=target_lang,
+    )
 
-        # print(messages.data[0].content[0].text.value)
-
-        return messages.data[0].content[0].text.value
-
+    if response.translations:
+        translated_text = response.translations[0].translated_text
+        print(f"Translation completed successfully")
+        return translated_text
     else:
-        print(f"run {run.id} failed with status: {run.status}")
-        sys.exit(0)
+        print(f"Translation failed: no translations returned")
+        sys.exit(1)
 
 
 if __name__ == '__main__':

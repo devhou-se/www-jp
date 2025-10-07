@@ -1,4 +1,4 @@
-openai
+google-cloud-translate
 flask
 flask-cors
 requests
