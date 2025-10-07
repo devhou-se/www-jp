@@ -32,6 +32,7 @@
 
             let theme = window.getPreferredTheme();
             applyTheme(theme);
+            if (window.updateLogo) window.updateLogo(theme);
 
             // Listen for system preference changes
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
