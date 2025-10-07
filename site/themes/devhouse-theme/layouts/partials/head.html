@@ -15,6 +15,14 @@
                 window.updateLogoQueue.push(theme);
             };
         }
+
+        window.getPreferredTheme = function() {
+            let theme = localStorage.getItem('theme');
+            if (!theme) {
+                theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            return theme;
+        };
         // Load theme preference before page render to avoid flash
         (function() {
             function applyTheme(theme) {
@@ -22,11 +30,7 @@
                 document.getElementById('theme-light').disabled = (theme === 'dark');
             }
 
-            // Detect saved preference or system preference
-            let theme = localStorage.getItem('theme');
-            if (!theme) {
-                theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            }
+            let theme = window.getPreferredTheme();
             applyTheme(theme);
 
             // Listen for system preference changes

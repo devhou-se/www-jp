@@ -39,12 +39,7 @@
     }
 
     function getPreferredTheme() {
-        // Returns localStorage preference or system preference
-        let theme = localStorage.getItem('theme');
-        if (!theme) {
-            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-        return theme;
+        return window.getPreferredTheme();
     }
 
     function toggleTheme() {
