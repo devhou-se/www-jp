@@ -1,5 +1,6 @@
 import datetime
 import os
+import yaml
 
 POST_TITLE = os.getenv("POST_TITLE")
 POST_BODY = os.getenv("POST_BODY")
@@ -29,15 +30,17 @@ def main():
     md_filename = f"{POST_NUMBER}.md"
 
     header, content_body = extract_header(POST_BODY)
-    
-    if not header:
-        header = f"""---
-title: {POST_TITLE}
-date: {convert_date(POST_DATE)}
-authors: [{POST_AUTHOR}]
----"""
 
-    content = f"{header}\n{content_body}"
+    if not header:
+        frontmatter_data = {
+            'title': POST_TITLE,
+            'date': convert_date(POST_DATE),
+            'authors': [POST_AUTHOR]
+        }
+        yaml_content = yaml.dump(frontmatter_data, allow_unicode=True, default_flow_style=False, sort_keys=False)
+        header = f"---\n{yaml_content}---\n"
+
+    content = f"{header}{content_body}"
 
     with open(os.path.join(content_dir, md_filename), "w") as f:
         f.write(content)

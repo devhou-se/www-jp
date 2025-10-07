@@ -80,7 +80,7 @@ def main():
 
     # Recombine with translated frontmatter
     frontmatter_text = rebuild_frontmatter(frontmatter)
-    translated_text = f"{frontmatter_text}\n{translated_body}" if frontmatter_text else translated_body
+    translated_text = f"{frontmatter_text}{translated_body}" if frontmatter_text else translated_body
 
     with open(full_filename, "w") as f:
         f.write(translated_text)
