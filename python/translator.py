@@ -1,4 +1,5 @@
 from google.cloud import translate_v3
+import yaml
 
 from enum import Enum
 import argparse
@@ -7,6 +8,45 @@ import sys
 
 PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
 LOCATION = "global"
+
+
+def separate_frontmatter(content: str) -> tuple[dict, str]:
+    """Separate YAML frontmatter from markdown body."""
+    if not content.startswith("---"):
+        return {}, content
+
+    # Find the end of frontmatter
+    lines = content.split("\n")
+    end_index = -1
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            end_index = i
+            break
+
+    if end_index == -1:
+        return {}, content
+
+    frontmatter_text = "\n".join(lines[1:end_index])
+    body = "\n".join(lines[end_index + 1:]).strip()
+
+    # Parse YAML frontmatter
+    try:
+        frontmatter = yaml.safe_load(frontmatter_text)
+        if frontmatter is None:
+            frontmatter = {}
+    except yaml.YAMLError:
+        frontmatter = {}
+
+    return frontmatter, body
+
+
+def rebuild_frontmatter(frontmatter: dict) -> str:
+    """Rebuild YAML frontmatter with proper formatting."""
+    if not frontmatter:
+        return ""
+
+    yaml_content = yaml.dump(frontmatter, allow_unicode=True, default_flow_style=False, sort_keys=False)
+    return f"---\n{yaml_content}---"
 
 
 def main():
@@ -28,7 +68,19 @@ def main():
     if jp > 0.5:
         return
 
-    translated_text = translate_md(content, target_lang)
+    # Separate frontmatter from content
+    frontmatter, body = separate_frontmatter(content)
+
+    # Translate the title in frontmatter if it exists
+    if frontmatter and "title" in frontmatter:
+        frontmatter["title"] = translate_md(frontmatter["title"], target_lang)
+
+    # Translate the body content
+    translated_body = translate_md(body, target_lang)
+
+    # Recombine with translated frontmatter
+    frontmatter_text = rebuild_frontmatter(frontmatter)
+    translated_text = f"{frontmatter_text}\n{translated_body}" if frontmatter_text else translated_body
 
     with open(full_filename, "w") as f:
         f.write(translated_text)
