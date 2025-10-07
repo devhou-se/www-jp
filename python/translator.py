@@ -46,7 +46,7 @@ def rebuild_frontmatter(frontmatter: dict) -> str:
         return ""
 
     yaml_content = yaml.dump(frontmatter, allow_unicode=True, default_flow_style=False, sort_keys=False)
-    return f"---\n{yaml_content}---"
+    return f"---\n{yaml_content}---\n"
 
 
 def main():
