@@ -8,9 +8,12 @@
     <script src="/js/lazy.js"></script>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <script>
-        // Ensure updateLogo is always defined to avoid runtime errors
+        // Queueing stub for updateLogo to avoid race condition
         if (!window.updateLogo) {
-            window.updateLogo = function(theme) {};
+            window.updateLogoQueue = [];
+            window.updateLogo = function(theme) {
+                window.updateLogoQueue.push(theme);
+            };
         }
         // Load theme preference before page render to avoid flash
         (function() {
