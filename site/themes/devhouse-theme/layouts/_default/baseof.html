@@ -81,7 +81,22 @@
 
                 const heading = sidebar.querySelector('p');
                 if (heading) {
-                    heading.addEventListener('click', function() {
+                    let touchMoved = false;
+
+                    heading.addEventListener('touchstart', function() {
+                        touchMoved = false;
+                    }, { passive: true });
+
+                    heading.addEventListener('touchmove', function() {
+                        touchMoved = true;
+                    }, { passive: true });
+
+                    heading.addEventListener('click', function(e) {
+                        // Ignore click if it was from a scroll gesture
+                        if (touchMoved) {
+                            e.preventDefault();
+                            return;
+                        }
                         sidebar.classList.toggle('collapsed');
                     });
                 }
