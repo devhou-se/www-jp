@@ -38,7 +38,7 @@
                 if (!localStorage.getItem('theme')) {
                     const newTheme = e.matches ? 'dark' : 'light';
                     applyTheme(newTheme);
-                    if (window.updateLogo) updateLogo(newTheme);
+                    if (window.updateLogo) window.updateLogo(newTheme);
                 }
             });
         })();
