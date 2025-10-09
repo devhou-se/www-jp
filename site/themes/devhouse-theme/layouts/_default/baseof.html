@@ -46,7 +46,11 @@
     }
 
     function getPreferredTheme() {
-        return window.getPreferredTheme();
+        let theme = localStorage.getItem('theme');
+        if (!theme) {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        return theme;
     }
 
     function toggleTheme() {
@@ -59,7 +63,7 @@
 
     // Mobile collapsible sidebar and theme initialization
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize theme and logo
+        // Initialize theme and logo immediately
         const theme = getPreferredTheme();
         applyTheme(theme);
 
@@ -91,14 +95,23 @@
                         touchMoved = true;
                     }, { passive: true });
 
-                    heading.addEventListener('click', function(e) {
-                        // Ignore click if it was from a scroll gesture
+                    // Add both click and touchend handlers for better mobile support
+                    const toggleSidebar = function(e) {
+                        // Ignore if it was from a scroll gesture
                         if (touchMoved) {
-                            e.preventDefault();
                             return;
                         }
+                        e.preventDefault();
                         sidebar.classList.toggle('collapsed');
-                    });
+                    };
+
+                    heading.addEventListener('click', toggleSidebar);
+                    heading.addEventListener('touchend', function(e) {
+                        if (!touchMoved) {
+                            e.preventDefault();
+                            sidebar.classList.toggle('collapsed');
+                        }
+                    }, { passive: false });
                 }
             }
         }
