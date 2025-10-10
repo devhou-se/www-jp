@@ -86,19 +86,26 @@
                 const heading = sidebar.querySelector('p');
                 if (heading) {
                     let touchMoved = false;
+                    let isScrolling = false;
 
                     heading.addEventListener('touchstart', function() {
                         touchMoved = false;
+                        isScrolling = false;
                     }, { passive: true });
 
                     heading.addEventListener('touchmove', function() {
                         touchMoved = true;
                     }, { passive: true });
 
+                    // Detect page scrolling during touch interaction
+                    window.addEventListener('scroll', function() {
+                        isScrolling = true;
+                    }, { passive: true });
+
                     // Add both click and touchend handlers for better mobile support
                     const toggleSidebar = function(e) {
                         // Ignore if it was from a scroll gesture
-                        if (touchMoved) {
+                        if (touchMoved || isScrolling) {
                             return;
                         }
                         e.preventDefault();
@@ -107,7 +114,7 @@
 
                     heading.addEventListener('click', toggleSidebar);
                     heading.addEventListener('touchend', function(e) {
-                        if (!touchMoved) {
+                        if (!touchMoved && !isScrolling) {
                             e.preventDefault();
                             sidebar.classList.toggle('collapsed');
                         }
