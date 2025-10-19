@@ -76,54 +76,61 @@
             });
         }
 
-        // Mobile sidebar behavior
-        if (window.innerWidth <= 1400) {
+        // Mobile sidebar behavior - collapsible blog post list
+        function initMobileSidebar() {
             const sidebar = document.querySelector('div.左-ナビ');
-            if (sidebar) {
-                // Start collapsed on mobile
+            if (!sidebar) return;
+
+            const heading = sidebar.querySelector('p');
+            if (!heading) return;
+
+            // Only enable collapsible behavior on mobile
+            if (window.innerWidth <= 1400) {
                 sidebar.classList.add('collapsed');
 
-                const heading = sidebar.querySelector('p');
-                if (heading) {
-                    let touchMoved = false;
-                    let isScrolling = false;
+                // Track touch position to distinguish tap from scroll
+                let touchStartY = 0;
+                let touchStartX = 0;
+                const SCROLL_THRESHOLD = 10; // pixels of movement to consider it a scroll
 
-                    heading.addEventListener('touchstart', function() {
-                        touchMoved = false;
-                        isScrolling = false;
-                    }, { passive: true });
+                heading.addEventListener('touchstart', function(e) {
+                    touchStartY = e.touches[0].clientY;
+                    touchStartX = e.touches[0].clientX;
+                }, { passive: true });
 
-                    heading.addEventListener('touchmove', function() {
-                        touchMoved = true;
-                    }, { passive: true });
+                heading.addEventListener('touchend', function(e) {
+                    // Get the position where touch ended
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const touchEndX = e.changedTouches[0].clientX;
 
-                    // Detect page scrolling during touch interaction
-                    window.addEventListener('scroll', function() {
-                        isScrolling = true;
-                    }, { passive: true });
+                    // Calculate distance moved
+                    const deltaY = Math.abs(touchEndY - touchStartY);
+                    const deltaX = Math.abs(touchEndX - touchStartX);
 
-                    // Add both click and touchend handlers for better mobile support
-                    const toggleSidebar = function(e) {
-                        // Ignore if it was from a scroll gesture
-                        if (touchMoved || isScrolling) {
-                            return;
-                        }
+                    // Only toggle if movement was minimal (a tap, not a scroll)
+                    if (deltaY < SCROLL_THRESHOLD && deltaX < SCROLL_THRESHOLD) {
                         e.preventDefault();
                         sidebar.classList.toggle('collapsed');
-                    };
+                    }
+                });
 
-                    heading.addEventListener('click', toggleSidebar);
-                    heading.addEventListener('touchend', function(e) {
-                        if (!touchMoved && !isScrolling) {
-                            e.preventDefault();
-                            sidebar.classList.toggle('collapsed');
-                        }
-                    }, { passive: false });
-                }
+                // Also support mouse clicks for testing on desktop
+                heading.addEventListener('click', function(e) {
+                    // Only handle mouse clicks (not touch events converted to clicks)
+                    if (e.detail > 0) {
+                        e.preventDefault();
+                        sidebar.classList.toggle('collapsed');
+                    }
+                });
+            } else {
+                sidebar.classList.remove('collapsed');
             }
         }
 
-        // Re-check on window resize
+        // Initialize on page load
+        initMobileSidebar();
+
+        // Re-initialize on window resize
         window.addEventListener('resize', function() {
             const sidebar = document.querySelector('div.左-ナビ');
             if (sidebar) {
