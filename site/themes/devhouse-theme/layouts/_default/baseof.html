@@ -75,6 +75,99 @@
                 toggleTheme();
             });
         }
+
+        // Mobile sidebar behavior - collapsible blog post list
+        function initMobileSidebar() {
+            const sidebar = document.querySelector('div.左-ナビ');
+            if (!sidebar) return;
+
+            const heading = sidebar.querySelector('p');
+            if (!heading) return;
+
+            // Only enable collapsible behavior on mobile
+            if (window.innerWidth <= 1400) {
+                sidebar.classList.add('collapsed');
+
+                // Track if touch started on the heading element specifically
+                let touchStartedOnHeading = false;
+                let touchStartY = 0;
+                let touchStartX = 0;
+                let touchStartTime = 0;
+                const SCROLL_THRESHOLD = 10; // pixels of movement to consider it a scroll
+                const TAP_TIME_THRESHOLD = 300; // milliseconds - max duration for a tap
+
+                heading.addEventListener('touchstart', function(e) {
+                    // Mark that touch started on heading
+                    touchStartedOnHeading = true;
+                    touchStartY = e.touches[0].clientY;
+                    touchStartX = e.touches[0].clientX;
+                    touchStartTime = Date.now();
+                }, { passive: true });
+
+                heading.addEventListener('touchend', function(e) {
+                    // Only process if touch actually started on the heading
+                    if (!touchStartedOnHeading) {
+                        return;
+                    }
+
+                    // Reset the flag
+                    touchStartedOnHeading = false;
+
+                    // Get the position where touch ended
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const touchEndX = e.changedTouches[0].clientX;
+                    const touchEndTime = Date.now();
+
+                    // Calculate distance moved and time elapsed
+                    const deltaY = Math.abs(touchEndY - touchStartY);
+                    const deltaX = Math.abs(touchEndX - touchStartX);
+                    const duration = touchEndTime - touchStartTime;
+
+                    // Only toggle if:
+                    // 1. Movement was minimal (a tap, not a scroll)
+                    // 2. Duration was short (a tap, not a long press or scroll)
+                    if (deltaY < SCROLL_THRESHOLD &&
+                        deltaX < SCROLL_THRESHOLD &&
+                        duration < TAP_TIME_THRESHOLD) {
+                        e.preventDefault();
+                        sidebar.classList.toggle('collapsed');
+                    }
+                });
+
+                // Reset flag if touch is cancelled or moves outside
+                heading.addEventListener('touchcancel', function() {
+                    touchStartedOnHeading = false;
+                }, { passive: true });
+
+                // Also support mouse clicks for testing on desktop
+                heading.addEventListener('click', function(e) {
+                    // Only handle mouse clicks (not touch events converted to clicks)
+                    if (e.detail > 0) {
+                        e.preventDefault();
+                        sidebar.classList.toggle('collapsed');
+                    }
+                });
+            } else {
+                sidebar.classList.remove('collapsed');
+            }
+        }
+
+        // Initialize on page load
+        initMobileSidebar();
+
+        // Re-initialize on window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.querySelector('div.左-ナビ');
+            if (sidebar) {
+                if (window.innerWidth <= 1400) {
+                    if (!sidebar.classList.contains('collapsed')) {
+                        sidebar.classList.add('collapsed');
+                    }
+                } else {
+                    sidebar.classList.remove('collapsed');
+                }
+            }
+        });
     });
 </script>
 </body>
