@@ -338,6 +338,30 @@ div.章::before {
     color: #ffffff;
 }
 
+/* Desktop sidebar - always show content, hide toggle mechanism */
+@media (min-width: 1401px) {
+    div.主要 div.左-ナビ .sidebar-toggle-checkbox {
+        display: none;
+    }
+
+    div.主要 div.左-ナビ .sidebar-toggle-label {
+        font-weight: bold;
+        margin: 0 0 10px 0;
+        display: block;
+        cursor: default;
+    }
+
+    /* No arrow on desktop */
+    div.主要 div.左-ナビ .sidebar-toggle-label::after {
+        display: none;
+    }
+
+    /* Always show content on desktop */
+    div.主要 div.左-ナビ .sidebar-content {
+        display: block;
+    }
+}
+
 /* Mobile responsive styles */
 @media (max-width: 1400px) {
     html, body {
@@ -437,38 +461,48 @@ div.章::before {
         margin: -10px -10px 10px -10px;
     }
 
-    /* Collapsible blog list on mobile */
+    /* Collapsible blog list on mobile - CSS only */
     div.主要 div.左-ナビ {
         position: relative;
     }
 
-    div.主要 div.左-ナビ > p {
+    /* Hide the checkbox */
+    div.主要 div.左-ナビ .sidebar-toggle-checkbox {
+        display: none;
+    }
+
+    /* Style the label as the clickable heading */
+    div.主要 div.左-ナビ .sidebar-toggle-label {
         cursor: pointer;
         user-select: none;
         position: relative;
         padding-right: 30px;
         margin: 0 0 10px 0;
         font-weight: bold;
+        display: block;
     }
 
-    div.主要 div.左-ナビ > p::after {
+    /* Arrow indicator - points right when collapsed (unchecked) */
+    div.主要 div.左-ナビ .sidebar-toggle-label::after {
         content: '▼';
         position: absolute;
         right: 0;
         transition: transform 0.3s;
-    }
-
-    div.主要 div.左-ナビ.collapsed > p::after {
         transform: rotate(-90deg);
     }
 
-    div.主要 div.左-ナビ.collapsed h3,
-    div.主要 div.左-ナビ.collapsed ul {
+    /* Arrow points down when expanded (checked) */
+    div.主要 div.左-ナビ .sidebar-toggle-checkbox:checked + .sidebar-toggle-label::after {
+        transform: rotate(0deg);
+    }
+
+    /* Hide content by default (collapsed) */
+    div.主要 div.左-ナビ .sidebar-content {
         display: none;
     }
 
-    div.主要 div.左-ナビ h3,
-    div.主要 div.左-ナビ ul {
+    /* Show content when checkbox is checked (expanded) */
+    div.主要 div.左-ナビ .sidebar-toggle-checkbox:checked ~ .sidebar-content {
         display: block;
     }
 }

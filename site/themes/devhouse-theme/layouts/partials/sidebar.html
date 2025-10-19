@@ -1,4 +1,6 @@
-<p>ブログ投稿</p>
+<input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-checkbox">
+<label for="sidebar-toggle" class="sidebar-toggle-label">ブログ投稿</label>
+<div class="sidebar-content">
 {{ range where (.Site.RegularPages.GroupByPublishDate "2006-01-02" "desc") "Key" "ne" "0001-01-01" }}
 <h3>{{ .Key }}</h3>
 <ul>
@@ -7,3 +9,4 @@
 {{ end }}
 </ul>
 {{ end }}
+</div>
