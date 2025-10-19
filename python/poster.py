@@ -1,6 +1,7 @@
 import datetime
 import os
 import yaml
+import urllib.request
 
 POST_TITLE = os.getenv("POST_TITLE")
 POST_BODY = os.getenv("POST_BODY")
@@ -25,9 +26,28 @@ def extract_header(body: str):
         return '\n'.join(lines[:end_index + 1]), '\n'.join(lines[end_index + 1:])
     return None, body
 
+def download_github_avatar(username: str, avatars_dir: str):
+    """Download GitHub avatar for the specified username."""
+    avatar_url = f"https://github.com/{username}.png?size=128"
+    avatar_path = os.path.join(avatars_dir, f"{username}.png")
+
+    # Skip if avatar already exists
+    if os.path.exists(avatar_path):
+        return
+
+    try:
+        urllib.request.urlretrieve(avatar_url, avatar_path)
+        print(f"Downloaded avatar for {username}")
+    except Exception as e:
+        print(f"Failed to download avatar for {username}: {e}")
+
 def main():
     content_dir = os.path.join(os.getcwd(), "site", "content")
+    avatars_dir = os.path.join(os.getcwd(), "site", "static", "images", "avatars")
     md_filename = f"{POST_NUMBER}.md"
+
+    # Create avatars directory if it doesn't exist
+    os.makedirs(avatars_dir, exist_ok=True)
 
     header, content_body = extract_header(POST_BODY)
 
@@ -44,6 +64,9 @@ def main():
 
     with open(os.path.join(content_dir, md_filename), "w") as f:
         f.write(content)
+
+    # Download GitHub avatar for the author
+    download_github_avatar(POST_AUTHOR, avatars_dir)
 
 if __name__ == '__main__':
     main()
