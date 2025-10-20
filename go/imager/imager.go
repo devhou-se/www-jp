@@ -44,7 +44,7 @@ func main() {
 	fl := &fileLocker{fl: make(map[string]*sync.Mutex)}
 	wg := sync.WaitGroup{}
 
-	sem := semaphore.NewWeighted(50)
+	sem := semaphore.NewWeighted(150)
 
 	for _, image := range images {
 		wg.Add(1)
@@ -117,69 +117,90 @@ func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int
 	x1 := img.Bounds().Size().X
 	y1 := img.Bounds().Size().Y
 
+	// Process all width variants in parallel
+	widthWg := sync.WaitGroup{}
+	errChan := make(chan error, len(widths))
+
 	for i, width := range widths {
-		// Calculate new dimensions
-		x2 := width
-		if x2 == 0 {
-			x2 = x1
-		}
-		y2 := newY(x1, y1, x2)
+		widthWg.Add(1)
+		go func(width, index int) {
+			defer widthWg.Done()
 
-		// Resize image
-		resized := resize.Resize(uint(x2), uint(y2), img, resize.Lanczos3)
+			// Calculate new dimensions
+			x2 := width
+			if x2 == 0 {
+				x2 = x1
+			}
+			y2 := newY(x1, y1, x2)
 
-		// Create file for resized image
-		suffix := ""
-		if width > 0 {
-			suffix = fmt.Sprintf("_%d", i)
-		}
+			// Resize image
+			resized := resize.Resize(uint(x2), uint(y2), img, resize.Lanczos3)
 
-		filename := imageStorePath + "/" + filenameBase + suffix + ".jpeg"
+			// Create file for resized image
+			suffix := ""
+			if width > 0 {
+				suffix = fmt.Sprintf("_%d", index)
+			}
 
-		fl.Lock(filename)
-		if _, err = os.Stat(filename); err == nil {
-			fmt.Printf("Already completed %s\n", filename)
+			filename := imageStorePath + "/" + filenameBase + suffix + ".jpeg"
+
+			fl.Lock(filename)
+			if _, err := os.Stat(filename); err == nil {
+				fmt.Printf("Already completed %s\n", filename)
+				fl.Unlock(filename)
+				return
+			}
+
+			// Encode to buffer first
+			buf := &bytes.Buffer{}
+			err := jpeg.Encode(buf, resized, nil)
+			if err != nil {
+				fl.Unlock(filename)
+				errChan <- err
+				return
+			}
+
+			// Extract new exif data from buffer
+			mc2, err := jis.NewJpegMediaParser().ParseBytes(buf.Bytes())
+			if err != nil {
+				fl.Unlock(filename)
+				errChan <- err
+				return
+			}
+			sl2 := mc2.(*jis.SegmentList)
+
+			// Replace new exif data with previous
+			err = sl2.SetExif(eb)
+			if err != nil {
+				fl.Unlock(filename)
+				errChan <- err
+				return
+			}
+
+			// Write to file with exif data
+			file, err := os.Create(filename)
+			if err != nil {
+				fl.Unlock(filename)
+				errChan <- err
+				return
+			}
+
+			err = sl2.Write(file)
+			file.Close()
 			fl.Unlock(filename)
-			continue
-		}
 
-		// Encode to buffer first
-		buf := &bytes.Buffer{}
-		err = jpeg.Encode(buf, resized, nil)
-		if err != nil {
-			fl.Unlock(filename)
-			return 0, 0, err
-		}
+			if err != nil {
+				errChan <- err
+			}
+		}(width, i)
+	}
 
-		// Extract new exif data from buffer
-		mc2, err := jis.NewJpegMediaParser().ParseBytes(buf.Bytes())
-		if err != nil {
-			fl.Unlock(filename)
-			return 0, 0, err
-		}
-		sl2 := mc2.(*jis.SegmentList)
+	widthWg.Wait()
+	close(errChan)
 
-		// Replace new exif data with previous
-		err = sl2.SetExif(eb)
-		if err != nil {
-			fl.Unlock(filename)
-			return 0, 0, err
-		}
-
-		// Write to file with exif data
-		file, err := os.Create(filename)
-		if err != nil {
-			fl.Unlock(filename)
-			return 0, 0, err
-		}
-
-		err = sl2.Write(file)
-		file.Close()
-		fl.Unlock(filename)
-
-		if err != nil {
-			return 0, 0, err
-		}
+	// Check for any errors
+	if err := <-errChan; err != nil {
+		return 0, 0, err
 	}
 
 	return x1, y1, nil
