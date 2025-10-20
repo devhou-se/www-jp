@@ -83,6 +83,9 @@ jobs:
     needs: update-gallery
     if: needs.post.outputs.valid == 'true'
     secrets: inherit
+    permissions:
+      contents: write
+      pull-requests: write
 
   close-issue:
     name: Close issue

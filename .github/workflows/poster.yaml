@@ -103,6 +103,9 @@ jobs:
     needs: update-gallery
     if: needs.post.outputs.valid == 'true'
     secrets: inherit
+    permissions:
+      contents: write
+      pull-requests: write
 
   reactions:
     name: React
