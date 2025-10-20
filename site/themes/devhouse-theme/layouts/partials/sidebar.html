@@ -1,11 +1,31 @@
+<style>
+.sidebar-content li a { padding: 8px; }
+.sidebar-content li:hover { background-color: #FF0000; }
+.sidebar-content li:hover .post-title { color: white !important; }
+</style>
 <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-checkbox">
 <label for="sidebar-toggle" class="sidebar-toggle-label">ブログ投稿</label>
 <div class="sidebar-content">
 {{ range where (.Site.RegularPages.GroupByPublishDate "2006-01-02" "desc") "Key" "ne" "0001-01-01" }}
 <h3>{{ .Key }}</h3>
-<ul>
+<ul style="padding-left: 0;">
 {{ range .Pages }}
-    <li {{ if eq $.Page.RelPermalink .RelPermalink }}class="アクティブ"{{ end }}>{{ delimit (.Param "authors") ", " }}：<a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></li>
+    <li {{ if eq $.Page.RelPermalink .RelPermalink }}class="アクティブ"{{ end }} style="list-style: none;">
+      <a href="{{ .RelPermalink }}" style="display: block; color: inherit; text-decoration: none;">
+        {{ $authors := .Param "authors" }}
+        {{ if $authors }}
+          <div style="display: flex; align-items: center;">
+            {{ range $index, $author := $authors }}
+              {{ if eq $index 0 }}
+                <img src="/images/avatars/{{ $author }}.png" alt="{{ $author }}" style="width: 16px; height: 16px; margin-right: 4px; flex-shrink: 0;">
+              {{ end }}
+            {{ end }}
+            <span>{{ delimit $authors ", " }}</span>
+          </div>
+        {{ end }}
+        <div class="post-title" style="color: {{ if eq $.Page.RelPermalink .RelPermalink }}white{{ else }}#FF0000{{ end }};">{{ .LinkTitle }}</div>
+      </a>
+    </li>
 {{ end }}
 </ul>
 {{ end }}
