@@ -66,9 +66,6 @@ jobs:
         with:
           ref: main
 
-      - name: Login to Docker registry
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login registry.baileys.dev -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
       - name: Build and push
         run: |
           docker build -t registry.baileys.dev/devhouse:latest .
