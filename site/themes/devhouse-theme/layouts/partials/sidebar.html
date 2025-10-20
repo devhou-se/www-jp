@@ -6,13 +6,35 @@
 <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-checkbox">
 <label for="sidebar-toggle" class="sidebar-toggle-label">ブログ投稿</label>
 <div class="sidebar-content">
+{{ $allAuthors := slice }}
+{{ range .Site.RegularPages }}
+  {{ $authors := .Param "authors" }}
+  {{ if $authors }}
+    {{ range $authors }}
+      {{ $allAuthors = $allAuthors | append . }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+{{ $uniqueAuthors := $allAuthors | uniq | sort }}
+{{ if gt (len $uniqueAuthors) 0 }}
+<div style="margin-bottom: 16px; padding: 8px;">
+  <label for="author-filter" style="display: block; margin-bottom: 4px; font-weight: bold;">著者でフィルタ:</label>
+  <select id="author-filter" style="width: 100%; padding: 4px; border: 1px solid #333; background-color: var(--bg-color); color: var(--text-color);">
+    <option value="">すべての著者</option>
+    {{ range $uniqueAuthors }}
+    <option value="{{ . }}">{{ . }}</option>
+    {{ end }}
+  </select>
+</div>
+{{ end }}
 {{ range where (.Site.RegularPages.GroupByPublishDate "2006-01-02" "desc") "Key" "ne" "0001-01-01" }}
+<div class="date-group">
 <h3>{{ .Key }}</h3>
-<ul style="padding-left: 0;">
+<ul style="padding-left: 0;" class="post-list">
 {{ range .Pages }}
-    <li {{ if eq $.Page.RelPermalink .RelPermalink }}class="アクティブ"{{ end }} style="list-style: none;">
+    {{ $authors := .Param "authors" }}
+    <li {{ if eq $.Page.RelPermalink .RelPermalink }}class="アクティブ"{{ end }} style="list-style: none;" data-authors="{{ if $authors }}{{ delimit $authors "," }}{{ end }}">
       <a href="{{ .RelPermalink }}" style="display: block; color: inherit; text-decoration: none;">
-        {{ $authors := .Param "authors" }}
         {{ if $authors }}
           <div style="display: flex; align-items: center;">
             {{ range $index, $author := $authors }}
@@ -28,5 +50,6 @@
     </li>
 {{ end }}
 </ul>
+</div>
 {{ end }}
 </div>
