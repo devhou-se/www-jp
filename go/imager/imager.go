@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
+	_ "image/png" // Register PNG decoder
 	"io"
 	"net/http"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dsoprea/go-exif/v3"
 	jis "github.com/dsoprea/go-jpeg-image-structure/v2"
 	"github.com/nfnt/resize"
 	"golang.org/x/sync/semaphore"
@@ -90,21 +92,24 @@ func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int
 	imageReader := io.TeeReader(response.Body, exifReader)
 
 	// Load image data
-	img, _, err := image.Decode(imageReader)
+	img, format, err := image.Decode(imageReader)
 	if err != nil {
 		return 0, 0, err
 	}
 
-	// Load exif data
-	mc, err := jis.NewJpegMediaParser().ParseBytes(exifReader.Bytes())
-	if err != nil {
-		return 0, 0, err
-	}
-	sl := mc.(*jis.SegmentList)
+	// Load exif data (only for JPEG)
+	var eb *exif.IfdBuilder
+	if format == "jpeg" {
+		mc, err := jis.NewJpegMediaParser().ParseBytes(exifReader.Bytes())
+		if err != nil {
+			return 0, 0, err
+		}
+		sl := mc.(*jis.SegmentList)
 
-	eb, err := sl.ConstructExifBuilder()
-	if err != nil {
-		return 0, 0, err
+		eb, err = sl.ConstructExifBuilder()
+		if err != nil {
+			return 0, 0, err
+		}
 	}
 
 	// Ensure images directory exists
@@ -160,24 +165,7 @@ func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int
 				return
 			}
 
-			// Extract new exif data from buffer
-			mc2, err := jis.NewJpegMediaParser().ParseBytes(buf.Bytes())
-			if err != nil {
-				fl.Unlock(filename)
-				errChan <- err
-				return
-			}
-			sl2 := mc2.(*jis.SegmentList)
-
-			// Replace new exif data with previous
-			err = sl2.SetExif(eb)
-			if err != nil {
-				fl.Unlock(filename)
-				errChan <- err
-				return
-			}
-
-			// Write to file with exif data
+			// Write to file
 			file, err := os.Create(filename)
 			if err != nil {
 				fl.Unlock(filename)
@@ -185,7 +173,34 @@ func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int
 				return
 			}
 
-			err = sl2.Write(file)
+			// If we have EXIF data (from JPEG), preserve it
+			if eb != nil {
+				// Extract new exif data from buffer
+				mc2, err := jis.NewJpegMediaParser().ParseBytes(buf.Bytes())
+				if err != nil {
+					file.Close()
+					fl.Unlock(filename)
+					errChan <- err
+					return
+				}
+				sl2 := mc2.(*jis.SegmentList)
+
+				// Replace new exif data with previous
+				err = sl2.SetExif(eb)
+				if err != nil {
+					file.Close()
+					fl.Unlock(filename)
+					errChan <- err
+					return
+				}
+
+				// Write with EXIF
+				err = sl2.Write(file)
+			} else {
+				// No EXIF, just write the JPEG directly
+				_, err = file.Write(buf.Bytes())
+			}
+
 			file.Close()
 			fl.Unlock(filename)
 
