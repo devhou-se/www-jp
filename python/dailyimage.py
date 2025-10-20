@@ -12,7 +12,22 @@ IMAGES_HTML = os.path.join(os.getcwd(), "site", "content", "gallery.md")
 IMG_PATTERN = r"(\!\[(.*)\]\((.*)\))"
 LAZYIMAGE_PATTERN = r"\{\{<\s*lazyimage\s+([a-f0-9-]+)\s+\d+\s*>\}\}"
 
-IMG_TEMPLATE = "<a href=\"/{}\"><img src=\"{}\" alt=\"{}\" /></a>"
+def format_image_src(src: str) -> str:
+    """Convert image source to GCS URL."""
+    if src.startswith("https://github.com"):
+        # Extract image ID from GitHub URL
+        parts = src.split("/")
+        image_id = parts[-1].split("?")[0]  # Remove query params if present
+        # For gallery, we'll use the smallest size for faster loading
+        return f"https://static.devh.se/images/{image_id}_0.jpeg"
+    elif src.startswith("/images/"):
+        # Convert local path to GCS URL
+        return f"https://static.devh.se{src}"
+    else:
+        # Return as-is for other URLs
+        return src
+
+IMG_TEMPLATE = "<a href=\"/{{}}\"><img src=\"{{}}\" alt=\"{{}}\" /></a>"
 IMG_MD_TEMPLATE = "![{}]({})"
 IMG_MD_LINK_TEMPLATE = "[![{}]({})](/{})"
 HTML_TEMPLATE = """<span id="daily-image"></span>
@@ -75,7 +90,7 @@ def main():
         with open(GALLERY_HTML, "w") as f:
             f.write("最近の写真はありません")
     else:
-        images = [IMG_TEMPLATE.format(img[1], img[0][2], img[0][1]) for img in sidebar_images]
+        images = [IMG_TEMPLATE.format(img[1], format_image_src(img[0][2]), img[0][1]) for img in sidebar_images]
         images = "['" + "', '".join(images) + "']"
         js = HTML_TEMPLATE.format(choices=images)
 

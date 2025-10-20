@@ -24,15 +24,12 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Cache processed images
-        uses: actions/cache@v4
-        with:
-          path: site/static/images
-          key: images-${{ hashFiles('site/**/*.md') }}
-          restore-keys: |
-            images-
+      - name: Setup GCP credentials
+        run: |
+          echo '${{ secrets.GCP_SA_KEY }}' > $HOME/gcp-key.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
 
-      - name: Process images
+      - name: Process and upload images to GCS
         run: |
           go run go/imager/imager.go
 

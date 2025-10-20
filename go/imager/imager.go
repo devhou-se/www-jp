@@ -9,11 +9,11 @@ import (
 	_ "image/png" // Register PNG decoder
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"sync"
 	"time"
 
+	"cloud.google.com/go/storage"
 	"github.com/dsoprea/go-exif/v3"
 	jis "github.com/dsoprea/go-jpeg-image-structure/v2"
 	"github.com/nfnt/resize"
@@ -23,7 +23,8 @@ import (
 )
 
 const (
-	imageStorePath = utils.SiteDirectory + "/static/images"
+	gcsBucketName = "static.devh.se"
+	gcsImagePath  = "images"
 )
 
 var httpClient = &http.Client{
@@ -36,6 +37,17 @@ var httpClient = &http.Client{
 }
 
 func main() {
+	ctx := context.Background()
+
+	// Initialize GCS client
+	gcsClient, err := storage.NewClient(ctx)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to create GCS client: %v", err))
+	}
+	defer gcsClient.Close()
+
+	bucket := gcsClient.Bucket(gcsBucketName)
+
 	images, err := utils.WebImages()
 	if err != nil {
 		panic(err.Error())
@@ -65,22 +77,22 @@ func main() {
 			webLocationParts := strings.Split(image.WebLocation, "/")
 			filenameBase := webLocationParts[len(webLocationParts)-1]
 
-			_, _, err = resizeAndStore(image.WebLocation, filenameBase, imageWidths, fl)
+			_, _, err = resizeAndUpload(ctx, bucket, image.WebLocation, filenameBase, imageWidths, fl)
 			if err != nil {
 				fmt.Println(err.Error())
 				return
 			}
 
-			fmt.Printf("Downloaded %s\n", image.Location)
+			fmt.Printf("Uploaded %s\n", image.Location)
 		}()
 	}
 
 	wg.Wait()
 }
 
-// resizeAndStore downloads an image from a url and stores a resized version for
-// each of the widths defined. A width of 0 will keep the original width.
-func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int, int, error) {
+// resizeAndUpload downloads an image from a url and uploads resized versions to GCS
+// for each of the widths defined. A width of 0 will keep the original width.
+func resizeAndUpload(ctx context.Context, bucket *storage.BucketHandle, url, filenameBase string, widths []int, fl *fileLocker) (int, int, error) {
 	// Fetch image
 	response, err := httpClient.Get(url)
 	if err != nil {
@@ -112,12 +124,6 @@ func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int
 		}
 	}
 
-	// Ensure images directory exists
-	err = os.MkdirAll(imageStorePath, os.ModePerm)
-	if err != nil {
-		return 0, 0, err
-	}
-
 	// Find original image dimensions
 	x1 := img.Bounds().Size().X
 	y1 := img.Bounds().Size().Y
@@ -141,18 +147,21 @@ func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int
 			// Resize image
 			resized := resize.Resize(uint(x2), uint(y2), img, resize.Lanczos3)
 
-			// Create file for resized image
+			// Create GCS object path
 			suffix := ""
 			if width > 0 {
 				suffix = fmt.Sprintf("_%d", index)
 			}
 
-			filename := imageStorePath + "/" + filenameBase + suffix + ".jpeg"
+			objectPath := fmt.Sprintf("%s/%s%s.jpeg", gcsImagePath, filenameBase, suffix)
 
-			fl.Lock(filename)
-			if _, err := os.Stat(filename); err == nil {
-				fmt.Printf("Already completed %s\n", filename)
-				fl.Unlock(filename)
+			fl.Lock(objectPath)
+
+			// Check if object already exists
+			obj := bucket.Object(objectPath)
+			if _, err := obj.Attrs(ctx); err == nil {
+				fmt.Printf("Already completed %s\n", objectPath)
+				fl.Unlock(objectPath)
 				return
 			}
 
@@ -160,26 +169,18 @@ func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int
 			buf := &bytes.Buffer{}
 			err := jpeg.Encode(buf, resized, nil)
 			if err != nil {
-				fl.Unlock(filename)
+				fl.Unlock(objectPath)
 				errChan <- err
 				return
 			}
 
-			// Write to file
-			file, err := os.Create(filename)
-			if err != nil {
-				fl.Unlock(filename)
-				errChan <- err
-				return
-			}
-
-			// If we have EXIF data (from JPEG), preserve it
+			// Prepare final buffer with or without EXIF
+			var finalBuf *bytes.Buffer
 			if eb != nil {
 				// Extract new exif data from buffer
 				mc2, err := jis.NewJpegMediaParser().ParseBytes(buf.Bytes())
 				if err != nil {
-					file.Close()
-					fl.Unlock(filename)
+					fl.Unlock(objectPath)
 					errChan <- err
 					return
 				}
@@ -188,21 +189,39 @@ func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int
 				// Replace new exif data with previous
 				err = sl2.SetExif(eb)
 				if err != nil {
-					file.Close()
-					fl.Unlock(filename)
+					fl.Unlock(objectPath)
 					errChan <- err
 					return
 				}
 
-				// Write with EXIF
-				err = sl2.Write(file)
+				// Write with EXIF to buffer
+				finalBuf = &bytes.Buffer{}
+				err = sl2.Write(finalBuf)
+				if err != nil {
+					fl.Unlock(objectPath)
+					errChan <- err
+					return
+				}
 			} else {
-				// No EXIF, just write the JPEG directly
-				_, err = file.Write(buf.Bytes())
+				// No EXIF, use the original buffer
+				finalBuf = buf
 			}
 
-			file.Close()
-			fl.Unlock(filename)
+			// Upload to GCS
+			writer := obj.NewWriter(ctx)
+			writer.ContentType = "image/jpeg"
+			writer.CacheControl = "public, max-age=31536000, immutable"
+
+			_, err = writer.Write(finalBuf.Bytes())
+			if err != nil {
+				writer.Close()
+				fl.Unlock(objectPath)
+				errChan <- err
+				return
+			}
+
+			err = writer.Close()
+			fl.Unlock(objectPath)
 
 			if err != nil {
 				errChan <- err

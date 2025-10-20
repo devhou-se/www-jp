@@ -10,7 +10,7 @@
     {{- $imageId = index (split $imageId "?") 0 -}}
   {{- end -}}
 
-  <img id="img-{{ $imageId }}" alt="{{ $alt }}" /><script>loadImageInStages(document.getElementById('img-{{ $imageId }}'), '/images/{{ $imageId }}_0.jpeg', '/images/{{ $imageId }}_1.jpeg', '/images/{{ $imageId }}_2.jpeg', '/images/{{ $imageId }}.jpeg');</script>
+  <img id="img-{{ $imageId }}" alt="{{ $alt }}" /><script>loadImageInStages(document.getElementById('img-{{ $imageId }}'), 'https://static.devh.se/images/{{ $imageId }}_0.jpeg', 'https://static.devh.se/images/{{ $imageId }}_1.jpeg', 'https://static.devh.se/images/{{ $imageId }}_2.jpeg', 'https://static.devh.se/images/{{ $imageId }}.jpeg');</script>
 {{- else -}}
   <img src="{{ $src }}" alt="{{ $alt }}" />
 {{- end -}}

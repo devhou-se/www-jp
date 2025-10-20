@@ -76,7 +76,6 @@ jobs:
         run: |
           git add site/content/${{ github.event.issue.number }}.md
           git add site/static/images/avatars/
-          git add site/static/images/posts/ || echo "No post images to add"
           git commit -m "Add post for post ${{ github.event.issue.number }}"
           git push
 
