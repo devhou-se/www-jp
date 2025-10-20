@@ -1,91 +1,98 @@
-name: "Post archiver"
+name: Post Archiver
 
 on:
   issue_comment:
 
+concurrency:
+  group: archive-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
 jobs:
   post:
-    name: "Archive post"
-    permissions: write-all
+    name: Archive post
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     if: contains(github.event.issue.labels.*.name, 'post')
     steps:
-      - name: "checkout"
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: main
-      - name: "check comment"
+
+      - name: Check comment
         id: check-comment
         run: |
           echo "Comment: ${{ github.event.comment.body }}"
           if [[ "${{ github.event.comment.body }}" == "/archive" ]]; then
-            echo "::set-output name=valid::true"
+            echo "valid=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=valid::false"
+            echo "valid=false" >> $GITHUB_OUTPUT
           fi
-      - name: "setup python"
+      - name: Setup Python with dependencies
         if: steps.check-comment.outputs.valid == 'true'
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-      - name: "install dependencies"
-        if: steps.check-comment.outputs.valid == 'true'
-        run: pip install -r python/requirements.txt
-      - name: "create branch"
+        uses: ./.github/actions/setup-python-deps
+
+      - name: Create branch
         if: steps.check-comment.outputs.valid == 'true'
         run: |
           git checkout "archive/${{ github.event.issue.number }}" || git checkout -b "archive/${{ github.event.issue.number }}"
-      - name: "post creator"
+
+      - name: Archive post
         if: steps.check-comment.outputs.valid == 'true'
         env:
           POST_NUMBER: ${{ github.event.issue.number }}
         run: |
           python python/archiver.py
-      - name: "commit post"
+      - name: Setup git bot
+        if: steps.check-comment.outputs.valid == 'true'
+        uses: ./.github/actions/setup-git-bot
+
+      - name: Commit post
         if: steps.check-comment.outputs.valid == 'true'
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git config --global push.autosetupremote true
           git add site/content/${{ github.event.issue.number }}.md
           git commit -m "Archive post ${{ github.event.issue.number }}"
           git push
-      - name: "merge branch"
+
+      - name: Create and merge PR
         if: steps.check-comment.outputs.valid == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr create --title "Archive post #${{ github.event.issue.number }}" --body "Archive post ${{ github.event.issue.number }}" --base main --head "archive/${{ github.event.issue.number }}"
           gh pr merge --squash --delete-branch
-      - name: "just fail lol"
-        if: steps.check-comment.outputs.valid == 'false'
-        run: exit 1
 
   update-gallery:
-    name: "Update Gallery"
+    name: Update Gallery
     uses: ./.github/workflows/gallery.yaml
     needs: post
     secrets: inherit
-    permissions: write-all
+    permissions:
+      contents: write
+      pull-requests: write
 
   deploy:
-    name: "Deploy"
+    name: Deploy
     uses: ./.github/workflows/deploy.yaml
     needs: update-gallery
     secrets: inherit
-    permissions: write-all
 
   close-issue:
-    name: "Close issue"
+    name: Close issue
     runs-on: ubuntu-latest
-    permissions: write-all
     needs: deploy
+    permissions:
+      issues: write
     steps:
-      - name: "checkout"
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: main
-      - name: "close issue"
+
+      - name: Close issue
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

@@ -1,0 +1,22 @@
+name: Setup Python with Dependencies
+description: Sets up Python environment and installs dependencies with caching
+
+inputs:
+  python-version:
+    description: Python version to use
+    required: false
+    default: "3.10"
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: pip
+        cache-dependency-path: python/requirements.txt
+
+    - name: Install dependencies
+      shell: bash
+      run: pip install -r python/requirements.txt

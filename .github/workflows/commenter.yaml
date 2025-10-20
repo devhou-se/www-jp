@@ -1,4 +1,4 @@
-name: "Commenter"
+name: Commenter
 
 on:
   issues:
@@ -11,13 +11,15 @@ env:
 
 jobs:
   comment:
-    name: "Comment instructions"
-    permissions: write-all
+    name: Comment instructions
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
-      - name: "checkout"
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: "comment on issue"
+
+      - name: Comment on issue
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
