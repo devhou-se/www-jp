@@ -19,10 +19,10 @@ def format_image_src(src: str) -> str:
         parts = src.split("/")
         image_id = parts[-1].split("?")[0]  # Remove query params if present
         # For gallery, we'll use the smallest size for faster loading
-        return f"https://static.devh.se/images/{image_id}_0.jpeg"
+        return f"https://storage.googleapis.com/static.devh.se/images/{image_id}_0.jpeg"
     elif src.startswith("/images/"):
         # Convert local path to GCS URL
-        return f"https://static.devh.se{src}"
+        return f"https://storage.googleapis.com/static.devh.se{src}"
     else:
         # Return as-is for other URLs
         return src
