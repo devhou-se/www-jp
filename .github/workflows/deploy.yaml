@@ -21,6 +21,13 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version-file: go.mod
+      - name: Cache processed images
+        uses: actions/cache@v4
+        with:
+          path: site/static/images
+          key: images-${{ hashFiles('site/**/*.md') }}
+          restore-keys: |
+            images-
       - name: Store Images
         run: |
           go run go/imager/imager.go
