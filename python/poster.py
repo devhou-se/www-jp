@@ -49,19 +49,43 @@ def download_and_rehost_image(url: str, post_number: str) -> str:
 
     try:
         # Use authenticated request for user-attachments URLs
-        headers = {}
+        headers = {
+            'Accept': 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28'
+        }
         if GITHUB_TOKEN:
-            headers['Authorization'] = f'token {GITHUB_TOKEN}'
+            headers['Authorization'] = f'Bearer {GITHUB_TOKEN}'
+            print(f"Using authenticated request with token (length: {len(GITHUB_TOKEN)})")
+        else:
+            print("WARNING: No GITHUB_TOKEN available, trying unauthenticated request")
 
         request = urllib.request.Request(url, headers=headers)
+        print(f"Attempting to download: {url}")
+
         with urllib.request.urlopen(request) as response:
+            print(f"Response status: {response.status}")
+            print(f"Response headers: {response.headers}")
             with open(img_path, 'wb') as out_file:
                 out_file.write(response.read())
 
-        print(f"Downloaded image from {url} to {img_path}")
+        print(f"✓ Successfully downloaded image from {url} to {img_path}")
         return f"/images/posts/{post_number}-{img_hash}.{ext}"
+    except urllib.error.HTTPError as e:
+        print(f"✗ HTTP Error downloading image from {url}")
+        print(f"  Status: {e.code}")
+        print(f"  Reason: {e.reason}")
+        print(f"  Headers: {e.headers}")
+        try:
+            print(f"  Body: {e.read().decode('utf-8')}")
+        except:
+            pass
+        return url
     except Exception as e:
-        print(f"Failed to download image from {url}: {e}")
+        print(f"✗ Failed to download image from {url}")
+        print(f"  Error type: {type(e).__name__}")
+        print(f"  Error: {e}")
+        import traceback
+        traceback.print_exc()
         return url
 
 def convert_html_images_to_markdown(content: str, post_number: str) -> str:
