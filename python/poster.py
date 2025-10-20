@@ -27,35 +27,8 @@ def extract_header(body: str):
         return '\n'.join(lines[:end_index + 1]), '\n'.join(lines[end_index + 1:])
     return None, body
 
-def download_and_rehost_image(url: str, post_number: str) -> str:
-    """Download image from user-attachments and save to static folder."""
-    if 'user-attachments/assets/' not in url:
-        return url
-
-    # Extract image ID from URL
-    import hashlib
-    img_hash = hashlib.md5(url.encode()).hexdigest()[:8]
-
-    # Create posts images directory
-    posts_dir = os.path.join(os.getcwd(), "site", "static", "images", "posts")
-    os.makedirs(posts_dir, exist_ok=True)
-
-    # Determine file extension (default to png)
-    ext = 'png'
-
-    # Download the image
-    img_path = os.path.join(posts_dir, f"{post_number}-{img_hash}.{ext}")
-
-    try:
-        urllib.request.urlretrieve(url, img_path)
-        print(f"Downloaded image from {url} to {img_path}")
-        return f"/images/posts/{post_number}-{img_hash}.{ext}"
-    except Exception as e:
-        print(f"Failed to download image from {url}: {e}")
-        return url
-
-def convert_html_images_to_markdown(content: str, post_number: str) -> str:
-    """Convert HTML img tags to markdown image syntax and rehost user-attachments images."""
+def convert_html_images_to_markdown(content: str) -> str:
+    """Convert HTML img tags to markdown image syntax."""
     # Pattern to match HTML img tags with various attributes
     # Matches: <img width="..." height="..." alt="..." src="..." />
     img_pattern = r'<img\s+[^>]*?alt="([^"]*)"[^>]*?src="([^"]*)"[^>]*?/?>'
@@ -63,8 +36,6 @@ def convert_html_images_to_markdown(content: str, post_number: str) -> str:
     def replace_img(match):
         alt_text = match.group(1)
         src_url = match.group(2)
-        # Download and rehost if it's a user-attachments URL
-        src_url = download_and_rehost_image(src_url, post_number)
         return f"![{alt_text}]({src_url})"
 
     # Replace all HTML img tags with markdown format
@@ -76,22 +47,9 @@ def convert_html_images_to_markdown(content: str, post_number: str) -> str:
     def replace_img_alt_after(match):
         src_url = match.group(1)
         alt_text = match.group(2)
-        # Download and rehost if it's a user-attachments URL
-        src_url = download_and_rehost_image(src_url, post_number)
         return f"![{alt_text}]({src_url})"
 
     content = re.sub(img_pattern_alt_after, replace_img_alt_after, content)
-
-    # Also handle markdown images with user-attachments URLs
-    md_img_pattern = r'!\[([^\]]*)\]\((https://github\.com/user-attachments/[^\)]+)\)'
-
-    def replace_md_img(match):
-        alt_text = match.group(1)
-        src_url = match.group(2)
-        src_url = download_and_rehost_image(src_url, post_number)
-        return f"![{alt_text}]({src_url})"
-
-    content = re.sub(md_img_pattern, replace_md_img, content)
 
     return content
 
@@ -120,8 +78,8 @@ def main():
 
     header, content_body = extract_header(POST_BODY)
 
-    # Convert HTML img tags to markdown format and rehost user-attachments images
-    content_body = convert_html_images_to_markdown(content_body, POST_NUMBER)
+    # Convert HTML img tags to markdown format
+    content_body = convert_html_images_to_markdown(content_body)
 
     if not header:
         frontmatter_data = {
