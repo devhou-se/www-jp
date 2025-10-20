@@ -1,1 +1,7 @@
-最近の写真はありません
+<span id="daily-image"></span>
+<script>
+const choices = ['<a href="/419"><img src="https://github.com/user-attachments/assets/2532aac3-4488-41bc-9608-50a40f1c944d" alt="画像" /></a>'];
+const choice = choices[Math.floor(Math.random() * choices.length)];
+const imgSpan = document.getElementById("daily-image");
+imgSpan.innerHTML = choice;
+</script>
