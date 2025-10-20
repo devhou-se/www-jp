@@ -34,7 +34,7 @@ const (
 )
 
 var httpClient = &http.Client{
-	Timeout: 30 * time.Second,
+	Timeout: 120 * time.Second,
 	Transport: &http.Transport{
 		MaxIdleConns:        100,
 		MaxIdleConnsPerHost: 50,
@@ -217,12 +217,28 @@ func main() {
 
 	imageWidths := []int{240, 480, 960, 0}
 
+	// Filter out cached images before spawning goroutines
+	uncachedImages := make([]utils.Image, 0, len(images))
+	cachedCount := 0
+	for _, image := range images {
+		webLocationParts := strings.Split(image.WebLocation, "/")
+		filenameBase := webLocationParts[len(webLocationParts)-1]
+
+		if cache.isInCache(filenameBase) {
+			cachedCount++
+			continue
+		}
+		uncachedImages = append(uncachedImages, image)
+	}
+
+	fmt.Printf("Skipping %d cached images, processing %d new images\n", cachedCount, len(uncachedImages))
+
 	fl := &fileLocker{fl: make(map[string]*sync.Mutex)}
 	wg := sync.WaitGroup{}
 
-	sem := semaphore.NewWeighted(150)
+	sem := semaphore.NewWeighted(20)
 
-	for _, image := range images {
+	for _, image := range uncachedImages {
 		wg.Add(1)
 		image := image // Capture loop variable
 
@@ -252,17 +268,36 @@ func main() {
 	wg.Wait()
 }
 
+// fetchWithRetry attempts to fetch a URL with exponential backoff retry logic
+func fetchWithRetry(url string, maxRetries int) (*http.Response, error) {
+	var response *http.Response
+	var err error
+
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		response, err = httpClient.Get(url)
+		if err == nil && response.StatusCode == http.StatusOK {
+			return response, nil
+		}
+
+		if response != nil {
+			response.Body.Close()
+		}
+
+		if attempt < maxRetries {
+			backoff := time.Duration(1<<uint(attempt)) * time.Second
+			fmt.Printf("Retry %d/%d for %s after %v (error: %v)\n", attempt+1, maxRetries, url, backoff, err)
+			time.Sleep(backoff)
+		}
+	}
+
+	return nil, fmt.Errorf("failed after %d retries: %w", maxRetries, err)
+}
+
 // resizeAndUpload downloads an image from a url and uploads resized versions to GCS
 // for each of the widths defined. A width of 0 will keep the original width.
 func resizeAndUpload(ctx context.Context, bucket *storage.BucketHandle, url, filenameBase string, widths []int, fl *fileLocker, cache *imageCache) (int, int, error) {
-	// Check cache first - if base filename is already uploaded, skip all variants
-	if cache.isInCache(filenameBase) {
-		fmt.Printf("Skipping %s (found in cache)\n", filenameBase)
-		return 0, 0, nil
-	}
-
-	// Fetch image
-	response, err := httpClient.Get(url)
+	// Fetch image with retry
+	response, err := fetchWithRetry(url, 3)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -325,8 +360,16 @@ func resizeAndUpload(ctx context.Context, bucket *storage.BucketHandle, url, fil
 
 			fl.Lock(objectPath)
 
-			// Encode to buffer first
+			// Check if object already exists in GCS
 			obj := bucket.Object(objectPath)
+			_, existsErr := obj.Attrs(ctx)
+			if existsErr == nil {
+				// Object exists, skip upload
+				fl.Unlock(objectPath)
+				return
+			}
+
+			// Encode to buffer first
 			buf := &bytes.Buffer{}
 			err := jpeg.Encode(buf, resized, nil)
 			if err != nil {
