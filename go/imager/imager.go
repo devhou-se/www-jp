@@ -79,8 +79,19 @@ func main() {
 // resizeAndStore downloads an image from a url and stores a resized version for
 // each of the widths defined. A width of 0 will keep the original width.
 func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int, int, error) {
-	// Fetch image
-	response, err := httpClient.Get(url)
+	// Fetch image with authentication for GitHub URLs
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	// Add GitHub token for user-attachments URLs
+	githubToken := os.Getenv("GITHUB_TOKEN")
+	if githubToken != "" && strings.Contains(url, "github.com") {
+		req.Header.Set("Authorization", "token "+githubToken)
+	}
+
+	response, err := httpClient.Do(req)
 	if err != nil {
 		return 0, 0, err
 	}

@@ -9,6 +9,7 @@ POST_BODY = os.getenv("POST_BODY")
 POST_NUMBER = os.getenv("POST_NUMBER")
 POST_AUTHOR = os.getenv("POST_AUTHOR")
 POST_DATE = os.getenv("POST_DATE")
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 HEADER_DELIMITER = "---"
 
@@ -47,7 +48,16 @@ def download_and_rehost_image(url: str, post_number: str) -> str:
     img_path = os.path.join(posts_dir, f"{post_number}-{img_hash}.{ext}")
 
     try:
-        urllib.request.urlretrieve(url, img_path)
+        # Use authenticated request for user-attachments URLs
+        headers = {}
+        if GITHUB_TOKEN:
+            headers['Authorization'] = f'token {GITHUB_TOKEN}'
+
+        request = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(request) as response:
+            with open(img_path, 'wb') as out_file:
+                out_file.write(response.read())
+
         print(f"Downloaded image from {url} to {img_path}")
         return f"/images/posts/{post_number}-{img_hash}.{ext}"
     except Exception as e:
