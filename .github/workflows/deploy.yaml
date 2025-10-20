@@ -52,6 +52,15 @@ jobs:
           projectId: devhouse-80936
           target: devhouse-blog
 
+  update-imager-cache:
+    name: Update Imager Cache
+    uses: ./.github/workflows/update-imager-cache.yaml
+    needs: deploy
+    secrets: inherit
+    permissions:
+      contents: write
+      pull-requests: write
+
   # push-image:
   #   name: Build and push image
   #   runs-on: ubuntu-latest
