@@ -47,30 +47,11 @@ def download_and_rehost_image(url: str, post_number: str) -> str:
     img_path = os.path.join(posts_dir, f"{post_number}-{img_hash}.{ext}")
 
     try:
-        # User-attachments URLs are pre-signed S3 URLs - no additional auth needed
-        # Just download directly without adding Authorization headers
-        print(f"Downloading user-attachments image: {url}")
-
         urllib.request.urlretrieve(url, img_path)
-
-        print(f"✓ Successfully downloaded image to {img_path}")
+        print(f"Downloaded image from {url} to {img_path}")
         return f"/images/posts/{post_number}-{img_hash}.{ext}"
-    except urllib.error.HTTPError as e:
-        print(f"✗ HTTP Error downloading image from {url}")
-        print(f"  Status: {e.code}")
-        print(f"  Reason: {e.reason}")
-        print(f"  Headers: {e.headers}")
-        try:
-            print(f"  Body: {e.read().decode('utf-8')}")
-        except:
-            pass
-        return url
     except Exception as e:
-        print(f"✗ Failed to download image from {url}")
-        print(f"  Error type: {type(e).__name__}")
-        print(f"  Error: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"Failed to download image from {url}: {e}")
         return url
 
 def convert_html_images_to_markdown(content: str, post_number: str) -> str:

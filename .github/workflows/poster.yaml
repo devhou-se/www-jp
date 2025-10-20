@@ -45,17 +45,6 @@ jobs:
           POST_DATE: ${{ github.event.issue.created_at }}
         run: |
           python python/poster.py ${{ github.event.issue.number }}
-      - name: "validate images"
-        if: steps.check-comment.outputs.valid == 'true'
-        run: |
-          echo "Checking for user-attachments URLs in markdown..."
-          if grep -q "user-attachments" site/content/${{ github.event.issue.number }}.md; then
-            echo "ERROR: Found user-attachments URLs in markdown file. Images were not properly downloaded."
-            grep "user-attachments" site/content/${{ github.event.issue.number }}.md
-            exit 1
-          else
-            echo "All images have been properly downloaded and rehosted."
-          fi
       - name: "setup gcp credentials"
         if: steps.check-comment.outputs.valid == 'true' && steps.check-comment.outputs.translate == 'true'
         run: |

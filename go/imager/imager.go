@@ -79,8 +79,7 @@ func main() {
 // resizeAndStore downloads an image from a url and stores a resized version for
 // each of the widths defined. A width of 0 will keep the original width.
 func resizeAndStore(url, filenameBase string, widths []int, fl *fileLocker) (int, int, error) {
-	// User-attachments URLs are pre-signed S3 URLs - no additional auth needed
-	// Just download directly without adding Authorization headers
+	// Fetch image
 	response, err := httpClient.Get(url)
 	if err != nil {
 		return 0, 0, err
