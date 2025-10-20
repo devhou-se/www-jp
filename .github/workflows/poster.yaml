@@ -75,6 +75,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global push.autosetupremote true
           git add site/content/${{ github.event.issue.number }}.md
+          git add site/static/images/avatars/
           git commit -m "Add post for post ${{ github.event.issue.number }}"
           git push
       - name: "merge branch"

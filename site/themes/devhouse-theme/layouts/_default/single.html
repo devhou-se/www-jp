@@ -1,7 +1,23 @@
 {{ define "main" }}
 <h2>{{ .Title }}</h2>
+{{ $authors := .Param "authors" }}
+{{ if $authors }}
+<div style="display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px;">
+  <div style="flex-shrink: 0;">
+    {{ range $index, $author := $authors }}
+      {{ if eq $index 0 }}
+        <img src="/images/avatars/{{ $author }}.png" alt="{{ $author }}" style="width: 64px; height: 64px;">
+      {{ end }}
+    {{ end }}
+  </div>
+  <div>
+    <p style="margin: 0;">投稿日{{ .Date.Format "2006年01月02日15時04分" }}</p>
+    <p style="margin: 0;">投稿者{{ delimit $authors ", " }}</p>
+  </div>
+</div>
+{{ else }}
 <p>投稿日{{ .Date.Format "2006年01月02日15時04分" }}</p>
-<p>投稿者{{ .Params.Author }}</p>
+{{ end }}
 <hr>
 <div class="コンテンツ">
 {{ replaceRE `\[([^\]]*)\]{[^\}]*}` `$1` .Content | safeHTML }}
