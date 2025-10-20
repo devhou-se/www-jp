@@ -47,7 +47,7 @@ jobs:
   deploy:
     name: "Deploy"
     uses: ./.github/workflows/deploy.yaml
-    if: ${{ !github.event_name == 'workflow_call' }}
+    if: github.event_name != 'workflow_call'
     needs: gallery
     secrets: inherit
     permissions: write-all

@@ -62,12 +62,6 @@ jobs:
       #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       #   run: |
       #     python python/furigana.py ${{ github.event.issue.number }}
-      # - name: "notify game repo"
-      #   if: steps.check-comment.outputs.valid == 'true'
-      #   uses: ./.github/workflows/game-content-notifier.yaml
-      #   with:
-      #     issue_number: ${{ github.event.issue.number }}
-      #   secrets: inherit
       - name: "commit post"
         if: steps.check-comment.outputs.valid == 'true'
         run: |
@@ -76,6 +70,7 @@ jobs:
           git config --global push.autosetupremote true
           git add site/content/${{ github.event.issue.number }}.md
           git add site/static/images/avatars/
+          git add site/static/images/posts/ || echo "No post images to add"
           git commit -m "Add post for post ${{ github.event.issue.number }}"
           git push
       - name: "merge branch"
@@ -88,6 +83,15 @@ jobs:
       - name: "just fail lol"
         if: steps.check-comment.outputs.valid == 'false'
         run: exit 1
+
+  # notify-game:
+  #   name: "Notify Game Repo"
+  #   uses: ./.github/workflows/game-content-notifier.yaml
+  #   needs: post
+  #   with:
+  #     issue_number: "${{ github.event.issue.number }}"
+  #   secrets: inherit
+  #   permissions: write-all
 
   update-gallery:
     name: "Update Gallery"
