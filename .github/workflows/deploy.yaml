@@ -29,8 +29,6 @@ jobs:
           restore-keys: |
             images-
       - name: Store Images
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           go run go/imager/imager.go
       - name: "install hugo"

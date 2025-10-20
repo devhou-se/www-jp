@@ -9,7 +9,6 @@ POST_BODY = os.getenv("POST_BODY")
 POST_NUMBER = os.getenv("POST_NUMBER")
 POST_AUTHOR = os.getenv("POST_AUTHOR")
 POST_DATE = os.getenv("POST_DATE")
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 HEADER_DELIMITER = "---"
 
@@ -48,27 +47,13 @@ def download_and_rehost_image(url: str, post_number: str) -> str:
     img_path = os.path.join(posts_dir, f"{post_number}-{img_hash}.{ext}")
 
     try:
-        # Use authenticated request for user-attachments URLs
-        headers = {
-            'Accept': 'application/vnd.github+json',
-            'X-GitHub-Api-Version': '2022-11-28'
-        }
-        if GITHUB_TOKEN:
-            headers['Authorization'] = f'Bearer {GITHUB_TOKEN}'
-            print(f"Using authenticated request with token (length: {len(GITHUB_TOKEN)})")
-        else:
-            print("WARNING: No GITHUB_TOKEN available, trying unauthenticated request")
+        # User-attachments URLs are pre-signed S3 URLs - no additional auth needed
+        # Just download directly without adding Authorization headers
+        print(f"Downloading user-attachments image: {url}")
 
-        request = urllib.request.Request(url, headers=headers)
-        print(f"Attempting to download: {url}")
+        urllib.request.urlretrieve(url, img_path)
 
-        with urllib.request.urlopen(request) as response:
-            print(f"Response status: {response.status}")
-            print(f"Response headers: {response.headers}")
-            with open(img_path, 'wb') as out_file:
-                out_file.write(response.read())
-
-        print(f"✓ Successfully downloaded image from {url} to {img_path}")
+        print(f"✓ Successfully downloaded image to {img_path}")
         return f"/images/posts/{post_number}-{img_hash}.{ext}"
     except urllib.error.HTTPError as e:
         print(f"✗ HTTP Error downloading image from {url}")
