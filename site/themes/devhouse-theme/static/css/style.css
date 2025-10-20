@@ -510,7 +510,7 @@ div.章::before {
 /* Gallery Styles */
 .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(var(--gallery-thumb-min-width, 130px), 1fr));
     gap: 15px;
     padding: 15px 0;
 }
@@ -668,7 +668,7 @@ div.章::before {
 /* Mobile gallery adjustments */
 @media (max-width: 1400px) {
     .gallery-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(var(--gallery-thumb-min-width-mobile, 120px), 1fr));
         gap: 10px;
     }
 
