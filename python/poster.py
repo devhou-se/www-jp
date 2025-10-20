@@ -1,5 +1,6 @@
 import datetime
 import os
+import re
 import yaml
 import urllib.request
 
@@ -26,6 +27,32 @@ def extract_header(body: str):
         return '\n'.join(lines[:end_index + 1]), '\n'.join(lines[end_index + 1:])
     return None, body
 
+def convert_html_images_to_markdown(content: str) -> str:
+    """Convert HTML img tags to markdown image syntax."""
+    # Pattern to match HTML img tags with various attributes
+    # Matches: <img width="..." height="..." alt="..." src="..." />
+    img_pattern = r'<img\s+[^>]*?alt="([^"]*)"[^>]*?src="([^"]*)"[^>]*?/?>'
+
+    def replace_img(match):
+        alt_text = match.group(1)
+        src_url = match.group(2)
+        return f"![{alt_text}]({src_url})"
+
+    # Replace all HTML img tags with markdown format
+    content = re.sub(img_pattern, replace_img, content)
+
+    # Also handle cases where alt comes after src
+    img_pattern_alt_after = r'<img\s+[^>]*?src="([^"]*)"[^>]*?alt="([^"]*)"[^>]*?/?>'
+
+    def replace_img_alt_after(match):
+        src_url = match.group(1)
+        alt_text = match.group(2)
+        return f"![{alt_text}]({src_url})"
+
+    content = re.sub(img_pattern_alt_after, replace_img_alt_after, content)
+
+    return content
+
 def download_github_avatar(username: str, avatars_dir: str):
     """Download GitHub avatar for the specified username."""
     avatar_url = f"https://github.com/{username}.png?size=128"
@@ -50,6 +77,9 @@ def main():
     os.makedirs(avatars_dir, exist_ok=True)
 
     header, content_body = extract_header(POST_BODY)
+
+    # Convert HTML img tags to markdown format
+    content_body = convert_html_images_to_markdown(content_body)
 
     if not header:
         frontmatter_data = {

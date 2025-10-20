@@ -12,7 +12,20 @@ IMAGES_HTML = os.path.join(os.getcwd(), "site", "content", "gallery.md")
 IMG_PATTERN = r"(\!\[(.*)\]\((.*)\))"
 LAZYIMAGE_PATTERN = r"\{\{<\s*lazyimage\s+([a-f0-9-]+)\s+\d+\s*>\}\}"
 
-IMG_TEMPLATE = "<a href=\"/{}\"><img src=\"{}\" alt=\"{}\" /></a>"
+def get_image_id(src: str) -> str:
+    """Extract image ID from GitHub URL or local path."""
+    if src.startswith("https://github.com"):
+        # Extract image ID from GitHub URL
+        parts = src.split("/")
+        image_id = parts[-1].split("?")[0]  # Remove query params if present
+        return image_id
+    elif src.startswith("/images/"):
+        # Extract from local path
+        return src.split("/")[-1].replace(".jpeg", "").replace(".png", "").replace(".jpg", "")
+    else:
+        return None
+
+IMG_TEMPLATE = "<a href=\"/{}\"><img id=\"sidebar-img-{}\" alt=\"{}\" /></a><script>loadImageInStages(document.getElementById('sidebar-img-{}'), 'https://storage.googleapis.com/static.devh.se/images/{}_0.jpeg', 'https://storage.googleapis.com/static.devh.se/images/{}_1.jpeg', 'https://storage.googleapis.com/static.devh.se/images/{}_2.jpeg', 'https://storage.googleapis.com/static.devh.se/images/{}.jpeg');</script>"
 IMG_MD_TEMPLATE = "![{}]({})"
 IMG_MD_LINK_TEMPLATE = "[![{}]({})](/{})"
 HTML_TEMPLATE = """<span id="daily-image"></span>
@@ -75,8 +88,16 @@ def main():
         with open(GALLERY_HTML, "w") as f:
             f.write("最近の写真はありません")
     else:
-        images = [IMG_TEMPLATE.format(img[1], img[0][2], img[0][1]) for img in sidebar_images]
-        images = "['" + "', '".join(images) + "']"
+        formatted_images = []
+        for img in sidebar_images:
+            post_num = img[1]
+            alt = img[0][1]
+            img_id = get_image_id(img[0][2])
+            if img_id:
+                # Format: post_num, img_id (for element id), alt, img_id (for getElementById), img_id (4 times for URLs)
+                formatted_images.append(IMG_TEMPLATE.format(post_num, img_id, alt, img_id, img_id, img_id, img_id, img_id))
+
+        images = "['" + "', '".join(formatted_images) + "']"
         js = HTML_TEMPLATE.format(choices=images)
 
         with open(GALLERY_HTML, "w") as f:

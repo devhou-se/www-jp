@@ -16,6 +16,13 @@ copyright = '© 2025 devhou.se'
   description = "A multilingual blog about travel and experiences in Japan"
   author = "devhou.se"
 
+  # Gallery thumbnail settings
+  # Smaller values = more thumbnails across the page
+  # Desktop: 200px shows ~2 thumbnails, 130px shows ~3 thumbnails
+  # Mobile: 120px is recommended for mobile devices
+  galleryThumbnailMinWidth = "120px"
+  galleryThumbnailMinWidthMobile = "120px"
+
 [author]
   name = "devhou.se"
   email = "blog@devhou.se"

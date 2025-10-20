@@ -1,16 +1,16 @@
-name: Update Gallery
+name: Update Imager Cache
 
 on:
   workflow_dispatch:
   workflow_call:
 
 concurrency:
-  group: gallery-update
+  group: imager-cache-update
   cancel-in-progress: false
 
 jobs:
-  gallery:
-    name: Update Gallery
+  update-cache:
+    name: Update Imager Cache
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -21,15 +21,22 @@ jobs:
       with:
         ref: main
 
-    - name: Setup Python with dependencies
-      uses: ./.github/actions/setup-python-deps
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+
+    - name: Setup GCP credentials
+      run: |
+        echo '${{ secrets.GCP_SA_KEY }}' > $HOME/gcp-key.json
+        echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
 
     - name: Create branch
       run: |
-        git checkout -b "post/gallery"
+        git checkout -b "update/imager-cache"
 
-    - name: Update image of the day
-      run: python python/dailyimage.py
+    - name: Rebuild cache from GCS
+      run: go run go/imager/imager.go --rebuild-cache
 
     - name: Setup git bot
       uses: ./.github/actions/setup-git-bot
@@ -37,13 +44,13 @@ jobs:
     - name: Commit and push changes
       id: commit
       run: |
-        git add site/themes/devhouse-theme/layouts/partials/gallery.html site/content/gallery.md
+        git add imager-cache.txt
         if git diff --cached --quiet; then
           echo "No changes to commit"
           echo "has_changes=false" >> $GITHUB_OUTPUT
         else
-          git commit -m "Update gallery"
-          git push -u origin post/gallery
+          git commit -m "Update imager cache"
+          git push -u origin update/imager-cache
           echo "has_changes=true" >> $GITHUB_OUTPUT
         fi
 
@@ -52,5 +59,5 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh pr create --title "Update gallery" --body "" --base main --head "post/gallery"
+        gh pr create --title "Update imager cache" --body "" --base main --head "update/imager-cache"
         gh pr merge --squash --delete-branch

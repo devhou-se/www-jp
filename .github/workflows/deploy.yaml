@@ -7,32 +7,44 @@ on:
   workflow_call:
   workflow_dispatch:
 
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
 
 jobs:
   deploy:
-    name: "Deploy site"
+    name: Deploy site
     runs-on: ubuntu-latest
     steps:
-      - name: "checkout"
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: main
+
       - name: Setup Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Store Images
+
+      - name: Setup GCP credentials
+        run: |
+          echo '${{ secrets.GCP_SA_KEY }}' > $HOME/gcp-key.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
+
+      - name: Process and upload images to GCS
         run: |
           go run go/imager/imager.go
-      - name: "install hugo"
+
+      - name: Install Hugo
         uses: peaceiris/actions-hugo@v2
         with:
           hugo-version: "0.123.0"
-      - name: "build"
+
+      - name: Build site
         run: |
           cd site
           hugo --minify
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+
+      - name: Deploy to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEVHOUSE_80936 }}'
@@ -40,15 +52,23 @@ jobs:
           projectId: devhouse-80936
           target: devhouse-blog
 
-  push-image:
-    name: "Build and push image"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "checkout"
-        uses: actions/checkout@v4
-        with:
-          ref: main
-      - name: "build"
-        run: |
-          docker build -t registry.baileys.dev/devhouse:latest .
-          docker push registry.baileys.dev/devhouse:latest
+  update-imager-cache:
+    name: Update Imager Cache
+    uses: ./.github/workflows/update-imager-cache.yaml
+    needs: deploy
+    secrets: inherit
+    permissions:
+      contents: write
+      pull-requests: write
+
+  # push-image:
+  #   name: Build and push image
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Build and push
+  #       run: |
+  #         docker build -t registry.baileys.dev/devhouse:latest .
+  #         docker push registry.baileys.dev/devhouse:latest

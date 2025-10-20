@@ -6,6 +6,22 @@ on:
       issue_number:
         required: true
         type: string
+      dry_run:
+        description: Test mode - show what would be sent without sending
+        required: false
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number to notify about
+        required: true
+        type: string
+      dry_run:
+        description: Test mode - show what would be sent without sending
+        required: false
+        type: boolean
+        default: true
         
 jobs:
   notify-game-repo:
@@ -13,17 +29,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-          
-      - name: Install dependencies
-        run: |
-          # No longer need PyJWT and cryptography since we're using GITHUB_TOKEN
-          echo "Using default GITHUB_TOKEN for authentication"
-          
+
       - name: Get post content
         id: get-content
         run: |
@@ -31,11 +37,16 @@ jobs:
           POST_AUTHOR=$(gh issue view ${{ inputs.issue_number }} --json author -q .author.login)
           POST_TITLE=$(gh issue view ${{ inputs.issue_number }} --json title -q .title)
           POST_DATE=$(gh issue view ${{ inputs.issue_number }} --json createdAt -q .createdAt)
-          
+
+          echo "Found issue #${{ inputs.issue_number }}"
+          echo "Title: $POST_TITLE"
+          echo "Author: $POST_AUTHOR"
+          echo "Date: $POST_DATE"
+
           # Clean content for JSON
           POST_BODY_ESCAPED=$(echo "$POST_BODY" | jq -aRs .)
           POST_TITLE_ESCAPED=$(echo "$POST_TITLE" | jq -aRs .)
-          
+
           # Create payload file
           cat > payload.json << EOF
           {
@@ -49,12 +60,27 @@ jobs:
             }
           }
           EOF
-          
-          cat payload.json
+
+          # Show sanitized payload
+          jq '.client_payload.content = "<CONTENT TRUNCATED>"' payload.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Test webhook (dry run)
+        if: inputs.dry_run == true
+        run: |
+          echo "DRY RUN MODE - Would send webhook to:"
+          echo "  URL: https://api.github.com/repos/${{ secrets.GAME_REPO_OWNER }}/${{ secrets.GAME_REPO_NAME }}/dispatches"
+          echo "  Event type: new_post"
+          echo "  Post ID: ${{ inputs.issue_number }}"
+          echo ""
+          echo "Secrets check:"
+          echo "  GAME_REPO_OWNER available: ${{ secrets.GAME_REPO_OWNER != '' }}"
+          echo "  GAME_REPO_NAME available: ${{ secrets.GAME_REPO_NAME != '' }}"
+          echo "  GH_PAT available: ${{ secrets.GH_PAT != '' }}"
           
       - name: Trigger game repo workflow
+        if: inputs.dry_run != true
         run: |
           curl -X POST \
             -H "Authorization: token ${{ secrets.GH_PAT }}" \

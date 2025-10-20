@@ -1,0 +1,12 @@
+name: Setup Git Bot Config
+description: Configures git with github-actions bot credentials
+
+runs:
+  using: composite
+  steps:
+    - name: Configure git
+      shell: bash
+      run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+        git config --global push.autosetupremote true

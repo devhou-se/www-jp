@@ -1,41 +1,49 @@
-name: "Post"
+name: Post
 
 on:
   issue_comment:
 
+concurrency:
+  group: post-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
 jobs:
   post:
-    name: "Create Post"
-    permissions: write-all
+    name: Create Post
     runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ steps.check-comment.outputs.valid }}
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     if: contains(github.event.issue.labels.*.name, 'post')
     steps:
-      - name: "checkout"
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: main
-      - name: "check comment"
+
+      - name: Check comment
         id: check-comment
         run: |
           echo "Comment: ${{ github.event.comment.body }}"
           echo ${{ github.event.comment.body }} | python3 python/comment-parser.py
-      - name: "eyes react"
+
+      - name: Add eyes reaction
         if: steps.check-comment.outputs.valid == 'true'
         run: |
           curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"content":"eyes"}' "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions"
-      - name: "setup python"
+      - name: Setup Python with dependencies
         if: steps.check-comment.outputs.valid == 'true'
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-      - name: "install dependencies"
-        if: steps.check-comment.outputs.valid == 'true'
-        run: pip install -r python/requirements.txt
-      - name: "create branch"
+        uses: ./.github/actions/setup-python-deps
+
+      - name: Create branch
         if: steps.check-comment.outputs.valid == 'true'
         run: |
           git checkout "post/${{ github.event.issue.number }}" || git checkout -b "post/${{ github.event.issue.number }}"
-      - name: "post creator"
+
+      - name: Create post
         if: steps.check-comment.outputs.valid == 'true'
         env:
           POST_TITLE: ${{ github.event.issue.title }}
@@ -45,78 +53,78 @@ jobs:
           POST_DATE: ${{ github.event.issue.created_at }}
         run: |
           python python/poster.py ${{ github.event.issue.number }}
-      - name: "setup gcp credentials"
+
+      - name: Setup GCP credentials
         if: steps.check-comment.outputs.valid == 'true' && steps.check-comment.outputs.translate == 'true'
         run: |
           echo '${{ secrets.GCP_SA_KEY }}' > $HOME/gcp-key.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
-      - name: "translate"
+
+      - name: Translate post
         if: steps.check-comment.outputs.valid == 'true' && steps.check-comment.outputs.translate == 'true'
         env:
           GOOGLE_CLOUD_PROJECT: devhouse-80936
         run: |
           python python/translator.py ${{ github.event.issue.number }}
-      # - name: "add furigana"
-      #   if: steps.check-comment.outputs.valid == 'true'
-      #   env:
-      #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      #   run: |
-      #     python python/furigana.py ${{ github.event.issue.number }}
-      # - name: "notify game repo"
-      #   if: steps.check-comment.outputs.valid == 'true'
-      #   uses: ./.github/workflows/game-content-notifier.yaml
-      #   with:
-      #     issue_number: ${{ github.event.issue.number }}
-      #   secrets: inherit
-      - name: "commit post"
+
+      - name: Setup git bot
+        if: steps.check-comment.outputs.valid == 'true'
+        uses: ./.github/actions/setup-git-bot
+
+      - name: Commit post
         if: steps.check-comment.outputs.valid == 'true'
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git config --global push.autosetupremote true
           git add site/content/${{ github.event.issue.number }}.md
           git add site/static/images/avatars/
           git commit -m "Add post for post ${{ github.event.issue.number }}"
           git push
-      - name: "merge branch"
+
+      - name: Create and merge PR
         if: steps.check-comment.outputs.valid == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr create --title "Add post for post ${{ github.event.issue.number }}" --body "Add post for PR #${{ github.event.issue.number }}" --base main --head "post/${{ github.event.issue.number }}"
           gh pr merge --squash --delete-branch
-      - name: "just fail lol"
-        if: steps.check-comment.outputs.valid == 'false'
-        run: exit 1
 
   update-gallery:
-    name: "Update Gallery"
+    name: Update Gallery
     uses: ./.github/workflows/gallery.yaml
     needs: post
+    if: needs.post.outputs.valid == 'true'
     secrets: inherit
-    permissions: write-all
+    permissions:
+      contents: write
+      pull-requests: write
 
   deploy:
-    name: "Deploy"
+    name: Deploy
     uses: ./.github/workflows/deploy.yaml
     needs: update-gallery
+    if: needs.post.outputs.valid == 'true'
     secrets: inherit
-    permissions: write-all
+    permissions:
+      contents: write
+      pull-requests: write
 
   reactions:
-    name: "React"
+    name: React
     runs-on: ubuntu-latest
-    permissions: write-all
     needs: deploy
+    if: needs.post.outputs.valid == 'true'
+    permissions:
+      issues: write
     steps:
-      - name: "checkout"
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: main
-      - name: "reset reaction"
+
+      - name: Remove eyes reaction
         run: |
           REACTION_ID=$(curl -X GET -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions" | jq " .[] | select(.user.login == \"github-actions[bot]\") | .id ")
           curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions/$REACTION_ID"
-      - name: "react success"
+
+      - name: Add success reaction
         run: |
           curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"content":"+1"}' "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions"

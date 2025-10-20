@@ -70,9 +70,10 @@ node_modules/
 # ignore generated content from running hugo server
 site/public
 
-# ignore generated images
-site/static/images/
+# ignore generated images (now stored in GCS)
+site/static/images/*
 !site/static/images/avatars/
+!site/static/images/*.svg
 site/content/images/
 
 # Mac files
