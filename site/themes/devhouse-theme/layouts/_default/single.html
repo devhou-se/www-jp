@@ -6,7 +6,7 @@
   <div style="flex-shrink: 0;">
     {{ range $index, $author := $authors }}
       {{ if eq $index 0 }}
-        <img src="/images/avatars/{{ $author }}.png" alt="{{ $author }}" style="width: 64px; height: 64px;">
+        <img src="/images/avatars/{{ $author }}.png" alt="{{ $author }}" style="width: 64px; height: 64px; border: 1px solid #333333;">
       {{ end }}
     {{ end }}
   </div>

@@ -17,7 +17,7 @@
           <div style="display: flex; align-items: center;">
             {{ range $index, $author := $authors }}
               {{ if eq $index 0 }}
-                <img src="/images/avatars/{{ $author }}.png" alt="{{ $author }}" style="width: 16px; height: 16px; margin-right: 4px; flex-shrink: 0;">
+                <img src="/images/avatars/{{ $author }}.png" alt="{{ $author }}" style="width: 16px; height: 16px; margin-right: 4px; flex-shrink: 0; border: 1px solid #333333;">
               {{ end }}
             {{ end }}
             <span>{{ delimit $authors ", " }}</span>
