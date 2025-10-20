@@ -71,8 +71,9 @@ node_modules/
 site/public
 
 # ignore generated images
-site/static/images/
+site/static/images/*
 !site/static/images/avatars/
+!site/static/images/*.svg
 site/content/images/
 
 # Mac files
