@@ -49,12 +49,18 @@ jobs:
           python python/dailyimage.py
           echo "✓ Gallery updated"
 
-      - name: Commit cache and gallery updates
+      - name: Create branch for updates
+        run: |
+          BRANCH_NAME="update/cache-gallery-$(date +%s)"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          git checkout -b "$BRANCH_NAME"
+
+      - name: Setup git bot
+        uses: ./.github/actions/setup-git-bot
+
+      - name: Commit and push cache and gallery updates
         id: commit-updates
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
           git add imager-cache.txt
           git add site/themes/devhouse-theme/layouts/partials/gallery.html
           git add site/content/gallery.md
@@ -64,10 +70,24 @@ jobs:
             echo "has_changes=false" >> $GITHUB_OUTPUT
           else
             git commit -m "Update image cache and gallery"
-            git push
+            git push -u origin "$BRANCH_NAME"
             echo "has_changes=true" >> $GITHUB_OUTPUT
             echo "✓ Cache and gallery changes committed"
           fi
+
+      - name: Create and merge PR
+        if: steps.commit-updates.outputs.has_changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create --title "Update image cache and gallery" --body "" --base main --head "$BRANCH_NAME"
+          gh pr merge --squash --delete-branch
+
+      - name: Checkout main after merge
+        if: steps.commit-updates.outputs.has_changes == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Install Hugo
         uses: peaceiris/actions-hugo@v2

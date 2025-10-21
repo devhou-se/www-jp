@@ -66,11 +66,18 @@ jobs:
               ;;
           esac
 
+      - name: Create branch for cache updates
+        if: inputs.operation == 'rebuild-cache'
+        run: |
+          BRANCH_NAME="update/rebuild-cache-$(date +%s)"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          git checkout -b "$BRANCH_NAME"
+
       - name: Setup git bot
         if: inputs.operation == 'rebuild-cache'
         uses: ./.github/actions/setup-git-bot
 
-      - name: Commit cache changes
+      - name: Commit and push cache changes
         if: inputs.operation == 'rebuild-cache'
         id: commit
         run: |
@@ -81,10 +88,18 @@ jobs:
             echo "has_changes=false" >> $GITHUB_OUTPUT
           else
             git commit -m "Rebuild image cache from GCS"
-            git push
+            git push -u origin "$BRANCH_NAME"
             echo "has_changes=true" >> $GITHUB_OUTPUT
             echo "✓ Cache changes committed"
           fi
+
+      - name: Create and merge PR
+        if: inputs.operation == 'rebuild-cache' && steps.commit.outputs.has_changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create --title "Rebuild image cache from GCS" --body "" --base main --head "$BRANCH_NAME"
+          gh pr merge --squash --delete-branch
 
       - name: Summary
         run: |
