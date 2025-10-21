@@ -63,11 +63,7 @@ jobs:
             echo "No cache or gallery changes to commit"
             echo "has_changes=false" >> $GITHUB_OUTPUT
           else
-            git commit -m "Update image cache and gallery
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
+            git commit -m "Update image cache and gallery"
             git push
             echo "has_changes=true" >> $GITHUB_OUTPUT
             echo "✓ Cache and gallery changes committed"
