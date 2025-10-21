@@ -1,6 +1,6 @@
 <span id="daily-image"></span>
 <script>
-const choices = ['<a href="/419"><img src="https://github.com/user-attachments/assets/bb2fe9e9-75ef-45af-9835-8621e3a0e73d" alt="画像" /></a>'];
+const choices = ['<a href="/419"><img id="sidebar-img-bb2fe9e9-75ef-45af-9835-8621e3a0e73d" alt="image" /></a><script>loadImageInStages(document.getElementById('sidebar-img-bb2fe9e9-75ef-45af-9835-8621e3a0e73d'), 'https://storage.googleapis.com/static.devh.se/images/bb2fe9e9-75ef-45af-9835-8621e3a0e73d_0.jpeg', 'https://storage.googleapis.com/static.devh.se/images/bb2fe9e9-75ef-45af-9835-8621e3a0e73d_1.jpeg', 'https://storage.googleapis.com/static.devh.se/images/bb2fe9e9-75ef-45af-9835-8621e3a0e73d_2.jpeg', 'https://storage.googleapis.com/static.devh.se/images/bb2fe9e9-75ef-45af-9835-8621e3a0e73d.jpeg');</script>'];
 const choice = choices[Math.floor(Math.random() * choices.length)];
 const imgSpan = document.getElementById("daily-image");
 imgSpan.innerHTML = choice;
