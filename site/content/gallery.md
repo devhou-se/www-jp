@@ -2,6 +2,7 @@
 type: gallery
 ---
 [![image](https://github.com/user-attachments/assets/bb2fe9e9-75ef-45af-9835-8621e3a0e73d)](/419)
+[![画像](https://github.com/user-attachments/assets/49f9fbe7-9c5a-4018-b6a4-733d123058d6)](/419)
 [![image](https://github.com/devhou-se/www-jp/assets/5674656/5081aa89-7e39-4dfe-8061-44da3dce3a40)](/367)
 [![image](https://github.com/devhou-se/www-jp/assets/5674656/06d52e3b-d101-4fb7-8dbe-6b300e23cb02)](/367)
 [![image](https://github.com/devhou-se/www-jp/assets/5674656/92e98a5c-6a37-4c1f-aa80-f48334fa818c)](/367)
