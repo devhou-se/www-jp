@@ -87,20 +87,10 @@ jobs:
           gh pr create --title "Add post for post ${{ github.event.issue.number }}" --body "Add post for PR #${{ github.event.issue.number }}" --base main --head "post/${{ github.event.issue.number }}"
           gh pr merge --squash --delete-branch
 
-  update-gallery:
-    name: Update Gallery
-    uses: ./.github/workflows/gallery.yaml
-    needs: post
-    if: needs.post.outputs.valid == 'true'
-    secrets: inherit
-    permissions:
-      contents: write
-      pull-requests: write
-
   deploy:
     name: Deploy
     uses: ./.github/workflows/deploy.yaml
-    needs: update-gallery
+    needs: post
     if: needs.post.outputs.valid == 'true'
     secrets: inherit
     permissions:

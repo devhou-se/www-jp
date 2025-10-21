@@ -15,9 +15,14 @@ jobs:
   deploy:
     name: Deploy site
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -31,7 +36,42 @@ jobs:
 
       - name: Process and upload images to GCS
         run: |
-          go run go/imager/imager.go
+          echo "🖼️  Processing images with new processor..."
+          go run go/image-processor/*.go
+          echo "✓ Image processing complete"
+
+      - name: Setup Python with dependencies
+        uses: ./.github/actions/setup-python-deps
+
+      - name: Update gallery
+        run: |
+          echo "🖼️  Updating gallery..."
+          python python/dailyimage.py
+          echo "✓ Gallery updated"
+
+      - name: Commit cache and gallery updates
+        id: commit-updates
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add imager-cache.txt
+          git add site/themes/devhouse-theme/layouts/partials/gallery.html
+          git add site/content/gallery.md
+
+          if git diff --cached --quiet; then
+            echo "No cache or gallery changes to commit"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            git commit -m "Update image cache and gallery
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+            git push
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "✓ Cache and gallery changes committed"
+          fi
 
       - name: Install Hugo
         uses: peaceiris/actions-hugo@v2
@@ -51,15 +91,6 @@ jobs:
           channelId: live
           projectId: devhouse-80936
           target: devhouse-blog
-
-  update-imager-cache:
-    name: Update Imager Cache
-    uses: ./.github/workflows/update-imager-cache.yaml
-    needs: deploy
-    secrets: inherit
-    permissions:
-      contents: write
-      pull-requests: write
 
   # push-image:
   #   name: Build and push image
