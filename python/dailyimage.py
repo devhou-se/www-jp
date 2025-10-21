@@ -25,7 +25,7 @@ def get_image_id(src: str) -> str:
     else:
         return None
 
-IMG_TEMPLATE = "<a href=\"/{}\"><img id=\"sidebar-img-{}\" alt=\"{}\" /></a><script>loadImageInStages(document.getElementById('sidebar-img-{}'), 'https://storage.googleapis.com/static.devh.se/images/{}_0.jpeg', 'https://storage.googleapis.com/static.devh.se/images/{}_1.jpeg', 'https://storage.googleapis.com/static.devh.se/images/{}_2.jpeg', 'https://storage.googleapis.com/static.devh.se/images/{}.jpeg');</script>"
+IMG_TEMPLATE = r"<a href=\"/{}\"><img id=\"sidebar-img-{}\" alt=\"{}\" /></a><script>loadImageInStages(document.getElementById('sidebar-img-{}'), 'https://storage.googleapis.com/static.devh.se/images/{}_0.jpeg', 'https://storage.googleapis.com/static.devh.se/images/{}_1.jpeg', 'https://storage.googleapis.com/static.devh.se/images/{}_2.jpeg', 'https://storage.googleapis.com/static.devh.se/images/{}.jpeg');<\/script>"
 IMG_MD_TEMPLATE = "![{}]({})"
 IMG_MD_LINK_TEMPLATE = "[![{}]({})](/{})"
 HTML_TEMPLATE = """<span id="daily-image"></span>
@@ -94,8 +94,11 @@ def main():
             alt = img[0][1]
             img_id = get_image_id(img[0][2])
             if img_id:
-                # Format: post_num, img_id (for element id), alt, img_id (for getElementById), img_id (4 times for URLs)
-                formatted_images.append(IMG_TEMPLATE.format(post_num, img_id, alt, img_id, img_id, img_id, img_id, img_id))
+                # Sanitize ID to prevent Hugo from parsing as scientific notation
+                # Replace hyphens with underscores in HTML IDs
+                safe_id = img_id.replace('-', '_')
+                # Format: post_num, safe_id (for element id), alt, safe_id (for getElementById), img_id (4 times for URLs)
+                formatted_images.append(IMG_TEMPLATE.format(post_num, safe_id, alt, safe_id, img_id, img_id, img_id, img_id))
 
         images = "['" + "', '".join(formatted_images) + "']"
         js = HTML_TEMPLATE.format(choices=images)

@@ -46,7 +46,7 @@ jobs:
       - name: Build site
         run: |
           cd site
-          hugo --minify
+          hugo
 
       - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
