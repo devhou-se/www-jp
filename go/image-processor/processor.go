@@ -362,7 +362,11 @@ func uploadImageVariants(ctx context.Context, bucket *storage.BucketHandle, img 
 			if width > 0 {
 				suffix = fmt.Sprintf("_%d", index)
 			}
-			objectPath := fmt.Sprintf("%s/%s%s.jpeg", gcsImagePath, filename, suffix)
+			// Strip extension from filename to avoid double extensions
+			baseFilename := strings.TrimSuffix(filename, ".jpeg")
+			baseFilename = strings.TrimSuffix(baseFilename, ".jpg")
+			baseFilename = strings.TrimSuffix(baseFilename, ".png")
+			objectPath := fmt.Sprintf("%s/%s%s.jpeg", gcsImagePath, baseFilename, suffix)
 
 			fl.Lock(objectPath)
 			defer fl.Unlock(objectPath)
