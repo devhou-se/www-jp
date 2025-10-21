@@ -1,0 +1,56 @@
+name: Update Gallery
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: gallery-update
+  cancel-in-progress: false
+
+jobs:
+  gallery:
+    name: Update Gallery
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: main
+
+    - name: Setup Python with dependencies
+      uses: ./.github/actions/setup-python-deps
+
+    - name: Create branch
+      run: |
+        git checkout -b "post/gallery"
+
+    - name: Update image of the day
+      run: python python/dailyimage.py
+
+    - name: Setup git bot
+      uses: ./.github/actions/setup-git-bot
+
+    - name: Commit and push changes
+      id: commit
+      run: |
+        git add site/themes/devhouse-theme/layouts/partials/gallery.html site/content/gallery.md
+        if git diff --cached --quiet; then
+          echo "No changes to commit"
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+        else
+          git commit -m "Update gallery"
+          git push -u origin post/gallery
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create and merge PR
+      if: steps.commit.outputs.has_changes == 'true'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh pr create --title "Update gallery" --body "" --base main --head "post/gallery"
+        gh pr merge --squash --delete-branch

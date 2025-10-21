@@ -36,58 +36,7 @@ jobs:
 
       - name: Process and upload images to GCS
         run: |
-          echo "🖼️  Processing images with new processor..."
           go run go/image-processor/*.go
-          echo "✓ Image processing complete"
-
-      - name: Setup Python with dependencies
-        uses: ./.github/actions/setup-python-deps
-
-      - name: Update gallery
-        run: |
-          echo "🖼️  Updating gallery..."
-          python python/dailyimage.py
-          echo "✓ Gallery updated"
-
-      - name: Create branch for updates
-        run: |
-          BRANCH_NAME="update/cache-gallery-$(date +%s)"
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-          git checkout -b "$BRANCH_NAME"
-
-      - name: Setup git bot
-        uses: ./.github/actions/setup-git-bot
-
-      - name: Commit and push cache and gallery updates
-        id: commit-updates
-        run: |
-          git add imager-cache.txt
-          git add site/themes/devhouse-theme/layouts/partials/gallery.html
-          git add site/content/gallery.md
-
-          if git diff --cached --quiet; then
-            echo "No cache or gallery changes to commit"
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-          else
-            git commit -m "Update image cache and gallery"
-            git push -u origin "$BRANCH_NAME"
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "✓ Cache and gallery changes committed"
-          fi
-
-      - name: Create and merge PR
-        if: steps.commit-updates.outputs.has_changes == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr create --title "Update image cache and gallery" --body "" --base main --head "$BRANCH_NAME"
-          gh pr merge --squash --delete-branch
-
-      - name: Checkout main after merge
-        if: steps.commit-updates.outputs.has_changes == 'true'
-        uses: actions/checkout@v4
-        with:
-          ref: main
 
       - name: Install Hugo
         uses: peaceiris/actions-hugo@v2
@@ -107,6 +56,15 @@ jobs:
           channelId: live
           projectId: devhouse-80936
           target: devhouse-blog
+
+  update-imager-cache:
+    name: Update Imager Cache
+    uses: ./.github/workflows/update-imager-cache.yaml
+    needs: deploy
+    secrets: inherit
+    permissions:
+      contents: write
+      pull-requests: write
 
   # push-image:
   #   name: Build and push image
