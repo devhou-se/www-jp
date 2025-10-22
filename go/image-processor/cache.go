@@ -186,7 +186,6 @@ func (c *ImageCache) Save() error {
 	// Write header
 	fmt.Fprintf(writer, "# Version: %s\n", CacheVersion)
 	fmt.Fprintf(writer, "# Format: filename|hash|timestamp|width|height|gcs_0|gcs_1|gcs_2|gcs_3\n")
-	fmt.Fprintf(writer, "# Generated: %s\n", time.Now().Format(time.RFC3339))
 	fmt.Fprintln(writer)
 
 	// Sort entries for consistent output
