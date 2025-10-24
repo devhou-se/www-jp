@@ -75,15 +75,30 @@ jobs:
         EOF
         node screenshot.js
 
+    - name: Create branch
+      run: |
+        git checkout -b "update/location-screenshots"
+
     - name: Setup git bot
       uses: ./.github/actions/setup-git-bot
 
     - name: Commit and push changes
+      id: commit
       run: |
         git add site/static/images/location-sidebar/
         if git diff --cached --quiet; then
           echo "No changes to commit"
+          echo "has_changes=false" >> $GITHUB_OUTPUT
         else
           git commit -m "Update location sidebar screenshots"
-          git push
+          git push -u origin update/location-screenshots
+          echo "has_changes=true" >> $GITHUB_OUTPUT
         fi
+
+    - name: Create and merge PR
+      if: steps.commit.outputs.has_changes == 'true'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh pr create --title "Update location sidebar screenshots" --body "" --base main --head "update/location-screenshots"
+        gh pr merge --squash --delete-branch
