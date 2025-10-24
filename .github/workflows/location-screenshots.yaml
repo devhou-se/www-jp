@@ -1,0 +1,89 @@
+name: Update Location Screenshots
+
+on:
+  schedule:
+    # Run at 3 AM JST (6 PM UTC previous day)
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: location-screenshots
+  cancel-in-progress: false
+
+jobs:
+  capture-screenshots:
+    name: Capture Location Sidebar Screenshots
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: main
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Playwright
+      run: |
+        npm install -D @playwright/test
+        npx playwright install --with-deps chromium
+
+    - name: Create screenshots directory
+      run: mkdir -p site/static/images/location-sidebar
+
+    - name: Capture screenshots
+      run: |
+        cat > screenshot.js << 'EOF'
+        const { chromium } = require('@playwright/test');
+
+        (async () => {
+          const browser = await chromium.launch();
+          const context = await browser.newContext({
+            viewport: { width: 217, height: 600 }
+          });
+
+          // Capture light mode
+          const pageLight = await context.newPage();
+          await pageLight.goto('https://calendar.devhou.se/#/locations?lang=ja&theme=light', {
+            waitUntil: 'networkidle'
+          });
+          await pageLight.screenshot({
+            path: 'site/static/images/location-sidebar/location-light.jpg',
+            type: 'jpeg',
+            quality: 65
+          });
+          await pageLight.close();
+
+          // Capture dark mode
+          const pageDark = await context.newPage();
+          await pageDark.goto('https://calendar.devhou.se/#/locations?lang=ja&theme=dark', {
+            waitUntil: 'networkidle'
+          });
+          await pageDark.screenshot({
+            path: 'site/static/images/location-sidebar/location-dark.jpg',
+            type: 'jpeg',
+            quality: 65
+          });
+          await pageDark.close();
+
+          await browser.close();
+        })();
+        EOF
+        node screenshot.js
+
+    - name: Setup git bot
+      uses: ./.github/actions/setup-git-bot
+
+    - name: Commit and push changes
+      run: |
+        git add site/static/images/location-sidebar/
+        if git diff --cached --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Update location sidebar screenshots"
+          git push
+        fi
