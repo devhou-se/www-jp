@@ -73,6 +73,7 @@ site/public
 # ignore generated images (now stored in GCS)
 site/static/images/*
 !site/static/images/avatars/
+!site/static/images/location-sidebar/
 !site/static/images/*.svg
 site/content/images/
 
