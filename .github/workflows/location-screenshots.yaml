@@ -39,20 +39,33 @@ jobs:
     - name: Capture screenshots
       run: |
         # Calculate today's date in JST (UTC+9)
-        JST_DATE=$(TZ=Asia/Tokyo date +%Y-%m-%d)
+        # Subtract 1 day to compensate for calendar app timezone interpretation
+        JST_DATE=$(TZ=Asia/Tokyo date -d 'yesterday' +%Y-%m-%d)
+
+        echo "==================== DEBUG INFO ===================="
+        echo "UTC time: $(date -u)"
+        echo "JST time: $(TZ=Asia/Tokyo date)"
+        echo "Calculated JST_DATE (yesterday): ${JST_DATE}"
+        echo "Light URL: https://calendar.devhou.se/#/locations?lang=ja&theme=light&date=${JST_DATE}"
+        echo "Dark URL: https://calendar.devhou.se/#/locations?lang=ja&theme=dark&date=${JST_DATE}"
+        echo "===================================================="
 
         cat > screenshot.js << EOF
         const { chromium } = require('@playwright/test');
 
         (async () => {
+          console.log('Starting browser...');
           const browser = await chromium.launch();
           const context = await browser.newContext({
             viewport: { width: 217, height: 600 }
           });
 
           // Capture light mode
+          console.log('Capturing light mode...');
           const pageLight = await context.newPage();
-          await pageLight.goto('https://calendar.devhou.se/#/locations?lang=ja&theme=light&date=${JST_DATE}', {
+          const lightUrl = 'https://calendar.devhou.se/#/locations?lang=ja&theme=light&date=${JST_DATE}';
+          console.log('Light mode URL:', lightUrl);
+          await pageLight.goto(lightUrl, {
             waitUntil: 'networkidle'
           });
           await pageLight.screenshot({
@@ -60,11 +73,15 @@ jobs:
             type: 'jpeg',
             quality: 77
           });
+          console.log('Light mode screenshot saved');
           await pageLight.close();
 
           // Capture dark mode
+          console.log('Capturing dark mode...');
           const pageDark = await context.newPage();
-          await pageDark.goto('https://calendar.devhou.se/#/locations?lang=ja&theme=dark&date=${JST_DATE}', {
+          const darkUrl = 'https://calendar.devhou.se/#/locations?lang=ja&theme=dark&date=${JST_DATE}';
+          console.log('Dark mode URL:', darkUrl);
+          await pageDark.goto(darkUrl, {
             waitUntil: 'networkidle'
           });
           await pageDark.screenshot({
@@ -72,9 +89,11 @@ jobs:
             type: 'jpeg',
             quality: 77
           });
+          console.log('Dark mode screenshot saved');
           await pageDark.close();
 
           await browser.close();
+          console.log('Done!');
         })();
         EOF
         node screenshot.js
