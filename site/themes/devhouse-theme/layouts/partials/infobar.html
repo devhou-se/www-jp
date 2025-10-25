@@ -1,8 +1,43 @@
-<picture style="display: block; margin: 0; padding: 0;">
-  <source srcset="/images/location-sidebar/location-dark.jpg"
-          media="(prefers-color-scheme: dark)">
-  <img src="/images/location-sidebar/location-light.jpg"
-       alt="DevHouse Locations"
-       style="width: 217px; height: 600px; border: none; display: block; margin: 0; padding: 0;"
-       loading="lazy">
-</picture>
+<img id="location-sidebar-img"
+     src="/images/location-sidebar/location-light.jpg"
+     alt="DevHouse Locations"
+     style="width: 217px; height: 600px; border: none; display: block; margin: 0; padding: 0;"
+     loading="lazy">
+<script>
+(function() {
+    function updateLocationSidebar(theme) {
+        const img = document.getElementById('location-sidebar-img');
+        if (img) {
+            img.src = theme === 'dark'
+                ? '/images/location-sidebar/location-dark.jpg'
+                : '/images/location-sidebar/location-light.jpg';
+        }
+    }
+
+    // Update immediately with current theme
+    if (window.getPreferredTheme) {
+        updateLocationSidebar(window.getPreferredTheme());
+    }
+
+    // Listen for theme changes via storage events (for cross-tab sync)
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'theme' && window.getPreferredTheme) {
+            updateLocationSidebar(window.getPreferredTheme());
+        }
+    });
+
+    // Hook into theme changes
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.getPreferredTheme) {
+            updateLocationSidebar(window.getPreferredTheme());
+        }
+
+        // Listen for system preference changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+            if (!localStorage.getItem('theme') && window.getPreferredTheme) {
+                updateLocationSidebar(window.getPreferredTheme());
+            }
+        });
+    });
+})();
+</script>

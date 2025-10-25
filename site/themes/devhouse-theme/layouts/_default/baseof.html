@@ -43,6 +43,13 @@
         if (logo) {
             logo.src = theme === 'light' ? '/images/logo-dark.svg' : '/images/logo-white.svg';
         }
+        // Also update location sidebar image
+        const locationImg = document.getElementById('location-sidebar-img');
+        if (locationImg) {
+            locationImg.src = theme === 'dark'
+                ? '/images/location-sidebar/location-dark.jpg'
+                : '/images/location-sidebar/location-light.jpg';
+        }
     }
 
     function getPreferredTheme() {

@@ -38,7 +38,10 @@ jobs:
 
     - name: Capture screenshots
       run: |
-        cat > screenshot.js << 'EOF'
+        # Calculate today's date in JST (UTC+9)
+        JST_DATE=$(TZ=Asia/Tokyo date +%Y-%m-%d)
+
+        cat > screenshot.js << EOF
         const { chromium } = require('@playwright/test');
 
         (async () => {
@@ -49,25 +52,25 @@ jobs:
 
           // Capture light mode
           const pageLight = await context.newPage();
-          await pageLight.goto('https://calendar.devhou.se/#/locations?lang=ja&theme=light', {
+          await pageLight.goto('https://calendar.devhou.se/#/locations?lang=ja&theme=light&date=${JST_DATE}', {
             waitUntil: 'networkidle'
           });
           await pageLight.screenshot({
             path: 'site/static/images/location-sidebar/location-light.jpg',
             type: 'jpeg',
-            quality: 65
+            quality: 77
           });
           await pageLight.close();
 
           // Capture dark mode
           const pageDark = await context.newPage();
-          await pageDark.goto('https://calendar.devhou.se/#/locations?lang=ja&theme=dark', {
+          await pageDark.goto('https://calendar.devhou.se/#/locations?lang=ja&theme=dark&date=${JST_DATE}', {
             waitUntil: 'networkidle'
           });
           await pageDark.screenshot({
             path: 'site/static/images/location-sidebar/location-dark.jpg',
             type: 'jpeg',
-            quality: 65
+            quality: 77
           });
           await pageDark.close();
 
