@@ -220,9 +220,22 @@ div.主要 div.内容 img {
 
 div.主要 div.右-ナビ {
     display: inline-block;
-    width: 183px;
+    width: 217px; /* Increased from 183px to compensate for removed padding (30px) and border (4px) */
     vertical-align: top;
     white-space: normal;
+}
+
+/* Remove padding and border from right sidebar for location image */
+div.主要 div.右-ナビ.章 {
+    padding: 0;
+    border: none;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* Remove the decorative line from right sidebar */
+div.主要 div.右-ナビ.章::before {
+    display: none;
 }
 
 div.主要 div.右-ナビ img {
@@ -421,6 +434,19 @@ div.章::before {
         width: 100%;
         margin: 0;
         box-sizing: border-box;
+    }
+
+    /* Ensure right sidebar has no padding/border on mobile too */
+    div.主要 div.右-ナビ.章 {
+        padding: 0;
+        border: none;
+        margin: 0;
+        box-shadow: none;
+    }
+
+    /* Remove the decorative line from right sidebar on mobile */
+    div.主要 div.右-ナビ.章::before {
+        display: none;
     }
 
     div.主要 div.章 {

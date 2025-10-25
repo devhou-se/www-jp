@@ -1,8 +1,51 @@
-<picture style="display: block; margin: 0; padding: 0;">
-  <source srcset="/images/location-sidebar/location-dark.jpg"
-          media="(prefers-color-scheme: dark)">
-  <img src="/images/location-sidebar/location-light.jpg"
-       alt="DevHouse Locations"
-       style="width: 217px; height: 600px; border: none; display: block; margin: 0; padding: 0;"
-       loading="lazy">
-</picture>
+<img id="location-sidebar-img"
+     src="/images/location-sidebar/location-light.jpg"
+     alt="DevHouse Locations"
+     style="width: 217px; height: 600px; border: none; display: block; margin: 0; padding: 0;"
+     loading="lazy">
+<script>
+(function() {
+    function updateLocationImage(theme) {
+        const img = document.getElementById('location-sidebar-img');
+        if (img) {
+            img.src = theme === 'dark'
+                ? '/images/location-sidebar/location-dark.jpg'
+                : '/images/location-sidebar/location-light.jpg';
+        }
+    }
+
+    // Get theme from localStorage or system preference
+    function getPreferredTheme() {
+        let theme = localStorage.getItem('theme');
+        if (!theme) {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        return theme;
+    }
+
+    // Update image immediately
+    updateLocationImage(getPreferredTheme());
+
+    // Listen for theme changes
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update on initial load
+        updateLocationImage(getPreferredTheme());
+
+        // Listen for storage changes (when theme is changed in another tab/window)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'theme') {
+                updateLocationImage(e.newValue || getPreferredTheme());
+            }
+        });
+
+        // Override the toggleTheme function to also update our image
+        const originalToggleTheme = window.toggleTheme;
+        if (originalToggleTheme) {
+            window.toggleTheme = function() {
+                originalToggleTheme();
+                updateLocationImage(getPreferredTheme());
+            };
+        }
+    });
+})();
+</script>
