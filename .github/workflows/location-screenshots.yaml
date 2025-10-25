@@ -14,6 +14,8 @@ jobs:
   capture-screenshots:
     name: Capture Location Sidebar Screenshots
     runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.commit.outputs.has_changes }}
     permissions:
       contents: write
       pull-requests: write
@@ -125,3 +127,13 @@ jobs:
       run: |
         gh pr create --title "Update location sidebar screenshots" --body "" --base main --head "update/location-screenshots"
         gh pr merge --squash --delete-branch
+
+  deploy:
+    name: Deploy
+    uses: ./.github/workflows/deploy.yaml
+    needs: capture-screenshots
+    if: needs.capture-screenshots.outputs.has_changes == 'true'
+    secrets: inherit
+    permissions:
+      contents: write
+      pull-requests: write
