@@ -1,10 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
-  const authorFilter = document.getElementById('author-filter');
-
-  if (!authorFilter) return;
-
   const rssButton = document.getElementById('rss-button');
   const rssButtonText = document.getElementById('rss-button-text');
+  const authorFilter = document.getElementById('author-filter');
+
+  if (!authorFilter && !rssButton) return;
 
   // Function to update RSS button
   function updateRssButton(selectedAuthor) {
@@ -19,6 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
       rssButton.href = '/feed.xml';
       rssButtonText.textContent = 'RSS を購読';
     }
+  }
+
+  // If there's no author filter, just initialize the RSS button and exit
+  if (!authorFilter) {
+    updateRssButton('');
+    return;
   }
 
   // Function to apply the filter
