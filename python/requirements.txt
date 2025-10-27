@@ -3,3 +3,4 @@ flask
 flask-cors
 requests
 pyyaml
+packaging
