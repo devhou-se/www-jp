@@ -1,6 +1,7 @@
 ---
 type: gallery
 ---
+[![画像](https://github.com/user-attachments/assets/0ad0e333-acac-4ba5-ba9b-92159b909199)](/540)
 [![20251031_122726.jpg](https://github.com/user-attachments/assets/b365823a-ad60-411e-8a00-f05b4ef0c73f)](/535)
 [![20251031_120635.jpg](https://github.com/user-attachments/assets/f19c4615-c822-4627-aaf4-05ede5beb56a)](/535)
 [![20251031_140911.jpg](https://github.com/user-attachments/assets/3dd53de4-fafa-4801-8b6e-4fa0d0758301)](/535)
