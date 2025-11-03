@@ -218,6 +218,13 @@ div.主要 div.内容 img {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
+div.主要 div.内容 video {
+    max-width: 100%;
+    border: 2px solid #d0d0d0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    display: block;
+}
+
 div.主要 div.右-ナビ {
     display: inline-block;
     width: 217px; /* Increased from 183px to compensate for removed padding (30px) and border (4px) */
@@ -472,6 +479,7 @@ div.章::before {
     }
 
     div.主要 div.内容 img,
+    div.主要 div.内容 video,
     div.主要 div.内容 table {
         max-width: 100%;
         overflow-x: auto;

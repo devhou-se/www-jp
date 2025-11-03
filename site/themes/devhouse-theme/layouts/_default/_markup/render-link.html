@@ -1,0 +1,24 @@
+{{- $url := .Destination -}}
+{{- $text := .Text -}}
+{{- $plaintext := .PlainText -}}
+
+{{- /* Check if this is a plain GitHub user-attachments URL (where URL equals the link text) */ -}}
+{{- if and (strings.Contains $url "github.com/user-attachments/assets") (or (eq $url $text) (eq $url $plaintext)) -}}
+  {{- /* This looks like a video or other media file - render as video */ -}}
+  {{- $parts := split $url "/" -}}
+  {{- $fileId := index $parts (sub (len $parts) 1) -}}
+
+  {{- /* Extract just the ID from the URL (remove query params if any) */ -}}
+  {{- if strings.Contains $fileId "?" -}}
+    {{- $fileId = index (split $fileId "?") 0 -}}
+  {{- end -}}
+
+  {{- /* Render as HTML5 video element */ -}}
+  <video id="video-{{ $fileId }}" controls style="max-width: 100%; height: auto;">
+    <source src="{{ $url }}" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+{{- else -}}
+  {{- /* Regular link - render normally */ -}}
+  <a href="{{ $url }}"{{- with .Title }} title="{{ . }}"{{ end -}}>{{ $text | safeHTML }}</a>
+{{- end -}}
