@@ -107,8 +107,8 @@ jobs:
       contents: write
       pull-requests: write
 
-  reactions:
-    name: React
+  notify:
+    name: Notify
     runs-on: ubuntu-latest
     needs: deploy
     if: needs.post.outputs.valid == 'true'
@@ -128,3 +128,8 @@ jobs:
       - name: Add success reaction
         run: |
           curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"content":"+1"}' "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions"
+
+      - name: Comment post link
+        run: |
+          POST_URL="https://devhou.se/${{ github.event.issue.number }}"
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d "{\"body\":\"Your post is live at: $POST_URL\"}" "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
