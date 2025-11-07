@@ -1,6 +1,7 @@
 ---
 type: gallery
 ---
+[![画像](https://github.com/user-attachments/assets/b5d080ae-baf0-4fff-8e2d-7ed9503ddc17)](/672)
 [![image](https://github.com/user-attachments/assets/b352691a-943b-4b03-b70d-b65d0997dc3e)](/662)
 [![画像](https://github.com/user-attachments/assets/0eb6eebd-0dcc-48db-99c8-43ecec8a018c)](/662)
 [![画像](https://github.com/user-attachments/assets/b276cff3-4e33-46fc-9460-05cdc0cdc657)](/662)
