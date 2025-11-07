@@ -1,6 +1,8 @@
 ---
 type: gallery
 ---
+[![image](https://github.com/user-attachments/assets/f6367265-d490-4aae-8bed-46de6de9c818)](/677)
+[![image](https://github.com/user-attachments/assets/8b0b80fd-3c33-48f3-addc-73aa608d9cd2)](/677)
 [![画像](https://github.com/user-attachments/assets/b5d080ae-baf0-4fff-8e2d-7ed9503ddc17)](/672)
 [![image](https://github.com/user-attachments/assets/b352691a-943b-4b03-b70d-b65d0997dc3e)](/662)
 [![画像](https://github.com/user-attachments/assets/0eb6eebd-0dcc-48db-99c8-43ecec8a018c)](/662)
