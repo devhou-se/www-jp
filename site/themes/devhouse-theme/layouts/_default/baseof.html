@@ -68,11 +68,74 @@
     }
 
 
+    // Author filter functionality
+    function filterPostsByAuthor(author) {
+        const postItems = document.querySelectorAll('.post-list li[data-authors]');
+        const dateGroups = document.querySelectorAll('.date-group');
+
+        postItems.forEach(function(item) {
+            const authors = item.getAttribute('data-authors');
+            if (!author || !authors) {
+                item.style.display = '';
+            } else {
+                const authorList = authors.split(',').map(a => a.trim());
+                if (authorList.includes(author)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            }
+        });
+
+        // Hide date groups that have no visible posts
+        dateGroups.forEach(function(group) {
+            const visiblePosts = group.querySelectorAll('.post-list li[data-authors]:not([style*="display: none"])');
+            if (visiblePosts.length === 0) {
+                group.style.display = 'none';
+            } else {
+                group.style.display = '';
+            }
+        });
+    }
+
+    function updateURLWithAuthor(author) {
+        const url = new URL(window.location);
+        if (author) {
+            url.searchParams.set('author', author);
+        } else {
+            url.searchParams.delete('author');
+        }
+        window.history.pushState({}, '', url);
+    }
+
+    function getAuthorFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('author');
+    }
+
     // Mobile collapsible sidebar and theme initialization
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize theme and logo immediately
         const theme = getPreferredTheme();
         applyTheme(theme);
+
+        // Initialize author filter
+        const authorFilter = document.getElementById('author-filter');
+        if (authorFilter) {
+            // Check for author in URL and apply filter
+            const authorFromURL = getAuthorFromURL();
+            if (authorFromURL) {
+                authorFilter.value = authorFromURL;
+                filterPostsByAuthor(authorFromURL);
+            }
+
+            // Add event listener for filter changes
+            authorFilter.addEventListener('change', function() {
+                const selectedAuthor = this.value;
+                filterPostsByAuthor(selectedAuthor);
+                updateURLWithAuthor(selectedAuthor);
+            });
+        }
 
         // Theme toggle button
         const themeToggle = document.getElementById('theme-toggle');
