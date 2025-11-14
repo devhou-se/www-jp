@@ -12,39 +12,64 @@ jobs:
     name: Create Post
     runs-on: ubuntu-latest
     outputs:
-      valid: ${{ steps.check-comment.outputs.valid }}
+      valid: ${{ steps.check-team.outputs.is_member == 'true' && steps.check-comment.outputs.valid == 'true' }}
     permissions:
       contents: write
       issues: write
       pull-requests: write
     # if: contains(github.event.issue.labels.*.name, 'post')
     steps:
+      - name: Check team membership
+        id: check-team
+        run: |
+          # Check if comment author is a member of the "dev" team in "devhou-se" org
+          COMMENT_AUTHOR="${{ github.event.comment.user.login }}"
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/orgs/devhou-se/teams/dev/memberships/$COMMENT_AUTHOR")
+
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "is_member=true" >> $GITHUB_OUTPUT
+            echo "Comment author $COMMENT_AUTHOR is a member of devhou-se/dev team"
+          else
+            echo "is_member=false" >> $GITHUB_OUTPUT
+            echo "Comment author $COMMENT_AUTHOR is NOT a member of devhou-se/dev team (HTTP $HTTP_STATUS)"
+            curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -d '{"content":"confused"}' \
+              "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions"
+            curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -d "{\"body\":\"Sorry, only members of the devhou-se/dev team can create posts.\"}" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
+          fi
+
       - name: Checkout
+        if: steps.check-team.outputs.is_member == 'true'
         uses: actions/checkout@v4
         with:
           ref: main
 
       - name: Check comment
+        if: steps.check-team.outputs.is_member == 'true'
         id: check-comment
         run: |
           echo "Comment: ${{ github.event.comment.body }}"
           echo ${{ github.event.comment.body }} | python3 python/comment-parser.py
 
       - name: Add eyes reaction
-        if: steps.check-comment.outputs.valid == 'true'
+        if: steps.check-team.outputs.is_member == 'true' && steps.check-comment.outputs.valid == 'true'
         run: |
           curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"content":"eyes"}' "https://api.github.com/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions"
       - name: Setup Python with dependencies
-        if: steps.check-comment.outputs.valid == 'true'
+        if: steps.check-team.outputs.is_member == 'true' && steps.check-comment.outputs.valid == 'true'
         uses: ./.github/actions/setup-python-deps
 
       - name: Create branch
-        if: steps.check-comment.outputs.valid == 'true'
+        if: steps.check-team.outputs.is_member == 'true' && steps.check-comment.outputs.valid == 'true'
         run: |
           git checkout "post/${{ github.event.issue.number }}" || git checkout -b "post/${{ github.event.issue.number }}"
 
       - name: Create post
-        if: steps.check-comment.outputs.valid == 'true'
+        if: steps.check-team.outputs.is_member == 'true' && steps.check-comment.outputs.valid == 'true'
         env:
           POST_TITLE: ${{ github.event.issue.title }}
           POST_BODY: ${{ github.event.issue.body }}
@@ -55,24 +80,24 @@ jobs:
           python python/poster.py ${{ github.event.issue.number }}
 
       - name: Setup GCP credentials
-        if: steps.check-comment.outputs.valid == 'true' && steps.check-comment.outputs.translate == 'true'
+        if: steps.check-team.outputs.is_member == 'true' && steps.check-comment.outputs.valid == 'true' && steps.check-comment.outputs.translate == 'true'
         run: |
           echo '${{ secrets.GCP_SA_KEY }}' > $HOME/gcp-key.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
 
       - name: Translate post
-        if: steps.check-comment.outputs.valid == 'true' && steps.check-comment.outputs.translate == 'true'
+        if: steps.check-team.outputs.is_member == 'true' && steps.check-comment.outputs.valid == 'true' && steps.check-comment.outputs.translate == 'true'
         env:
           GOOGLE_CLOUD_PROJECT: devhouse-80936
         run: |
           python python/translator.py ${{ github.event.issue.number }}
 
       - name: Setup git bot
-        if: steps.check-comment.outputs.valid == 'true'
+        if: steps.check-team.outputs.is_member == 'true' && steps.check-comment.outputs.valid == 'true'
         uses: ./.github/actions/setup-git-bot
 
       - name: Commit post
-        if: steps.check-comment.outputs.valid == 'true'
+        if: steps.check-team.outputs.is_member == 'true' && steps.check-comment.outputs.valid == 'true'
         run: |
           git add site/content/${{ github.event.issue.number }}.md
           git add site/static/images/avatars/
@@ -80,7 +105,7 @@ jobs:
           git push
 
       - name: Create and merge PR
-        if: steps.check-comment.outputs.valid == 'true'
+        if: steps.check-team.outputs.is_member == 'true' && steps.check-comment.outputs.valid == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
