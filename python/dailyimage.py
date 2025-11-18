@@ -25,7 +25,7 @@ def get_image_id(src: str) -> str:
     else:
         return None
 
-IMG_TEMPLATE = r"<a href=\"/{}\"><img id=\"sidebar-img-{}\" alt=\"{}\" /></a><script>loadImageInStages(document.getElementById('sidebar-img-{}'), 'https://storage.googleapis.com/static.devh.se/images/{}_0.jpeg', 'https://storage.googleapis.com/static.devh.se/images/{}_1.jpeg', 'https://storage.googleapis.com/static.devh.se/images/{}_2.jpeg', 'https://storage.googleapis.com/static.devh.se/images/{}.jpeg');<\/script>"
+IMG_TEMPLATE = r"<a href=\"/{}\"><img id=\"sidebar-img-{}\" alt=\"{}\" /></a><script>loadImageInStages(document.getElementById(\'sidebar-img-{}\'), \'https://storage.googleapis.com/static.devh.se/images/{}_0.jpeg\', \'https://storage.googleapis.com/static.devh.se/images/{}_1.jpeg\', \'https://storage.googleapis.com/static.devh.se/images/{}_2.jpeg\', \'https://storage.googleapis.com/static.devh.se/images/{}.jpeg\');<\/script>"
 IMG_MD_TEMPLATE = "![{}]({})"
 IMG_MD_LINK_TEMPLATE = "[![{}]({})](/{})"
 HTML_TEMPLATE = """<span id="daily-image"></span>
@@ -33,7 +33,22 @@ HTML_TEMPLATE = """<span id="daily-image"></span>
 const choices = {choices};
 const choice = choices[Math.floor(Math.random() * choices.length)];
 const imgSpan = document.getElementById("daily-image");
-imgSpan.innerHTML = choice;
+
+// Split HTML and script parts
+const scriptTagStart = choice.indexOf('<script>');
+if (scriptTagStart !== -1) {{
+    const htmlPart = choice.substring(0, scriptTagStart);
+    const scriptPart = choice.substring(scriptTagStart + 8, choice.indexOf('<\\/script>'));
+
+    // Insert HTML
+    imgSpan.innerHTML = htmlPart;
+
+    // Execute script
+    eval(scriptPart);
+}} else {{
+    // Fallback if no script tag
+    imgSpan.innerHTML = choice;
+}}
 </script>
 """
 HTML_PAGE_TEMPLATE = """---
