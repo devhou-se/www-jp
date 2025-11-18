@@ -1,7 +1,22 @@
 <span id="daily-image"></span>
 <script>
-const choices = ['<a href=\"/769\"><img id=\"sidebar-img-21fa1959_f8b0_4df9_8f5f_942f9d53f7ba\" alt=\"画像\" /></a><script>loadImageInStages(document.getElementById('sidebar-img-21fa1959_f8b0_4df9_8f5f_942f9d53f7ba'), 'https://storage.googleapis.com/static.devh.se/images/21fa1959-f8b0-4df9-8f5f-942f9d53f7ba_0.jpeg', 'https://storage.googleapis.com/static.devh.se/images/21fa1959-f8b0-4df9-8f5f-942f9d53f7ba_1.jpeg', 'https://storage.googleapis.com/static.devh.se/images/21fa1959-f8b0-4df9-8f5f-942f9d53f7ba_2.jpeg', 'https://storage.googleapis.com/static.devh.se/images/21fa1959-f8b0-4df9-8f5f-942f9d53f7ba.jpeg');<\/script>', '<a href=\"/769\"><img id=\"sidebar-img-54f63f61_b303_4a7f_a4a1_3b4f470cf12d\" alt=\"画像\" /></a><script>loadImageInStages(document.getElementById('sidebar-img-54f63f61_b303_4a7f_a4a1_3b4f470cf12d'), 'https://storage.googleapis.com/static.devh.se/images/54f63f61-b303-4a7f-a4a1-3b4f470cf12d_0.jpeg', 'https://storage.googleapis.com/static.devh.se/images/54f63f61-b303-4a7f-a4a1-3b4f470cf12d_1.jpeg', 'https://storage.googleapis.com/static.devh.se/images/54f63f61-b303-4a7f-a4a1-3b4f470cf12d_2.jpeg', 'https://storage.googleapis.com/static.devh.se/images/54f63f61-b303-4a7f-a4a1-3b4f470cf12d.jpeg');<\/script>', '<a href=\"/769\"><img id=\"sidebar-img-6f0bd393_01f8_4338_aa17_0eff024c401d\" alt=\"画像\" /></a><script>loadImageInStages(document.getElementById('sidebar-img-6f0bd393_01f8_4338_aa17_0eff024c401d'), 'https://storage.googleapis.com/static.devh.se/images/6f0bd393-01f8-4338-aa17-0eff024c401d_0.jpeg', 'https://storage.googleapis.com/static.devh.se/images/6f0bd393-01f8-4338-aa17-0eff024c401d_1.jpeg', 'https://storage.googleapis.com/static.devh.se/images/6f0bd393-01f8-4338-aa17-0eff024c401d_2.jpeg', 'https://storage.googleapis.com/static.devh.se/images/6f0bd393-01f8-4338-aa17-0eff024c401d.jpeg');<\/script>'];
+const choices = ['<a href=\"/769\"><img id=\"sidebar-img-21fa1959_f8b0_4df9_8f5f_942f9d53f7ba\" alt=\"画像\" /></a><script>loadImageInStages(document.getElementById(\'sidebar-img-21fa1959_f8b0_4df9_8f5f_942f9d53f7ba\'), \'https://storage.googleapis.com/static.devh.se/images/21fa1959-f8b0-4df9-8f5f-942f9d53f7ba_0.jpeg\', \'https://storage.googleapis.com/static.devh.se/images/21fa1959-f8b0-4df9-8f5f-942f9d53f7ba_1.jpeg\', \'https://storage.googleapis.com/static.devh.se/images/21fa1959-f8b0-4df9-8f5f-942f9d53f7ba_2.jpeg\', \'https://storage.googleapis.com/static.devh.se/images/21fa1959-f8b0-4df9-8f5f-942f9d53f7ba.jpeg\');<\/script>', '<a href=\"/769\"><img id=\"sidebar-img-54f63f61_b303_4a7f_a4a1_3b4f470cf12d\" alt=\"画像\" /></a><script>loadImageInStages(document.getElementById(\'sidebar-img-54f63f61_b303_4a7f_a4a1_3b4f470cf12d\'), \'https://storage.googleapis.com/static.devh.se/images/54f63f61-b303-4a7f-a4a1-3b4f470cf12d_0.jpeg\', \'https://storage.googleapis.com/static.devh.se/images/54f63f61-b303-4a7f-a4a1-3b4f470cf12d_1.jpeg\', \'https://storage.googleapis.com/static.devh.se/images/54f63f61-b303-4a7f-a4a1-3b4f470cf12d_2.jpeg\', \'https://storage.googleapis.com/static.devh.se/images/54f63f61-b303-4a7f-a4a1-3b4f470cf12d.jpeg\');<\/script>', '<a href=\"/769\"><img id=\"sidebar-img-6f0bd393_01f8_4338_aa17_0eff024c401d\" alt=\"画像\" /></a><script>loadImageInStages(document.getElementById(\'sidebar-img-6f0bd393_01f8_4338_aa17_0eff024c401d\'), \'https://storage.googleapis.com/static.devh.se/images/6f0bd393-01f8-4338-aa17-0eff024c401d_0.jpeg\', \'https://storage.googleapis.com/static.devh.se/images/6f0bd393-01f8-4338-aa17-0eff024c401d_1.jpeg\', \'https://storage.googleapis.com/static.devh.se/images/6f0bd393-01f8-4338-aa17-0eff024c401d_2.jpeg\', \'https://storage.googleapis.com/static.devh.se/images/6f0bd393-01f8-4338-aa17-0eff024c401d.jpeg\');<\/script>'];
 const choice = choices[Math.floor(Math.random() * choices.length)];
 const imgSpan = document.getElementById("daily-image");
-imgSpan.innerHTML = choice;
+
+// Split HTML and script parts
+const scriptTagStart = choice.indexOf('<script>');
+if (scriptTagStart !== -1) {
+    const htmlPart = choice.substring(0, scriptTagStart);
+    const scriptPart = choice.substring(scriptTagStart + 8, choice.indexOf('<\/script>'));
+
+    // Insert HTML
+    imgSpan.innerHTML = htmlPart;
+
+    // Execute script
+    eval(scriptPart);
+} else {
+    // Fallback if no script tag
+    imgSpan.innerHTML = choice;
+}
 </script>
