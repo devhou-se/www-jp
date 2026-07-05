@@ -1,0 +1,115 @@
+name: Game NPC Backfill
+
+# One-shot: rebuild every mapped author's game NPC from ALL their 2025 blog
+# posts. Wipes the demo/test NPC states first (--reset), then places each 2025
+# post in date order so every author ends at their latest-2025 state. Authors
+# without an NPC are skipped. Manual only; dry run by default.
+
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: Post year to backfill
+        required: false
+        default: "2025"
+      dry_run:
+        description: Generate and place without committing to the game repo
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  backfill:
+    name: Backfill NPCs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+    steps:
+      - name: Checkout blog repo
+        uses: actions/checkout@v4
+
+      - name: Collect the year's post payloads
+        id: collect
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          YEAR: ${{ inputs.year }}
+        run: |
+          mkdir -p payloads
+          # published posts are site/content/<issue>.md; take those dated in YEAR
+          python3 - <<'PY'
+          import glob, os, re, subprocess, json
+          year = os.environ['YEAR']
+          nums = []
+          for f in sorted(glob.glob('site/content/*.md')):
+              b = os.path.basename(f)[:-3]
+              if not b.isdigit():
+                  continue
+              head = open(f, encoding='utf-8').read(500)
+              m = re.search(r"^date:\s*'?(\d{4})-", head, re.M)
+              if m and m.group(1) == year:
+                  nums.append(b)
+          got = 0
+          for n in nums:
+              try:
+                  raw = subprocess.check_output(
+                      ['gh', 'issue', 'view', n, '--json', 'title,body,author,createdAt'],
+                      text=True)
+              except subprocess.CalledProcessError:
+                  continue   # a content file with no matching issue
+              d = json.loads(raw)
+              json.dump({'post_id': n, 'title': d['title'], 'author': d['author']['login'],
+                         'date': d['createdAt'], 'content': d['body']},
+                        open(f'payloads/{n}.json', 'w'))
+              got += 1
+          print(f'collected {got} payloads for {year}')
+          PY
+          ls payloads | wc -l
+
+      - name: Mint game repo token
+        id: game-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.GAME_REPO_APP_ID }}
+          private-key: ${{ secrets.GAME_REPO_PRIVATE_KEY }}
+          owner: ${{ secrets.GAME_REPO_OWNER }}
+          repositories: ${{ secrets.GAME_REPO_NAME }}
+
+      - name: Checkout game repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.GAME_REPO_OWNER }}/${{ secrets.GAME_REPO_NAME }}
+          token: ${{ steps.game-token.outputs.token }}
+          path: game
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install anthropic
+
+      - name: Rebuild NPCs from the year's posts
+        working-directory: game/gamev2
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python3 tools/blog_to_npc.py \
+            --reset \
+            --payloads-dir "$GITHUB_WORKSPACE/payloads" \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Commit to game repo
+        if: ${{ !inputs.dry_run }}
+        working-directory: game
+        run: |
+          git config user.name "devhouse-game-bot"
+          git config user.email "actions@devhou.se"
+          git add gamev2/config.json
+          if git diff --cached --quiet; then
+            echo "no game changes"
+          else
+            git commit -m "gamev2: backfill NPCs from all ${{ inputs.year }} blog posts"
+            git push
+          fi
