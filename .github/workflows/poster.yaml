@@ -107,6 +107,18 @@ jobs:
       contents: write
       pull-requests: write
 
+  game-npc:
+    name: Game NPC
+    uses: ./.github/workflows/game-npc-pipeline.yaml
+    needs: post
+    if: needs.post.outputs.valid == 'true'
+    with:
+      issue_number: "${{ github.event.issue.number }}"
+    secrets: inherit
+    permissions:
+      contents: read
+      issues: read
+
   notify:
     name: Notify
     runs-on: ubuntu-latest

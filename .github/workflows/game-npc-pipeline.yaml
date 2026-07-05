@@ -1,0 +1,99 @@
+name: Game NPC Pipeline
+
+# Blog post -> game feature: when a post is published, Claude (Sonnet) reads
+# it, writes in-character dialogue for the author's NPC, and places them
+# somewhere fitting in the game world. The result lands as dated NPC states
+# in the game repo's gamev2/config.json (the game's time-travel system then
+# replays history faithfully), and the game auto-deploys from that push.
+#
+# Called by poster.yaml after a post is created; run manually with
+# workflow_dispatch to test (dry run by default).
+
+on:
+  workflow_call:
+    inputs:
+      issue_number:
+        required: true
+        type: string
+      dry_run:
+        description: Generate and place without committing to the game repo
+        required: false
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Post issue number
+        required: true
+        type: string
+      dry_run:
+        description: Generate and place without committing to the game repo
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  npc:
+    name: Post to NPC
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+    steps:
+      - name: Fetch post payload
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue view "${{ inputs.issue_number }}" -R "${{ github.repository }}" \
+            --json title,body,author,createdAt \
+            | jq --arg id "${{ inputs.issue_number }}" \
+              '{post_id: $id, title: .title, author: .author.login, date: .createdAt, content: .body}' \
+            > payload.json
+          jq '.content = "<\(.content | length) chars>"' payload.json
+
+      - name: Mint game repo token
+        id: game-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.GAME_REPO_APP_ID }}
+          private-key: ${{ secrets.GAME_REPO_PRIVATE_KEY }}
+          owner: ${{ secrets.GAME_REPO_OWNER }}
+          repositories: ${{ secrets.GAME_REPO_NAME }}
+
+      - name: Checkout game repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.GAME_REPO_OWNER }}/${{ secrets.GAME_REPO_NAME }}
+          token: ${{ steps.game-token.outputs.token }}
+          path: game
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install anthropic
+
+      - name: Generate dialogue and placement
+        working-directory: game/gamev2
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python3 tools/blog_to_npc.py \
+            --payload "$GITHUB_WORKSPACE/payload.json" \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Commit to game repo
+        if: ${{ !inputs.dry_run }}
+        working-directory: game
+        run: |
+          git config user.name "devhouse-game-bot"
+          git config user.email "actions@devhou.se"
+          git add gamev2/config.json
+          if git diff --cached --quiet; then
+            echo "no game changes (author has no NPC?)"
+          else
+            git commit -m "gamev2: blog post #${{ inputs.issue_number }} moves its author's NPC"
+            git push
+          fi
