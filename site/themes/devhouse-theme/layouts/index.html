@@ -1,7 +1,7 @@
 {{ define "main" }}
 {{- /* ---- Title screen ------------------------------------------------------ */ -}}
 <section class="title-screen">
-    <div class="title-logo">blog<span class="dot">.</span>devhou<span class="dot">.</span>se</div>
+    <h1 class="title-logo">blog<span class="dot">.</span>devhou<span class="dot">.</span>se</h1>
     <div class="title-sub">日本旅行RPG · a japan travel blog</div>
     <div class="party-hero" aria-hidden="true">
         <div class="party">
@@ -12,7 +12,7 @@
             <img src="/images/game/char-julia.png"  alt="" />
         </div>
     </div>
-    <div class="press-start" data-scroll="#journal">▶ PRESS START</div>
+    <a class="press-start js-nav-item" href="#journal" data-scroll="#journal">▶ PRESS START</a>
 </section>
 
 {{- /* ---- Start menu -------------------------------------------------------- */ -}}
@@ -56,7 +56,7 @@
     <div class="window-body">
         <div class="roster">
             {{ range $authors }}
-            <a href="/authors/{{ . }}/" title="{{ . }}">
+            <a class="js-nav-item" href="/authors/{{ . }}/" title="{{ . }}">
                 <img class="roster-sprite" src="/images/avatars/{{ . }}.png" alt="{{ . }}"
                      onerror="this.onerror=null;this.src='/images/game/char-james.png';">
                 <span class="roster-name">{{ . }}</span>
@@ -85,14 +85,12 @@
             <h3>{{ .Key }}</h3>
             {{ range .Pages }}
             {{ $a := .Param "authors" }}
-            {{ if $a }}
-            <a class="entry js-nav-item" href="{{ .RelPermalink }}" data-authors="{{ delimit $a "," }}">
-                <img class="entry-avatar" src="/images/avatars/{{ index $a 0 }}.png" alt="{{ index $a 0 }}"
-                     onerror="this.onerror=null;this.src='/images/game/char-james.png';">
+            <a class="entry js-nav-item" href="{{ .RelPermalink }}" data-authors="{{ if $a }}{{ delimit $a "," }}{{ end }}">
+                {{ if $a }}<img class="entry-avatar" src="/images/avatars/{{ index $a 0 }}.png" alt="{{ index $a 0 }}"
+                     onerror="this.onerror=null;this.src='/images/game/char-james.png';">{{ end }}
                 <span class="entry-title">{{ .LinkTitle }}</span>
-                <span class="entry-authors">{{ delimit $a ", " }}</span>
+                {{ if $a }}<span class="entry-authors">{{ delimit $a ", " }}</span>{{ end }}
             </a>
-            {{ end }}
             {{ end }}
         </div>
         {{ end }}

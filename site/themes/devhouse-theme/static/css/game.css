@@ -6,7 +6,8 @@
    style.css (night) / style-light.css (day).
    ========================================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=swap');
+/* DotGothic16 (pixel Japanese) is loaded via <link> in head.html so it is not
+   render-blocking. Press Start 2P is self-hosted below — do not re-fetch it. */
 
 @font-face { font-family: 'PixelOperatorMono';     src: url('/fonts/PixelOperatorMono.ttf') format('truetype');      font-display: swap; }
 @font-face { font-family: 'PixelOperatorMonoBold'; src: url('/fonts/PixelOperatorMono-Bold.ttf') format('truetype'); font-display: swap; }
@@ -69,6 +70,10 @@ img.絵文字, img.devtrain, .entry-avatar, .npc-portrait, .roster-sprite {
 
 a, a:visited { color: var(--accent); text-decoration: none; transition: color .12s, background-color .12s, text-shadow .12s, box-shadow .12s; }
 a:hover { color: var(--green); text-shadow: 0 0 6px var(--green-glow); }
+
+/* keyboard focus visibility + utilities */
+:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+.is-hidden { display: none !important; }
 
 ::selection      { background: var(--select-bg); color: var(--select-text); }
 ::-moz-selection { background: var(--select-bg); color: var(--select-text); }
@@ -163,6 +168,7 @@ p { margin: 1em 0; }
     overflow: hidden;
 }
 .title-logo {
+    margin: 0;
     font-family: var(--font-display);
     font-size: clamp(26px, 6vw, 58px);
     color: var(--accent-strong);
@@ -424,6 +430,7 @@ ruby rt { user-select: none; -webkit-user-select: none; }
 }
 .actionbar .hints { display: flex; gap: 16px; align-items: center; overflow: hidden; }
 .actionbar .hint { white-space: nowrap; }
+.actionbar button.hint { background: none; border: none; color: inherit; font: inherit; line-height: inherit; }
 .actionbar .hint.click { cursor: pointer; }
 .actionbar .hint.click:hover { color: var(--accent-strong); }
 .actionbar .key {
@@ -478,4 +485,14 @@ ruby rt { user-select: none; -webkit-user-select: none; }
     .title-sub { font-size: 11px; letter-spacing: 1px; }
     .actionbar .hint:not(.click) { display: none; }   /* keep only clickable hints on mobile */
     .post-nav { flex-wrap: wrap; }
+}
+
+/* ============================================================================
+   Respect reduced-motion: hold the idle animations still
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .party-hero .party img,
+    .press-start,
+    .npc-portrait.npc-sprite { animation: none !important; }
 }

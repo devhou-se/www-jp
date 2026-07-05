@@ -10,6 +10,6 @@
     <span class="hud-crumb">{{ if .IsHome }}ホーム{{ else if .Title }}{{ .Title }}{{ else }}ブログ{{ end }}</span>
 </div>
 <div class="hud-right">
-    <span class="hud-score"><span class="star">★</span> {{ len (.Site.RegularPages.ByPublishDate) }}</span>
+    <span class="hud-score" title="投稿数"><span class="star">★</span> {{ len (where .Site.RegularPages "Params.authors" "!=" nil) }}</span>
     <button class="hud-menu-btn" type="button" data-menu-open>☰ メニュー</button>
 </div>

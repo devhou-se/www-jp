@@ -6,7 +6,7 @@
     <div class="window-body">
         <div class="roster">
             {{ range .Pages }}
-            <a href="{{ .RelPermalink }}" title="{{ .Title }}">
+            <a class="js-nav-item" href="{{ .RelPermalink }}" title="{{ .Title }}">
                 <img class="roster-sprite" src="/images/avatars/{{ .Title }}.png" alt="{{ .Title }}"
                      onerror="this.onerror=null;this.src='/images/game/char-james.png';">
                 <span class="roster-name">{{ .Title }}</span>

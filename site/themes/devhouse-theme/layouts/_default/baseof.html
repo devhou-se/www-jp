@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 {{- partial "head.html" . -}}
 <body>
 <div class="crt"></div>
@@ -21,7 +21,6 @@
         var d = document.getElementById('theme-dark'), l = document.getElementById('theme-light');
         if (d && l) { d.disabled = (theme !== 'dark'); l.disabled = (theme === 'dark'); }
     }
-    window.updateLogo = function () {};   // logo is white in both themes now
     function pref() {
         var t = localStorage.getItem('theme');
         if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -37,9 +36,18 @@
     var overlay = document.getElementById('menu-overlay');
     var menuItems = overlay ? Array.prototype.slice.call(overlay.querySelectorAll('li')) : [];
     var menuSel = 0;
+    var stage = document.querySelector('.stage');
     function paintMenu() { menuItems.forEach(function (li, i) { li.classList.toggle('sel', i === menuSel); }); }
-    function openMenu() { if (!overlay) return; overlay.classList.add('open'); menuSel = 0; paintMenu(); }
-    function closeMenu() { if (overlay) overlay.classList.remove('open'); }
+    function openMenu() {
+        if (!overlay) return;
+        overlay.classList.add('open'); menuSel = 0; paintMenu();
+        if (stage) stage.inert = true;                 // keep background out of the tab order
+        var f = overlay.querySelector('li a'); if (f) f.focus();
+    }
+    function closeMenu() {
+        if (overlay) overlay.classList.remove('open');
+        if (stage) stage.inert = false;
+    }
     function menuOpen() { return overlay && overlay.classList.contains('open'); }
     function actMenu() {
         var li = menuItems[menuSel]; if (!li) return;
@@ -121,13 +129,13 @@
     var af = document.getElementById('author-filter');
     if (af) {
         function filter(author) {
-            document.querySelectorAll('.entry[data-authors]').forEach(function (el) {
-                var a = el.getAttribute('data-authors');
-                el.style.display = (!author || (a && a.split(',').map(function (s) { return s.trim(); }).indexOf(author) !== -1)) ? '' : 'none';
+            document.querySelectorAll('.entry').forEach(function (el) {
+                var a = el.getAttribute('data-authors') || '';
+                var show = !author || a.split(',').map(function (s) { return s.trim(); }).indexOf(author) !== -1;
+                el.classList.toggle('is-hidden', !show);
             });
             document.querySelectorAll('.date-group').forEach(function (g) {
-                var vis = g.querySelectorAll('.entry:not([style*="display: none"])');
-                g.style.display = vis.length ? '' : 'none';
+                g.classList.toggle('is-hidden', g.querySelectorAll('.entry:not(.is-hidden)').length === 0);
             });
         }
         var url = new URLSearchParams(window.location.search).get('author');
