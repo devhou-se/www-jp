@@ -1,0 +1,18 @@
+{{- /* Ordered author roster: by post count (desc), ties broken by most recent
+       post (desc). Returns a slice of dicts {name, count, last}.
+       Call with the site: {{ partial "party-order.html" site }} */ -}}
+{{ $names := slice }}
+{{ range .RegularPages }}{{ range (.Param "authors") }}{{ $names = $names | append . }}{{ end }}{{ end }}
+{{ $rows := slice }}
+{{ range ($names | uniq) }}
+    {{ $name := . }}
+    {{ $posts := where $.RegularPages "Params.authors" "intersect" (slice $name) }}
+    {{ $last := 0 }}
+    {{ range $posts }}{{ $u := int .Date.Unix }}{{ if gt $u $last }}{{ $last = $u }}{{ end }}{{ end }}
+    {{ $rows = $rows | append (dict
+        "name" $name
+        "count" (len $posts)
+        "last" $last
+        "key" (add (mul (len $posts) 100000000000) $last)) }}
+{{ end }}
+{{ return (sort $rows "key" "desc") }}

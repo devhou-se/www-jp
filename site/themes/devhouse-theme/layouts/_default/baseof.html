@@ -1,244 +1,148 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 {{- partial "head.html" . -}}
 <body>
-<div class="コンテナ">
-    <div class="ヘッダ 章">
-        {{- partial "header.html" . -}}
-    </div>
-    <div class="主要">
-        <div class="左-ナビ 章">
-            {{- partial "sidebar.html" . }}
-        </div>
-        <div class="内容 章">
-            {{- block "main" . }}{{- end }}
-        </div>
-        <div class="右-ナビ 章">
-            {{- partial "infobar.html" . }}
-        </div>
-    </div>
+<div class="crt"></div>
+
+<header class="hud">{{- partial "hud.html" . -}}</header>
+
+<div class="stage">
+    {{- block "main" . }}{{- end }}
 </div>
-{{ partial "footer.html" . }}
+
+<nav class="actionbar">{{- partial "actionbar.html" . -}}</nav>
+
+{{- partial "menu.html" . -}}
+
 <script>
-    // Theme functionality
+(function () {
+    // ---- theme (day / night) ------------------------------------------------
     function applyTheme(theme) {
-        const darkStylesheet = document.getElementById('theme-dark');
-        const lightStylesheet = document.getElementById('theme-light');
-        if (darkStylesheet && lightStylesheet) {
-            darkStylesheet.disabled = (theme !== 'dark');
-            lightStylesheet.disabled = (theme === 'dark');
-        }
-        updateLogo(theme);
+        var d = document.getElementById('theme-dark'), l = document.getElementById('theme-light');
+        if (d && l) { d.disabled = (theme !== 'dark'); l.disabled = (theme === 'dark'); }
     }
-
-    function updateLogo(theme) {
-        // Process any queued logo updates from head.html
-        if (window.updateLogoQueue && window.updateLogoQueue.length > 0) {
-            while (window.updateLogoQueue.length > 0) {
-                const queuedTheme = window.updateLogoQueue.shift();
-                updateLogo(queuedTheme);
-            }
-        }
-        const logo = document.getElementById('site-logo');
-        if (logo) {
-            logo.src = theme === 'light' ? '/images/logo-dark.svg' : '/images/logo-white.svg';
-        }
-        // Also update location sidebar image
-        const locationImg = document.getElementById('location-sidebar-img');
-        if (locationImg) {
-            locationImg.src = theme === 'dark'
-                ? '/images/location-sidebar/location-dark.jpg'
-                : '/images/location-sidebar/location-light.jpg';
-        }
+    function pref() {
+        var t = localStorage.getItem('theme');
+        if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        return t;
     }
-
-    function getPreferredTheme() {
-        let theme = localStorage.getItem('theme');
-        if (!theme) {
-            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-        return theme;
-    }
-
     function toggleTheme() {
-        const currentTheme = getPreferredTheme();
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        localStorage.setItem('theme', newTheme);
-        applyTheme(newTheme);
+        var next = pref() === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', next); applyTheme(next);
     }
+    applyTheme(pref());
 
-
-    // Author filter functionality
-    function filterPostsByAuthor(author) {
-        const postItems = document.querySelectorAll('.post-list li[data-authors]');
-        const dateGroups = document.querySelectorAll('.date-group');
-
-        postItems.forEach(function(item) {
-            const authors = item.getAttribute('data-authors');
-            if (!author || !authors) {
-                item.style.display = '';
-            } else {
-                const authorList = authors.split(',').map(a => a.trim());
-                if (authorList.includes(author)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            }
-        });
-
-        // Hide date groups that have no visible posts
-        dateGroups.forEach(function(group) {
-            const visiblePosts = group.querySelectorAll('.post-list li[data-authors]:not([style*="display: none"])');
-            if (visiblePosts.length === 0) {
-                group.style.display = 'none';
-            } else {
-                group.style.display = '';
-            }
-        });
+    // ---- in-game MENU overlay ----------------------------------------------
+    var overlay = document.getElementById('menu-overlay');
+    var menuItems = overlay ? Array.prototype.slice.call(overlay.querySelectorAll('li')) : [];
+    var menuSel = 0;
+    var stage = document.querySelector('.stage');
+    function paintMenu() { menuItems.forEach(function (li, i) { li.classList.toggle('sel', i === menuSel); }); }
+    function openMenu() {
+        if (!overlay) return;
+        overlay.classList.add('open'); menuSel = 0; paintMenu();
+        if (stage) stage.inert = true;                 // keep background out of the tab order
+        var f = overlay.querySelector('li a'); if (f) f.focus();
     }
-
-    function updateURLWithAuthor(author) {
-        const url = new URL(window.location);
-        if (author) {
-            url.searchParams.set('author', author);
-        } else {
-            url.searchParams.delete('author');
-        }
-        window.history.pushState({}, '', url);
+    function closeMenu() {
+        if (overlay) overlay.classList.remove('open');
+        if (stage) stage.inert = false;
     }
-
-    function getAuthorFromURL() {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('author');
+    function menuOpen() { return overlay && overlay.classList.contains('open'); }
+    function actMenu() {
+        var li = menuItems[menuSel]; if (!li) return;
+        if (li.dataset.action === 'theme') { toggleTheme(); return; }
+        if (li.dataset.action === 'close') { closeMenu(); return; }
+        var a = li.querySelector('a'); if (a && a.getAttribute('href')) window.location.href = a.getAttribute('href');
     }
-
-    // Mobile collapsible sidebar and theme initialization
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize theme and logo immediately
-        const theme = getPreferredTheme();
-        applyTheme(theme);
-
-        // Initialize author filter
-        const authorFilter = document.getElementById('author-filter');
-        if (authorFilter) {
-            // Check for author in URL and apply filter
-            const authorFromURL = getAuthorFromURL();
-            if (authorFromURL) {
-                authorFilter.value = authorFromURL;
-                filterPostsByAuthor(authorFromURL);
-            }
-
-            // Add event listener for filter changes
-            authorFilter.addEventListener('change', function() {
-                const selectedAuthor = this.value;
-                filterPostsByAuthor(selectedAuthor);
-                updateURLWithAuthor(selectedAuthor);
+    document.querySelectorAll('[data-menu-open]').forEach(function (b) {
+        b.addEventListener('click', function (e) { e.preventDefault(); menuOpen() ? closeMenu() : openMenu(); });
+    });
+    if (overlay) {
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) closeMenu(); });
+        menuItems.forEach(function (li, i) {
+            li.addEventListener('mouseenter', function () { menuSel = i; paintMenu(); });
+            var a = li.querySelector('a');
+            if (a) a.addEventListener('click', function (e) {
+                if (li.dataset.action) { e.preventDefault(); menuSel = i; actMenu(); }
             });
-        }
+        });
+    }
 
-        // Theme toggle button
-        const themeToggle = document.getElementById('theme-toggle');
-        if (themeToggle) {
-            themeToggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                toggleTheme();
-            });
-        }
-
-        // Mobile sidebar behavior - collapsible blog post list
-        function initMobileSidebar() {
-            const sidebar = document.querySelector('div.左-ナビ');
-            if (!sidebar) return;
-
-            const heading = sidebar.querySelector('p');
-            if (!heading) return;
-
-            // Only enable collapsible behavior on mobile
-            if (window.innerWidth <= 1400) {
-                sidebar.classList.add('collapsed');
-
-                // Track if touch started on the heading element specifically
-                let touchStartedOnHeading = false;
-                let touchStartY = 0;
-                let touchStartX = 0;
-                let touchStartTime = 0;
-                const SCROLL_THRESHOLD = 10; // pixels of movement to consider it a scroll
-                const TAP_TIME_THRESHOLD = 300; // milliseconds - max duration for a tap
-
-                heading.addEventListener('touchstart', function(e) {
-                    // Mark that touch started on heading
-                    touchStartedOnHeading = true;
-                    touchStartY = e.touches[0].clientY;
-                    touchStartX = e.touches[0].clientX;
-                    touchStartTime = Date.now();
-                }, { passive: true });
-
-                heading.addEventListener('touchend', function(e) {
-                    // Only process if touch actually started on the heading
-                    if (!touchStartedOnHeading) {
-                        return;
-                    }
-
-                    // Reset the flag
-                    touchStartedOnHeading = false;
-
-                    // Get the position where touch ended
-                    const touchEndY = e.changedTouches[0].clientY;
-                    const touchEndX = e.changedTouches[0].clientX;
-                    const touchEndTime = Date.now();
-
-                    // Calculate distance moved and time elapsed
-                    const deltaY = Math.abs(touchEndY - touchStartY);
-                    const deltaX = Math.abs(touchEndX - touchStartX);
-                    const duration = touchEndTime - touchStartTime;
-
-                    // Only toggle if:
-                    // 1. Movement was minimal (a tap, not a scroll)
-                    // 2. Duration was short (a tap, not a long press or scroll)
-                    if (deltaY < SCROLL_THRESHOLD &&
-                        deltaX < SCROLL_THRESHOLD &&
-                        duration < TAP_TIME_THRESHOLD) {
-                        e.preventDefault();
-                        sidebar.classList.toggle('collapsed');
-                    }
-                });
-
-                // Reset flag if touch is cancelled or moves outside
-                heading.addEventListener('touchcancel', function() {
-                    touchStartedOnHeading = false;
-                }, { passive: true });
-
-                // Also support mouse clicks for testing on desktop
-                heading.addEventListener('click', function(e) {
-                    // Only handle mouse clicks (not touch events converted to clicks)
-                    if (e.detail > 0) {
-                        e.preventDefault();
-                        sidebar.classList.toggle('collapsed');
-                    }
-                });
-            } else {
-                sidebar.classList.remove('collapsed');
-            }
-        }
-
-        // Initialize on page load
-        initMobileSidebar();
-
-        // Re-initialize on window resize
-        window.addEventListener('resize', function() {
-            const sidebar = document.querySelector('div.左-ナビ');
-            if (sidebar) {
-                if (window.innerWidth <= 1400) {
-                    if (!sidebar.classList.contains('collapsed')) {
-                        sidebar.classList.add('collapsed');
-                    }
-                } else {
-                    sidebar.classList.remove('collapsed');
-                }
-            }
+    // ---- on-page cursor over selectable rows (start menu + journal) ---------
+    function items() {
+        return Array.prototype.slice.call(document.querySelectorAll('.js-nav-item'))
+            .filter(function (el) { return el.offsetParent !== null; });
+    }
+    var sel = -1;
+    function paint() {
+        var list = items();
+        list.forEach(function (el, i) { el.classList.toggle('sel', i === sel); });
+        if (sel >= 0 && list[sel]) list[sel].scrollIntoView({ block: 'nearest' });
+    }
+    function move(d) {
+        var n = items().length; if (!n) return;
+        sel = sel < 0 ? (d > 0 ? 0 : n - 1) : Math.max(0, Math.min(n - 1, sel + d));
+        paint();
+    }
+    function act() {
+        var list = items(); if (sel < 0 || !list[sel]) return;
+        var href = list[sel].getAttribute('href'); if (href) window.location.href = href;
+    }
+    items().forEach(function (el) {
+        el.addEventListener('mouseenter', function () {
+            var list = items(); sel = list.indexOf(el); list.forEach(function (x, i) { x.classList.toggle('sel', i === sel); });
         });
     });
+
+    // ---- keyboard -----------------------------------------------------------
+    document.addEventListener('keydown', function (e) {
+        var typing = /^(INPUT|SELECT|TEXTAREA)$/.test((e.target.tagName || ''));
+        if (menuOpen()) {
+            if (e.key === 'Escape') { closeMenu(); }
+            else if (e.key === 'ArrowDown') { menuSel = (menuSel + 1) % menuItems.length; paintMenu(); e.preventDefault(); }
+            else if (e.key === 'ArrowUp') { menuSel = (menuSel - 1 + menuItems.length) % menuItems.length; paintMenu(); e.preventDefault(); }
+            else if (e.key === 'Enter') { actMenu(); e.preventDefault(); }
+            return;
+        }
+        if (typing) return;
+        if (e.key === 'm' || e.key === 'M') { openMenu(); e.preventDefault(); }
+        else if (e.key === 't' || e.key === 'T') { toggleTheme(); }
+        else if (e.key === 'ArrowDown') { move(1); e.preventDefault(); }
+        else if (e.key === 'ArrowUp') { move(-1); e.preventDefault(); }
+        else if (e.key === 'Enter') { act(); }
+        else if (e.key === 'Escape') { sel = -1; paint(); }
+    });
+
+    // ---- misc buttons -------------------------------------------------------
+    document.querySelectorAll('[data-theme-toggle]').forEach(function (b) {
+        b.addEventListener('click', function (e) { e.preventDefault(); toggleTheme(); });
+    });
+    document.querySelectorAll('[data-scroll]').forEach(function (b) {
+        b.addEventListener('click', function (e) {
+            var t = document.querySelector(b.getAttribute('data-scroll'));
+            if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        });
+    });
+
+    // ---- author filter (journal) -------------------------------------------
+    var af = document.getElementById('author-filter');
+    if (af) {
+        function filter(author) {
+            document.querySelectorAll('.entry').forEach(function (el) {
+                var a = el.getAttribute('data-authors') || '';
+                var show = !author || a.split(',').map(function (s) { return s.trim(); }).indexOf(author) !== -1;
+                el.classList.toggle('is-hidden', !show);
+            });
+            document.querySelectorAll('.date-group').forEach(function (g) {
+                g.classList.toggle('is-hidden', g.querySelectorAll('.entry:not(.is-hidden)').length === 0);
+            });
+        }
+        var url = new URLSearchParams(window.location.search).get('author');
+        if (url) { af.value = url; filter(url); }
+        af.addEventListener('change', function () { filter(this.value); });
+    }
+})();
 </script>
 </body>
 </html>

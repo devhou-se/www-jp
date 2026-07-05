@@ -1,1 +1,52 @@
-okokok
+{{ define "main" }}
+{{ if eq .Kind "taxonomy" }}
+{{- /* /authors/ — the whole party roster */ -}}
+<section class="window" id="party">
+    <div class="window-title">パーティ · {{ .Title }}</div>
+    <div class="window-body">
+        <div class="roster">
+            {{ range partial "party-order.html" site }}
+            <a class="js-nav-item" href="/authors/{{ .name }}/" title="{{ .name }} · 投稿 {{ .count }}">
+                <img class="roster-sprite" src="/images/avatars/{{ .name }}.png" alt="{{ .name }}"
+                     onerror="this.onerror=null;this.src='/images/game/char-james.png';">
+                <span class="roster-name">{{ .name }}</span>
+                <span class="roster-count">投稿 {{ .count }}</span>
+            </a>
+            {{ end }}
+        </div>
+    </div>
+</section>
+{{ else }}
+<section class="window">
+    {{ if eq .Kind "term" }}
+    <div class="npc-plate">
+        <img class="npc-portrait" src="/images/avatars/{{ .Title }}.png" alt="{{ .Title }}"
+             onerror="this.onerror=null;this.src='/images/game/char-james.png';">
+        <div>
+            <div class="npc-nameplate">{{ .Title }}</div>
+            <div class="npc-meta">{{ len .Pages }} 件の投稿 · <a href="{{ .RelPermalink }}feed.xml">RSS</a></div>
+        </div>
+    </div>
+    <hr class="pixel-hr">
+    {{ else }}
+    <div class="window-title">{{ .Title }} · journal</div>
+    {{ end }}
+    <div class="window-body">
+        {{ range where (.Pages.GroupByPublishDate "2006-01-02" "desc") "Key" "ne" "0001-01-01" }}
+        <div class="date-group">
+            <h3>{{ .Key }}</h3>
+            {{ range .Pages }}
+            {{ $a := .Param "authors" }}
+            <a class="entry js-nav-item" href="{{ .RelPermalink }}" data-authors="{{ if $a }}{{ delimit $a "," }}{{ end }}">
+                {{ if $a }}<img class="entry-avatar" src="/images/avatars/{{ index $a 0 }}.png" alt="{{ index $a 0 }}"
+                     onerror="this.onerror=null;this.src='/images/game/char-james.png';">{{ end }}
+                <span class="entry-title">{{ .LinkTitle }}</span>
+                {{ if $a }}<span class="entry-authors">{{ delimit $a ", " }}</span>{{ end }}
+            </a>
+            {{ end }}
+        </div>
+        {{ end }}
+    </div>
+</section>
+{{ end }}
+{{ end }}

@@ -1,21 +1,18 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>devhou.se</title>
+    <title>{{ if .IsHome }}devhou.se{{ else }}{{ .Title }} · devhou.se{{ end }}</title>
+    {{ with .Description | default .Site.Params.description }}<meta name="description" content="{{ . }}">{{ end }}
     <link rel="stylesheet" href="/css/style.css" id="theme-dark" disabled>
     <link rel="stylesheet" href="/css/style-light.css" id="theme-light">
+    <link rel="stylesheet" href="/css/game.css">
     <link rel="stylesheet" href="/css/emoticon.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap">
     <script src="/js/lazy.js"></script>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <script>
-        // Queueing stub for updateLogo to avoid race condition
-        if (!window.updateLogo) {
-            window.updateLogoQueue = [];
-            window.updateLogo = function(theme) {
-                window.updateLogoQueue.push(theme);
-            };
-        }
-
         window.getPreferredTheme = function() {
             let theme = localStorage.getItem('theme');
             if (!theme) {
@@ -23,24 +20,15 @@
             }
             return theme;
         };
-        // Load theme preference before page render to avoid flash
+        // Load theme preference before page render to avoid a flash of the wrong theme
         (function() {
             function applyTheme(theme) {
                 document.getElementById('theme-dark').disabled = (theme !== 'dark');
                 document.getElementById('theme-light').disabled = (theme === 'dark');
             }
-
-            let theme = window.getPreferredTheme();
-            applyTheme(theme);
-            if (window.updateLogo) window.updateLogo(theme);
-
-            // Listen for system preference changes
+            applyTheme(window.getPreferredTheme());
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                if (!localStorage.getItem('theme')) {
-                    const newTheme = e.matches ? 'dark' : 'light';
-                    applyTheme(newTheme);
-                    if (window.updateLogo) window.updateLogo(newTheme);
-                }
+                if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light');
             });
         })();
     </script>
