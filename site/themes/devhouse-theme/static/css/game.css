@@ -1,0 +1,473 @@
+/* ============================================================================
+   devhou.se — the blog, rebuilt as a game.
+   A fixed HUD, a letterboxed "game viewport", RPG windows floating over the
+   overworld, an in-game MENU, and a control-hint action bar.
+   Heavily inspired by game.devhou.se (gamev2). Palette lives in
+   style.css (night) / style-light.css (day).
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=swap');
+
+@font-face { font-family: 'PixelOperatorMono';     src: url('/fonts/PixelOperatorMono.ttf') format('truetype');      font-display: swap; }
+@font-face { font-family: 'PixelOperatorMonoBold'; src: url('/fonts/PixelOperatorMono-Bold.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'PressStart2P';          src: url('/fonts/PressStart2P-Regular.ttf') format('truetype');   font-display: swap; }
+
+:root {
+    --font-pixel:      'PixelOperatorMono', 'DotGothic16', 'Courier New', monospace;
+    --font-pixel-bold: 'PixelOperatorMonoBold', 'DotGothic16', 'Courier New', monospace;
+    --font-display:    'PressStart2P', 'DotGothic16', monospace;
+    --hud-h: 48px;
+    --bar-h: 40px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--hud-h) + 20px); }
+
+html, body {
+    margin: 0; padding: 0;
+    min-width: 320px;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-pixel);
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- the overworld backdrop: tile grid + vignette, fixed behind everything -- */
+body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: -2;
+    background-color: var(--bg);
+    background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 34px 34px, 34px 34px;
+}
+body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 38%, transparent 45%, var(--vignette) 100%);
+}
+/* faint CRT scanlines */
+.crt {
+    position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+    background: repeating-linear-gradient(0deg,
+        rgba(0,0,0,var(--scanline)) 0 1px, transparent 1px 3px);
+    mix-blend-mode: multiply;
+}
+
+img { image-rendering: auto; }
+.pixelated, .hud-logo, .sprite, .party img, .avatar-64, .avatar-mini,
+img.絵文字, img.devtrain, .entry-avatar, .npc-portrait, .roster-sprite {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+a, a:visited { color: var(--accent); text-decoration: none; transition: color .12s, background-color .12s, text-shadow .12s, box-shadow .12s; }
+a:hover { color: var(--green); text-shadow: 0 0 6px var(--green-glow); }
+
+::selection      { background: var(--select-bg); color: var(--select-text); }
+::-moz-selection { background: var(--select-bg); color: var(--select-text); }
+
+::-webkit-scrollbar { width: 14px; height: 14px; }
+::-webkit-scrollbar-track { background: var(--bg-2); }
+::-webkit-scrollbar-thumb { background: var(--accent-strong); border: 3px solid var(--bg-2); }
+::-webkit-scrollbar-thumb:hover { background: var(--green); }
+
+/* ============================================================================
+   HUD — fixed top bar (game.devhou.se | 日本 | crumb ......... ★ · MENU)
+   ========================================================================= */
+.hud {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    height: var(--hud-h);
+    background: var(--hud-bg);
+    border-bottom: 2px solid var(--border-bright);
+    display: flex; align-items: stretch; justify-content: space-between;
+}
+.hud::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: repeating-linear-gradient(90deg, var(--hud-check-a) 0 6px, var(--hud-check-b) 6px 12px);
+}
+.hud-left, .hud-right { display: flex; align-items: center; min-width: 0; }
+.hud-left  { padding: 0 6px 0 14px; overflow: hidden; }
+.hud-right { padding: 0; flex-shrink: 0; }
+
+.hud-home { display: flex; align-items: center; flex-shrink: 0; }
+.hud-home:hover { text-shadow: none; }
+.hud-logo { height: 26px; margin-right: 10px; }
+.hud-word { font-family: var(--font-pixel-bold); font-size: 19px; letter-spacing: 1px; color: var(--hud-text); white-space: nowrap; }
+.hud-home:hover .hud-word { color: var(--accent-strong); }
+.hud-sep { color: var(--hud-dim); padding: 0 9px; font-size: 17px; user-select: none; flex-shrink: 0; }
+.hud-crumb { font-size: 17px; color: var(--hud-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hud-loc { flex-shrink: 0; }
+.hud-loc::before {
+    content: ''; display: inline-block; width: 9px; height: 9px; margin-right: 6px;
+    background: var(--green); box-shadow: 0 0 6px var(--green-glow);
+}
+.hud-score { font-family: var(--font-pixel-bold); font-size: 16px; color: var(--accent-strong); padding: 0 14px; white-space: nowrap; }
+.hud-score .star { color: var(--accent-strong); }
+.hud-menu-btn {
+    font-family: var(--font-pixel-bold); font-size: 15px; letter-spacing: 1px;
+    color: var(--hud-text); background: transparent; cursor: pointer;
+    border: none; border-left: 2px solid var(--border);
+    padding: 0 18px; height: 100%;
+}
+.hud-menu-btn:hover { background: var(--select-bg); color: var(--select-text); }
+
+/* ============================================================================
+   Stage + windows
+   ========================================================================= */
+.stage {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: calc(var(--hud-h) + 16px) 16px calc(var(--bar-h) + 26px);
+    min-height: 100vh;
+}
+
+.window {
+    background: var(--panel);
+    border: 2px solid var(--border-bright);
+    box-shadow: 0 3px 0 var(--panel-shadow), inset 0 0 0 1px var(--panel-hi);
+    margin: 0 0 18px;
+    position: relative;
+}
+.window-title {
+    font-family: var(--font-pixel-bold);
+    font-size: 15px; letter-spacing: 2px;
+    color: var(--accent-strong);
+    padding: 9px 14px;
+    border-bottom: 2px solid var(--border);
+    background: var(--panel-inset);
+    display: flex; align-items: center; gap: 8px;
+    text-transform: uppercase;
+}
+.window-title::before { content: '▶'; color: var(--accent-strong); font-size: 12px; }
+.window-body { padding: 18px 20px; }
+.window-body > :first-child { margin-top: 0; }
+.window-body > :last-child { margin-bottom: 0; }
+
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-pixel-bold); font-weight: normal; letter-spacing: .5px; line-height: 1.35; }
+p { margin: 1em 0; }
+
+/* ============================================================================
+   Title screen (home hero)
+   ========================================================================= */
+.title-screen {
+    text-align: center;
+    padding: 30px 16px 8px;
+    margin-bottom: 18px;
+    overflow: hidden;
+}
+.title-logo {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 6vw, 58px);
+    color: var(--accent-strong);
+    letter-spacing: 2px;
+    line-height: 1.2;
+    text-shadow: 0 3px 0 var(--panel-shadow), 0 0 18px var(--accent-glow);
+}
+.title-logo .dot { color: var(--green); text-shadow: 0 0 14px var(--green-glow); }
+.title-sub {
+    font-family: var(--font-pixel);
+    color: var(--text-dim);
+    font-size: clamp(12px, 2.4vw, 17px);
+    letter-spacing: 3px; margin-top: 14px; text-transform: uppercase;
+}
+
+/* party standing on a grass ledge */
+.party-hero {
+    margin: 26px auto 4px;
+    max-width: 640px; height: 118px;
+    position: relative; overflow: hidden;
+    border: 2px solid var(--border-bright);
+    background-color: var(--grass-band);
+    background-image: url('/images/game/grass.png');
+    background-size: 34px 34px;
+    box-shadow: inset 0 14px 26px rgba(0,0,0,.28);
+}
+.party-hero .party { position: absolute; bottom: 8px; left: 0; right: 0; display: flex; gap: 30px; justify-content: center; align-items: flex-end; }
+.party-hero .party img { width: 66px; height: 66px; filter: drop-shadow(0 3px 0 rgba(0,0,0,.35)); animation: bob 1.4s steps(2) infinite; }
+.party-hero .party img:nth-child(2){ animation-delay:.15s; }
+.party-hero .party img:nth-child(3){ animation-delay:.3s; }
+.party-hero .party img:nth-child(4){ animation-delay:.45s; }
+.party-hero .party img:nth-child(5){ animation-delay:.6s; }
+.party-hero .party img:nth-child(6){ animation-delay:.75s; }
+@keyframes bob { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-4px);} }
+
+.press-start {
+    margin-top: 22px;
+    font-family: var(--font-pixel-bold);
+    font-size: 17px; letter-spacing: 3px;
+    color: var(--accent-strong);
+    animation: blink 1.1s steps(2) infinite;
+    cursor: pointer; display: inline-block;
+    text-transform: uppercase;
+}
+.press-start:hover { color: var(--green); text-shadow: 0 0 8px var(--green-glow); }
+@keyframes blink { 0%,49%{ opacity: 1;} 50%,100%{ opacity: .25;} }
+
+/* ============================================================================
+   Start menu (title-screen main menu) — big selectable rows
+   ========================================================================= */
+.startmenu { max-width: 460px; margin: 0 auto; }
+.startmenu .menu-row {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--font-pixel-bold);
+    font-size: 20px; letter-spacing: 1px;
+    color: var(--text);
+    padding: 12px 16px 12px 40px;
+    border: 2px solid transparent;
+    position: relative;
+}
+.startmenu .menu-row .en { color: var(--text-dim); font-size: 13px; margin-left: auto; letter-spacing: 2px; }
+.startmenu .menu-row::before {
+    content: '▶'; position: absolute; left: 16px; color: var(--accent-strong);
+    opacity: 0; transition: opacity .1s;
+}
+.startmenu .menu-row:hover, .startmenu .menu-row.sel {
+    background: var(--select-bg); border-color: var(--accent-strong); color: var(--select-text); text-shadow: none;
+}
+.startmenu .menu-row:hover::before, .startmenu .menu-row.sel::before { opacity: 1; }
+.startmenu .menu-row:hover .en, .startmenu .menu-row.sel .en { color: var(--select-text); }
+
+/* ============================================================================
+   Party roster (authors)
+   ========================================================================= */
+.roster { display: flex; flex-wrap: wrap; gap: 14px; }
+.roster a {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    width: 96px; padding: 12px 6px; text-align: center;
+    border: 2px solid var(--border);
+    background: var(--panel-inset);
+}
+.roster a:hover { border-color: var(--accent-strong); background: var(--select-bg); text-shadow: none; }
+.roster .roster-sprite { width: 52px; height: 52px; border: none; }
+.roster .roster-name { font-family: var(--font-pixel-bold); font-size: 13px; color: var(--text); word-break: break-all; }
+.roster a:hover .roster-name { color: var(--select-text); }
+
+/* ============================================================================
+   Journal (quest log of posts) — selectable menu rows
+   ========================================================================= */
+.journal-filter { margin-bottom: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.journal-filter label { font-family: var(--font-pixel-bold); color: var(--text-dim); font-size: 14px; }
+#author-filter {
+    padding: 7px 10px; font-family: var(--font-pixel); font-size: 15px;
+    border: 2px solid var(--border-bright); background: var(--panel-inset); color: var(--text);
+}
+
+.date-group { margin: 0 0 6px; }
+.date-group > h3 {
+    font-family: var(--font-pixel-bold); font-size: 12px; letter-spacing: 2px;
+    color: var(--text-dim); margin: 16px 0 6px; padding-bottom: 4px;
+    border-bottom: 2px dashed var(--border);
+}
+.entry {
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 12px 9px 34px;
+    border: 2px solid transparent;
+    position: relative;
+    color: var(--text);
+}
+.entry::before {
+    content: '▶'; position: absolute; left: 12px; color: var(--accent-strong);
+    opacity: 0; transition: opacity .1s;
+}
+.entry:hover, .entry.sel {
+    background: var(--select-bg); border-color: var(--accent-strong); text-shadow: none;
+}
+.entry:hover::before, .entry.sel::before { opacity: 1; }
+.entry-avatar { width: 26px; height: 26px; border: 1px solid var(--border-bright); background: var(--panel-inset); flex-shrink: 0; }
+.entry-title { font-family: var(--font-pixel-bold); font-size: 16px; color: var(--text); flex: 1; min-width: 0; }
+.entry:hover .entry-title, .entry.sel .entry-title { color: var(--select-text); }
+.entry-authors { font-size: 13px; color: var(--text-dim); white-space: nowrap; }
+.entry:hover .entry-authors, .entry.sel .entry-authors { color: var(--select-text); }
+
+/* ============================================================================
+   Post window (single) — an NPC dialogue
+   ========================================================================= */
+.npc-plate { display: flex; align-items: flex-end; gap: 16px; padding: 20px 20px 0; }
+.npc-portrait {
+    width: 76px; height: 76px; flex-shrink: 0;
+    border: 2px solid var(--border-bright); background: var(--panel-inset);
+    box-shadow: 0 3px 0 var(--panel-shadow);
+}
+.npc-nameplate {
+    font-family: var(--font-pixel-bold); font-size: 16px; letter-spacing: 1px;
+    color: #fff; background: #000; border: 1px solid var(--border-bright);
+    padding: 4px 10px; align-self: flex-end; margin-bottom: 6px;
+}
+.npc-meta { color: var(--text-dim); font-size: 14px; margin-top: 6px; }
+
+.post-title-main {
+    font-family: var(--font-pixel-bold);
+    color: var(--accent-strong);
+    font-size: clamp(22px, 3.4vw, 30px);
+    letter-spacing: 1px; margin: 14px 20px 2px; line-height: 1.3;
+}
+.post-body { padding: 4px 20px 20px; font-size: 1.02em; line-height: 1.85; }
+.post-body h2 { border-left: 4px solid var(--accent-strong); padding-left: 12px; margin-top: 24px; color: var(--text); }
+.post-body h3 { color: var(--text); margin-top: 20px; }
+.post-body a { color: var(--accent); }
+.post-body img, .post-body video {
+    max-width: 100%; display: block; margin: 14px 0;
+    border: 2px solid var(--border-bright); box-shadow: 0 3px 0 var(--panel-shadow);
+}
+.post-body pre {
+    background: var(--code-bg); border: 2px solid var(--border-bright);
+    padding: 14px; overflow-x: auto; line-height: 1.5;
+}
+.post-body code { font-family: var(--font-pixel); background: var(--panel-inset); border: 1px solid var(--border); padding: 2px 6px; color: var(--green); }
+.post-body pre code { background: none; border: none; color: var(--code-text); padding: 0; }
+.post-body blockquote {
+    margin: 1em 0; padding: 10px 15px;
+    border: 2px solid var(--border-bright); border-left: 4px solid var(--accent-strong);
+    background: var(--panel-inset); color: var(--text-dim);
+}
+.post-body table { border: 2px solid var(--border-bright); border-collapse: collapse; background: var(--panel-inset); }
+.post-body td, .post-body th { border: 1px solid var(--border); padding: .5em; }
+.post-body ul, .post-body ol { padding-left: 1.4em; }
+
+.pixel-hr { border: none; height: 2px; margin: 16px 20px; background: repeating-linear-gradient(90deg, var(--border-bright) 0 6px, transparent 6px 12px); }
+
+#rss-button {
+    display: inline-block; margin: 0 20px 14px; padding: 7px 13px;
+    background: var(--panel-inset); border: 2px solid var(--terracotta); color: var(--terracotta);
+    font-family: var(--font-pixel-bold); font-size: 14px; letter-spacing: 1px;
+}
+#rss-button:hover { background: var(--terracotta); color: var(--panel); text-shadow: none; box-shadow: 0 0 10px var(--terracotta-glow); }
+#rss-button svg { width: 13px; height: 13px; vertical-align: middle; margin-right: 5px; fill: currentColor; }
+
+/* prev / journal / next controls */
+.post-nav { display: flex; gap: 10px; padding: 8px 20px 20px; border-top: 2px solid var(--border); margin-top: 8px; }
+.post-nav a, .post-nav span {
+    font-family: var(--font-pixel-bold); font-size: 14px; letter-spacing: 1px;
+    padding: 9px 14px; border: 2px solid var(--border-bright);
+    background: var(--panel-inset); color: var(--text);
+    flex: 1; text-align: center; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.post-nav a:hover { background: var(--select-bg); border-color: var(--accent-strong); color: var(--select-text); text-shadow: none; }
+.post-nav .disabled { opacity: .35; }
+.post-nav .to-journal { flex: 0 0 auto; }
+
+/* ============================================================================
+   Reactions
+   ========================================================================= */
+#reactions { padding: 8px 20px 18px; }
+.reaction-badge-parent { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+a.reaction-badge {
+    border: 2px solid var(--border-bright); display: flex; padding: .8em .7em;
+    background: var(--panel-inset); font-family: var(--font-pixel); font-size: .8em; line-height: 1;
+    color: var(--text); text-align: center; white-space: nowrap;
+}
+a.reaction-badge:hover { background: var(--select-bg); border-color: var(--accent-strong); color: var(--select-text); text-shadow: none; }
+.reaction-badge td { padding: 0 10px; border: none; }
+
+ruby rt { user-select: none; -webkit-user-select: none; }
+
+/* member emoji list on home intro */
+.window-body ul { line-height: 1.9; }
+
+/* ============================================================================
+   In-game MENU overlay
+   ========================================================================= */
+.menu-overlay {
+    position: fixed; inset: 0; z-index: 5000;
+    background: rgba(0,0,0,.85);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden; transition: opacity .12s;
+}
+.menu-overlay.open { opacity: 1; visibility: visible; }
+.menu-window {
+    width: 340px; max-width: 88vw;
+    background: var(--panel); border: 2px solid var(--border-bright);
+    box-shadow: 0 4px 0 var(--panel-shadow);
+    padding: 22px 0 16px;
+    transform: translateY(6px); transition: transform .12s;
+}
+.menu-overlay.open .menu-window { transform: translateY(0); }
+.menu-window .menu-heading {
+    text-align: center; font-family: var(--font-pixel-bold);
+    font-size: 26px; letter-spacing: 3px; color: var(--text); margin-bottom: 16px;
+}
+.menu-window ul { list-style: none; margin: 0; padding: 0; }
+.menu-window li a {
+    display: block; text-align: center;
+    font-family: var(--font-pixel-bold); font-size: 21px; letter-spacing: 1px;
+    color: var(--text); padding: 9px 0; position: relative;
+}
+.menu-window li a::before { content: '▶'; position: absolute; left: 54px; opacity: 0; color: var(--accent-strong); }
+.menu-window li.sel a, .menu-window li a:hover { color: var(--select-text); text-shadow: none; }
+.menu-window li.sel a::before, .menu-window li a:hover::before { opacity: 1; }
+.menu-window .menu-foot { text-align: center; color: var(--text-dim); font-size: 13px; margin-top: 14px; letter-spacing: 1px; }
+
+/* ============================================================================
+   Action bar — fixed bottom control hints
+   ========================================================================= */
+.actionbar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+    height: var(--bar-h);
+    background: var(--hud-bg); border-top: 2px solid var(--border-bright);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 14px; font-size: 14px; color: var(--hud-dim);
+}
+.actionbar .hints { display: flex; gap: 16px; align-items: center; overflow: hidden; }
+.actionbar .hint { white-space: nowrap; }
+.actionbar .hint.click { cursor: pointer; }
+.actionbar .hint.click:hover { color: var(--accent-strong); }
+.actionbar .key {
+    font-family: var(--font-pixel-bold); color: var(--hud-text);
+    border: 1px solid var(--border-bright); border-radius: 2px;
+    padding: 1px 6px; margin-right: 5px; background: var(--panel-inset);
+}
+.actionbar .bar-link { color: var(--hud-dim); font-family: var(--font-pixel-bold); white-space: nowrap; }
+.actionbar .bar-link:hover { color: var(--green); }
+
+/* ============================================================================
+   Gallery + lightbox
+   ========================================================================= */
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--gallery-thumb-min-width, 130px), 1fr)); gap: 12px; }
+.gallery-item { position: relative; cursor: pointer; overflow: hidden; border: 2px solid var(--border-bright); background: var(--panel-inset); transition: all .18s; aspect-ratio: 1; }
+.gallery-item:hover { border-color: var(--accent-strong); box-shadow: 0 0 14px var(--accent-glow); transform: translateY(-2px); }
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.93); z-index: 9999; justify-content: center; align-items: center; }
+.lightbox.active { display: flex; }
+.lightbox-content { position: relative; max-width: 90%; max-height: 90%; display: flex; }
+.lightbox-image { max-width: 100%; max-height: 90vh; border: 3px solid var(--accent-strong); box-shadow: 0 0 30px var(--accent-glow); object-fit: contain; }
+.lightbox-close, .lightbox-nav, .lightbox-counter, .lightbox-link {
+    font-family: var(--font-pixel-bold); background: rgba(0,0,0,.8); border: 2px solid var(--accent-strong); color: var(--accent-strong); transition: all .2s;
+}
+.lightbox-close { position: absolute; top: 20px; right: 20px; font-size: 30px; cursor: pointer; width: 46px; height: 46px; display: flex; justify-content: center; align-items: center; line-height: 1; z-index: 10000; }
+.lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); font-size: 38px; cursor: pointer; width: 54px; height: 54px; display: flex; justify-content: center; align-items: center; user-select: none; z-index: 10001; }
+.lightbox-close:hover, .lightbox-nav:hover, .lightbox-link:hover { background: var(--accent-strong); color: var(--bg); box-shadow: 0 0 18px var(--accent-glow); }
+.lightbox-prev { left: 20px; } .lightbox-next { right: 20px; }
+.lightbox-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: var(--text); padding: 8px 16px; font-size: 14px; }
+.lightbox-link { position: absolute; bottom: 66px; left: 50%; transform: translateX(-50%); padding: 8px 16px; font-size: 14px; z-index: 10001; }
+
+/* ============================================================================
+   Mobile
+   ========================================================================= */
+@media (max-width: 780px) {
+    :root { --hud-h: 44px; }
+    body { font-size: 16px; }
+    .hud-word { font-size: 16px; }
+    .hud-logo { height: 22px; margin-right: 7px; }
+    .hud-crumb:not(.hud-loc) { display: none; }
+    .hud-score { display: none; }
+    .hud-sep:last-of-type { display: none; }
+    .stage { padding-left: 8px; padding-right: 8px; }
+    .window-body { padding: 14px; }
+    .post-body { padding: 4px 14px 16px; }
+    .post-title-main { margin-left: 14px; margin-right: 14px; }
+    .npc-plate { padding: 14px 14px 0; }
+    .party-hero .party img { width: 52px; height: 52px; }
+    .party-hero .party { gap: 16px; }
+    .startmenu .menu-row { font-size: 18px; }
+    .title-logo { font-size: 21px; letter-spacing: 0; }
+    .title-sub { font-size: 11px; letter-spacing: 1px; }
+    .actionbar .hint:not(.click) { display: none; }   /* keep only clickable hints on mobile */
+    .post-nav { flex-wrap: wrap; }
+}

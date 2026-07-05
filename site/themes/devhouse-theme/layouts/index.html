@@ -1,31 +1,101 @@
 {{ define "main" }}
-<p>デベーハウスのホームページです。日本各地への旅行に関するリソースが見つかります。定期的に最新情報を入手するには、当社のブログをフォローしてください。</p>
-<p>デベーハウスの旅のパート1は東京です。私たちは3月22日から3月27日まで東京に滞在します。そこから、開発ハウスの旅のパート2を実行します。その後4月1日まで大阪に滞在します。</p>
-<p>デベーハウスのメンバー
-<ul>
-    <li>ベイリー<img class="絵文字 絵文字-ピンク"/></li>
-    <li>ダミアン<img class="絵文字 絵文字-頭蓋骨"/></li>
-    <li>ディラン<img class="絵文字 絵文字-ピエロ"/></li>
-    <li>ジェームス<img class="絵文字 絵文字-目"/></li>
-    <li>ジュリア<img class="絵文字 絵文字-虹"/></li>
-</ul>
-</p>
-<hr />
-<h2>デベーハウス2のお知らせ</h2>
-<p>デベーハウス2は2025年10月26日から11月17日まで行われます。今回の旅では、仙台、東京、福岡、大阪を訪れます。また、一部のメンバーは金沢にも足を運ぶ予定です。</p>
-<p>デベーハウス2のメンバー</p>
-<p>継続メンバー</p>
-<ul>
-    <li>ベイリー</li>
-    <li>ダミアン</li>
-    <li>ディラン</li>
-    <li>ジュリア</li>
-</ul>
-<p>🌟 新メンバー！</p>
-<ul>
-    <li>ヤシュク</li>
-    <li>グロリア</li>
-    <li>ヴィヴ</li>
-</ul>
-<p>（※ジェームスはデベーハウス2には参加しません。）</p>
+{{- /* ---- Title screen ------------------------------------------------------ */ -}}
+<section class="title-screen">
+    <div class="title-logo">blog<span class="dot">.</span>devhou<span class="dot">.</span>se</div>
+    <div class="title-sub">日本旅行RPG · a japan travel blog</div>
+    <div class="party-hero" aria-hidden="true">
+        <div class="party">
+            <img src="/images/game/char-james.png"  alt="" />
+            <img src="/images/game/char-bailey.png" alt="" />
+            <img src="/images/game/char-damian.png" alt="" />
+            <img src="/images/game/char-dylan.png"  alt="" />
+            <img src="/images/game/char-julia.png"  alt="" />
+        </div>
+    </div>
+    <div class="press-start" data-scroll="#journal">▶ PRESS START</div>
+</section>
+
+{{- /* ---- Start menu -------------------------------------------------------- */ -}}
+<div class="startmenu">
+    <a class="menu-row js-nav-item" href="#journal" data-scroll="#journal">ブログを読む <span class="en">JOURNAL</span></a>
+    <a class="menu-row js-nav-item" href="#party" data-scroll="#party">著者に会う <span class="en">PARTY</span></a>
+    <a class="menu-row js-nav-item" href="/gallery/">ギャラリー <span class="en">GALLERY</span></a>
+    <a class="menu-row js-nav-item" href="https://game.devhou.se">ゲームで遊ぶ <span class="en">PLAY</span></a>
+</div>
+
+{{- /* ---- About / story window --------------------------------------------- */ -}}
+<section class="window" id="about">
+    <div class="window-title">物語 · about</div>
+    <div class="window-body">
+        <p>デベーハウスのホームページです。日本各地への旅行に関するリソースが見つかります。定期的に最新情報を入手するには、当社のブログをフォローしてください。</p>
+        <p>デベーハウスの旅のパート1は東京です。私たちは3月22日から3月27日まで東京に滞在します。そこから、開発ハウスの旅のパート2を実行します。その後4月1日まで大阪に滞在します。</p>
+        <p>デベーハウスのメンバー</p>
+        <ul>
+            <li>ベイリー<img class="絵文字 絵文字-ピンク"/></li>
+            <li>ダミアン<img class="絵文字 絵文字-頭蓋骨"/></li>
+            <li>ディラン<img class="絵文字 絵文字-ピエロ"/></li>
+            <li>ジェームス<img class="絵文字 絵文字-目"/></li>
+            <li>ジュリア<img class="絵文字 絵文字-虹"/></li>
+        </ul>
+        <hr class="pixel-hr" style="margin-left:0;margin-right:0;">
+        <h2 style="color:var(--accent-strong);font-size:20px;">デベーハウス2のお知らせ</h2>
+        <p>デベーハウス2は2025年10月26日から11月17日まで行われます。今回の旅では、仙台、東京、福岡、大阪を訪れます。また、一部のメンバーは金沢にも足を運ぶ予定です。</p>
+        <p>継続メンバー：ベイリー・ダミアン・ディラン・ジュリア</p>
+        <p>🌟 新メンバー：ヤシュク・グロリア・ヴィヴ</p>
+        <p>（※ジェームスはデベーハウス2には参加しません。）</p>
+    </div>
+</section>
+
+{{- /* ---- Party roster (authors) ------------------------------------------- */ -}}
+{{ $allAuthors := slice }}
+{{ range .Site.RegularPages }}{{ range (.Param "authors") }}{{ $allAuthors = $allAuthors | append . }}{{ end }}{{ end }}
+{{ $authors := $allAuthors | uniq | sort }}
+{{ if gt (len $authors) 0 }}
+<section class="window" id="party">
+    <div class="window-title">パーティ · {{ len $authors }} 人の著者</div>
+    <div class="window-body">
+        <div class="roster">
+            {{ range $authors }}
+            <a href="/authors/{{ . }}/" title="{{ . }}">
+                <img class="roster-sprite" src="/images/avatars/{{ . }}.png" alt="{{ . }}"
+                     onerror="this.onerror=null;this.src='/images/game/char-james.png';">
+                <span class="roster-name">{{ . }}</span>
+            </a>
+            {{ end }}
+        </div>
+    </div>
+</section>
+{{ end }}
+
+{{- /* ---- Journal (quest log of all posts) --------------------------------- */ -}}
+<section class="window" id="journal">
+    <div class="window-title">ブログ投稿 · journal</div>
+    <div class="window-body">
+        {{ if gt (len $authors) 0 }}
+        <div class="journal-filter">
+            <label for="author-filter">著者でフィルタ:</label>
+            <select id="author-filter">
+                <option value="">すべての著者</option>
+                {{ range $authors }}<option value="{{ . }}">{{ . }}</option>{{ end }}
+            </select>
+        </div>
+        {{ end }}
+        {{ range where (.Site.RegularPages.GroupByPublishDate "2006-01-02" "desc") "Key" "ne" "0001-01-01" }}
+        <div class="date-group">
+            <h3>{{ .Key }}</h3>
+            {{ range .Pages }}
+            {{ $a := .Param "authors" }}
+            {{ if $a }}
+            <a class="entry js-nav-item" href="{{ .RelPermalink }}" data-authors="{{ delimit $a "," }}">
+                <img class="entry-avatar" src="/images/avatars/{{ index $a 0 }}.png" alt="{{ index $a 0 }}"
+                     onerror="this.onerror=null;this.src='/images/game/char-james.png';">
+                <span class="entry-title">{{ .LinkTitle }}</span>
+                <span class="entry-authors">{{ delimit $a ", " }}</span>
+            </a>
+            {{ end }}
+            {{ end }}
+        </div>
+        {{ end }}
+    </div>
+</section>
 {{ end }}

@@ -1,0 +1,15 @@
+{{- /* Top HUD strip — mirrors the in-game bar: site | 日本 | crumb ... ★score · MENU */ -}}
+<div class="hud-left">
+    <a href="/" class="hud-home">
+        <img src="/images/logo-white.svg" alt="devhou.se" class="hud-logo" />
+        <span class="hud-word">blog.devhou.se</span>
+    </a>
+    <span class="hud-sep">│</span>
+    <span class="hud-crumb hud-loc">日本</span>
+    <span class="hud-sep">│</span>
+    <span class="hud-crumb">{{ if .IsHome }}ホーム{{ else if .Title }}{{ .Title }}{{ else }}ブログ{{ end }}</span>
+</div>
+<div class="hud-right">
+    <span class="hud-score"><span class="star">★</span> {{ len (.Site.RegularPages.ByPublishDate) }}</span>
+    <button class="hud-menu-btn" type="button" data-menu-open>☰ メニュー</button>
+</div>
