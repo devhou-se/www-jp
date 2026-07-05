@@ -3,9 +3,16 @@
 {{ $first := "" }}{{ if $authors }}{{ $first = index $authors 0 }}{{ end }}
 <article class="window post-window">
 
-    {{- /* NPC plate: author portrait + name plate, like the game's dialogue */ -}}
+    {{- /* NPC plate: author portrait + name plate, like the game's dialogue.
+           Devhouse members with a gamev2 character walk in place; everyone
+           else keeps their avatar. Mapping mirrors gamev2/tools/blog_to_npc.py */ -}}
+    {{ $spriteMap := dict "baely" "bailey" "damiante" "damian" "dbut2" "dylan" "jughents" "julia" }}
+    {{ $game := "" }}{{ if $first }}{{ $game = index $spriteMap (lower $first) }}{{ end }}
     <div class="npc-plate">
-        {{ if $first }}
+        {{ if $game }}
+        <div class="npc-portrait npc-sprite" style="background-image:url('/images/game/char-{{ $game }}-sheet.png')"
+             role="img" aria-label="{{ $first }}" title="{{ $first }}"></div>
+        {{ else if $first }}
         <img class="npc-portrait" src="/images/avatars/{{ $first }}.png" alt="{{ $first }}"
              onerror="this.onerror=null;this.src='/images/game/char-james.png';">
         {{ else }}

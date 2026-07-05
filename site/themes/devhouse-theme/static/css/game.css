@@ -295,6 +295,14 @@ p { margin: 1em 0; }
     border: 2px solid var(--border-bright); background: var(--panel-inset);
     box-shadow: 0 3px 0 var(--panel-shadow);
 }
+/* authors with a game character walk in place (their gamev2 sprite) */
+.npc-portrait.npc-sprite {
+    background-repeat: no-repeat;
+    background-size: 304px 76px;   /* 4 frames × 76px (64px art upscaled) */
+    background-position: 0 0;
+    animation: npc-walk 0.66s steps(4) infinite;
+}
+@keyframes npc-walk { from { background-position: 0 0; } to { background-position: -304px 0; } }
 .npc-nameplate {
     font-family: var(--font-pixel-bold); font-size: 16px; letter-spacing: 1px;
     color: #fff; background: #000; border: 1px solid var(--border-bright);
