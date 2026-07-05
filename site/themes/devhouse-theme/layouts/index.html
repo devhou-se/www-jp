@@ -50,16 +50,18 @@
 {{ $allAuthors := slice }}
 {{ range .Site.RegularPages }}{{ range (.Param "authors") }}{{ $allAuthors = $allAuthors | append . }}{{ end }}{{ end }}
 {{ $authors := $allAuthors | uniq | sort }}
-{{ if gt (len $authors) 0 }}
+{{ $party := partial "party-order.html" site }}
+{{ if $party }}
 <section class="window" id="party">
-    <div class="window-title">パーティ · {{ len $authors }} 人の著者</div>
+    <div class="window-title">パーティ · {{ len $party }} 人の著者</div>
     <div class="window-body">
         <div class="roster">
-            {{ range $authors }}
-            <a class="js-nav-item" href="/authors/{{ . }}/" title="{{ . }}">
-                <img class="roster-sprite" src="/images/avatars/{{ . }}.png" alt="{{ . }}"
+            {{ range $party }}
+            <a class="js-nav-item" href="/authors/{{ .name }}/" title="{{ .name }} · 投稿 {{ .count }}">
+                <img class="roster-sprite" src="/images/avatars/{{ .name }}.png" alt="{{ .name }}"
                      onerror="this.onerror=null;this.src='/images/game/char-james.png';">
-                <span class="roster-name">{{ . }}</span>
+                <span class="roster-name">{{ .name }}</span>
+                <span class="roster-count">投稿 {{ .count }}</span>
             </a>
             {{ end }}
         </div>

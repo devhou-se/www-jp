@@ -253,7 +253,8 @@ p { margin: 1em 0; }
 .roster a:hover { border-color: var(--accent-strong); background: var(--select-bg); text-shadow: none; }
 .roster .roster-sprite { width: 52px; height: 52px; border: none; }
 .roster .roster-name { font-family: var(--font-pixel-bold); font-size: 13px; color: var(--text); word-break: break-all; }
-.roster a:hover .roster-name { color: var(--select-text); }
+.roster .roster-count { font-size: 11px; color: var(--text-dim); letter-spacing: 1px; }
+.roster a:hover .roster-name, .roster a:hover .roster-count { color: var(--select-text); }
 
 /* ============================================================================
    Journal (quest log of posts) — selectable menu rows
