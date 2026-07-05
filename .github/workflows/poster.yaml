@@ -117,7 +117,7 @@ jobs:
     secrets: inherit
     permissions:
       contents: read
-      issues: read
+      issues: write
 
   notify:
     name: Notify

@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      issues: read
+      issues: write   # to comment where the NPC can be found
     steps:
       - name: Fetch post payload
         env:
@@ -82,6 +82,7 @@ jobs:
         run: |
           python3 tools/blog_to_npc.py \
             --payload "$GITHUB_WORKSPACE/payload.json" \
+            --summary-out "$GITHUB_WORKSPACE/summary.json" \
             ${{ inputs.dry_run && '--dry-run' || '' }}
 
       - name: Commit to game repo
@@ -96,4 +97,27 @@ jobs:
           else
             git commit -m "gamev2: blog post #${{ inputs.issue_number }} moves its author's NPC"
             git push
+          fi
+
+      - name: Comment where the NPC can be found
+        # only when a placement happened (no NPC for the author -> empty -> no comment)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          # summary.json: {"placed":[{npc, room, spot, date}, ...]}; the
+          # pipeline processes one post, so 0 or 1 entry.
+          COUNT=$(jq '.placed | length' "$GITHUB_WORKSPACE/summary.json" 2>/dev/null || echo 0)
+          if [ "$COUNT" -lt 1 ]; then
+            echo "no NPC placed — no comment"
+            exit 0
+          fi
+          NPC=$(jq -r '.placed[0].npc'  "$GITHUB_WORKSPACE/summary.json")
+          ROOM=$(jq -r '.placed[0].room' "$GITHUB_WORKSPACE/summary.json")
+          SPOT=$(jq -r '.placed[0].spot' "$GITHUB_WORKSPACE/summary.json")
+          BODY="🎮 **${NPC}** has moved in the game! You'll find them by **${SPOT}** in **${ROOM}** — go say hi at https://game.devhou.se"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "DRY RUN — would comment: $BODY"
+          else
+            gh issue comment "${{ inputs.issue_number }}" -R "${{ github.repository }}" --body "$BODY"
           fi
