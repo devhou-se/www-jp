@@ -88,7 +88,9 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install anthropic
+        # requirements-photos.txt: post photos are pixelized into the game
+        # (tools/post_photos.py) — numpy/opencv-contrib/Pillow
+        run: pip install anthropic -r game/gamev2/tools/requirements-photos.txt
 
       - name: Rebuild NPCs from the year's posts
         working-directory: game/gamev2
@@ -106,7 +108,7 @@ jobs:
         run: |
           git config user.name "devhouse-game-bot"
           git config user.email "actions@devhou.se"
-          git add gamev2/config.json
+          git add gamev2/config.json gamev2/assets/photos
           if git diff --cached --quiet; then
             echo "no game changes"
           else

@@ -73,7 +73,9 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install anthropic
+        # requirements-photos.txt: post photos are pixelized into the game
+        # (tools/post_photos.py) — numpy/opencv-contrib/Pillow
+        run: pip install anthropic -r game/gamev2/tools/requirements-photos.txt
 
       - name: Generate dialogue and placement
         working-directory: game/gamev2
@@ -91,7 +93,7 @@ jobs:
         run: |
           git config user.name "devhouse-game-bot"
           git config user.email "actions@devhou.se"
-          git add gamev2/config.json
+          git add gamev2/config.json gamev2/assets/photos
           if git diff --cached --quiet; then
             echo "no game changes (author has no NPC?)"
           else
@@ -115,7 +117,11 @@ jobs:
           NPC=$(jq -r '.placed[0].npc'  "$GITHUB_WORKSPACE/summary.json")
           ROOM=$(jq -r '.placed[0].room' "$GITHUB_WORKSPACE/summary.json")
           SPOT=$(jq -r '.placed[0].spot' "$GITHUB_WORKSPACE/summary.json")
+          PHOTO=$(jq -r '.placed[0].photo // false' "$GITHUB_WORKSPACE/summary.json")
           BODY="🎮 **${NPC}** has moved in the game! You'll find them by **${SPOT}** in **${ROOM}** — go say hi at https://game.devhou.se"
+          if [ "$PHOTO" = "true" ]; then
+            BODY="$BODY 📸 They've hung up a photo from this post — talk to them to see it."
+          fi
           if [ "$DRY_RUN" = "true" ]; then
             echo "DRY RUN — would comment: $BODY"
           else
