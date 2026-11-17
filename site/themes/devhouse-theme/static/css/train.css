@@ -1,4 +1,4 @@
-img.devtrain {
+.devtrain {
     margin-bottom: -61px;
     height: 15px;
     width: 15px;
@@ -7,7 +7,7 @@ img.devtrain {
     transform: scale(-1, 1);
 }
 
-img.devtrain.p1 {
+.devtrain.p1 {
     height: 153px;
     width: 400px;
     background-position: 0px 1px;
@@ -36,6 +36,7 @@ img.devtrain.p1 {
 .bottom {
     position: fixed;
     bottom: 0;
+    pointer-events: none;
 }
 
 .animated-train {
