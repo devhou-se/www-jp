@@ -4,31 +4,28 @@
 <body>
 <div class="wrap" id="top">
     <div class="marquee"><span>☆★☆ ようこそ！デブハウスのホームページへ！！ ☆★☆ devhouse 3 は冬の雪国旅行です♪ ☆ キリ番を踏んだ人は掲示板に報告してね！ ☆ リンクフリーです ☆★☆</span></div>
-    <div class="title"><a href="/">❄ デブハウス☆ホームページ ❄</a><small>～ 開発者たちの日本旅行日記 ～ since 2024.03</small></div>
+    <div class="title"><a href="/"><img src="/img/heisei/logo.gif" alt="❄ デブハウス☆ホームページ ❄ ～ 開発者たちの日本旅行日記 ～ since 2024.03" border="0"></a></div>
     <hr class="rainbow">
     <table class="frame"><tr>
         <td class="menu">
             <div class="box">
-                <h2>■メニュー</h2>
-                <ul>
-                    <li><a href="/">トップ</a></li>
-                    <li><a href="/#mokuji">旅日記</a><span class="new blink">NEW!</span></li>
-                    <li><a href="/gallery/">写真館</a></li>
-                    <li><a href="/authors/">メンバー紹介</a></li>
-                    <li><a href="https://game.devhou.se">ゲーム</a></li>
-                    <li><a href="/feed.xml">RSS</a></li>
-                </ul>
+                {{ partial "h.html" (dict "n" "menu" "alt" "メニュー") }}
+                {{ partial "btn.html" (dict "n" "top" "href" "/" "alt" "トップ") }}<br>
+                {{ partial "btn.html" (dict "n" "nikki" "href" "/#mokuji" "alt" "旅日記 NEW!") }}<br>
+                {{ partial "btn.html" (dict "n" "photo" "href" "/gallery/" "alt" "写真館") }}<br>
+                {{ partial "btn.html" (dict "n" "members" "href" "/authors/" "alt" "メンバー紹介") }}<br>
+                {{ partial "btn.html" (dict "n" "game" "href" "https://game.devhou.se" "alt" "ゲーム") }}<br>
+                {{ partial "btn.html" (dict "n" "rss" "href" "/feed.xml" "alt" "RSS") }}
             </div>
             <div class="box counter">
-                <h2>■カウンター</h2>
+                {{ partial "h.html" (dict "n" "counter" "alt" "カウンター") }}
                 あなたは<br><span class="digits" id="digits"><b>0</b><b>0</b><b>3</b><b>1</b><b>3</b><b>3</b><b>7</b></span><br>人目のお客様です
                 <div class="kiriban blink" id="kiriban"></div>
             </div>
             <div class="box env">
-                <h2>■推奨環境</h2>
+                {{ partial "h.html" (dict "n" "env" "alt" "推奨環境") }}
                 IE5.0以上<br>800×600<br>文字サイズ「中」<br>
-                <span class="badge"><b>NETSCAPE</b><i>NOW!</i></span>
-                <span class="badge"><b>雪国</b><i>RING</i></span>
+                <img src="/img/heisei/88-ie5.gif" alt="IE5.0推奨"><img src="/img/heisei/88-netscape.gif" alt="Netscape NOW!"><img src="/img/heisei/88-yukiguni.gif" alt="雪国RING"><img src="/img/heisei/88-linkfree.gif" alt="リンクフリー">
             </div>
         </td>
         <td class="main">
@@ -38,7 +35,7 @@
     <div class="footer">
         このホームページの無断転載を禁じます。<br>
         Copyright (C) 2024-{{ now.Year }} devhou.se All Rights Reserved.<br>
-        <a href="#top">▲ページの先頭へ</a>
+        <a href="#top"><img src="/img/heisei/b-pagetop.gif" alt="▲ページの先頭へ" border="0"></a>
     </div>
 </div>
 <script>

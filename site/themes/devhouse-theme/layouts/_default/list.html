@@ -1,12 +1,14 @@
 {{ define "main" }}
 {{ if eq .Kind "taxonomy" }}
 <div class="box">
-    <h2>■メンバー紹介</h2>
+    {{ partial "h.html" (dict "n" "members" "alt" "メンバー紹介") }}
     {{ partial "members.html" . }}
 </div>
 {{ else }}
 <div class="box">
-    <h2>■{{ if eq .Kind "term" }}{{ partial "name.html" .Title }}の旅日記{{ else }}{{ .Title }}{{ end }}</h2>
+    {{ $h := printf "author-%s" (lower .Title) }}
+    {{ if and (eq .Kind "term") (fileExists (printf "themes/devhouse-theme/static/img/heisei/h-%s.gif" $h)) }}{{ partial "h.html" (dict "n" $h "alt" (printf "%sの旅日記" (partial "name.html" .Title))) }}
+    {{ else }}<h2 class="txt">■{{ if eq .Kind "term" }}{{ partial "name.html" .Title }}の旅日記{{ else }}{{ .Title }}{{ end }}</h2>{{ end }}
     {{ if eq .Kind "term" }}<p class="who"><img class="av" src="/images/avatars/{{ .Title }}.png" alt="" onerror="this.onerror=null;this.src='/images/game/char-james.png';"> {{ .Title }} ／ {{ len .Pages }}件 ／ <a href="{{ .RelPermalink }}feed.xml">RSS</a></p>{{ end }}
     <ul class="koshinlog">
         {{ range .Pages.ByDate.Reverse }}

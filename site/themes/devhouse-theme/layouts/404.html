@@ -1,8 +1,9 @@
 {{ define "main" }}
 <div class="box">
-    <h2>■エラー</h2>
+    {{ partial "h.html" (dict "n" "error" "alt" "エラー") }}
     <p>ページが見つかりませんでした m(_ _)m</p>
-    <div class="koji"><div>🚧 このページは工事中か、引っ越しました 🚧</div></div>
+    <div class="koji"><img src="/img/heisei/koji.gif" alt="工事中"></div>
+    <p>このページは工事中か、引っ越しました。</p>
     <p><a href="/">トップに戻る</a></p>
 </div>
 {{ end }}

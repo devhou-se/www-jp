@@ -2,7 +2,7 @@
 {{ $trip := "" }}
 {{ range partial "trips.html" site }}{{ if in .pages $ }}{{ $trip = .name }}{{ end }}{{ end }}
 <div class="box">
-    <h2>■旅日記</h2>
+    {{ partial "h.html" (dict "n" "nikki" "alt" "旅日記") }}
     <h1 class="post-title">{{ .Title }}</h1>
     <div class="post-meta">{{ .Date.Format "2006年1月2日 15:04" }}{{ with .Param "authors" }} ／ 書いた人：{{ range $i, $a := . }}{{ if $i }}・{{ end }}<a href="/authors/{{ $a }}/">{{ partial "name.html" $a }}</a>{{ end }}{{ end }}{{ with $trip }} ／ {{ . }}{{ end }}</div>
     {{ with .Params.en }}<div class="en" lang="en">{{ . }}</div>{{ end }}
@@ -13,9 +13,9 @@
     {{- partial "reactions.html" . -}}
     <hr class="rainbow">
     <div class="pager">
-        {{ with .PrevInSection }}<a href="{{ .RelPermalink }}">≪前の日記</a>{{ else }}<span></span>{{ end }}
-        <a href="/#mokuji">もくじに戻る</a>
-        {{ with .NextInSection }}<a href="{{ .RelPermalink }}">次の日記≫</a>{{ else }}<span></span>{{ end }}
+        {{ with .PrevInSection }}{{ partial "btn.html" (dict "n" "prev" "href" .RelPermalink "alt" "≪前の日記") }}{{ else }}<span></span>{{ end }}
+        {{ partial "btn.html" (dict "n" "mokuji" "href" "/#mokuji" "alt" "もくじに戻る") }}
+        {{ with .NextInSection }}{{ partial "btn.html" (dict "n" "next" "href" .RelPermalink "alt" "次の日記≫") }}{{ else }}<span></span>{{ end }}
     </div>
 </div>
 {{ end }}
