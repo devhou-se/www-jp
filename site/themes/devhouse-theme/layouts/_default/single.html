@@ -1,53 +1,23 @@
 {{ define "main" }}
 {{ $authors := .Param "authors" }}
-{{ $first := "" }}{{ if $authors }}{{ $first = index $authors 0 }}{{ end }}
-<article class="window post-window">
-
-    {{- /* NPC plate: author portrait + name plate, like the game's dialogue.
-           Devhouse members with a gamev2 character walk in place; everyone
-           else keeps their avatar. Mapping mirrors gamev2/tools/blog_to_npc.py */ -}}
-    {{ $spriteMap := dict "baely" "bailey" "damiante" "damian" "dbut2" "dylan" "jughents" "julia" }}
-    {{ $game := "" }}{{ if $first }}{{ $game = index $spriteMap (lower $first) }}{{ end }}
-    <div class="npc-plate">
-        {{ if $game }}
-        <div class="npc-portrait npc-sprite" style="background-image:url('/images/game/char-{{ $game }}-sheet.png')"
-             role="img" aria-label="{{ $first }}" title="{{ $first }}"></div>
-        {{ else if $first }}
-        <img class="npc-portrait" src="/images/avatars/{{ $first }}.png" alt="{{ $first }}"
-             onerror="this.onerror=null;this.src='/images/game/char-james.png';">
-        {{ else }}
-        <img class="npc-portrait" src="/images/game/char-james.png" alt="">
-        {{ end }}
-        <div>
-            <div class="npc-nameplate">{{ if $authors }}{{ delimit $authors " · " }}{{ else }}devhou.se{{ end }}</div>
-            <div class="npc-meta">投稿日 {{ .Date.Format "2006年01月02日15時04分" }}</div>
-        </div>
+{{ $key := .Date.Format "2006-01-02" }}
+{{ $n := 0 }}{{ range .Site.RegularPages }}{{ if eq (.Date.Format "2006-01-02") $key }}{{ $n = add $n 1 }}{{ end }}{{ end }}
+<article class="art">
+    {{ partial "ticket.html" (dict "date" .Date "count" $n "ticket" (index (site.Data.tickets | default dict) $key) "serial" (printf "%s" .File.BaseFileName) "small" true) }}
+    <h1>{{ .Title }}</h1>
+    <div class="by">
+        {{ with $authors }}<img class="av" src="/images/avatars/{{ index . 0 }}.png" alt="" onerror="this.onerror=null;this.src='/images/game/char-james.png';">
+        {{ range $i, $a := . }}{{ if $i }}, {{ end }}<a href="/authors/{{ $a }}/">{{ $a }}</a>{{ end }}{{ end }}
+        <a href="/#d{{ $key }}">{{ .Date.Format "1月2日" }}</a> {{ .Date.Format "15:04" }}
     </div>
-
-    <h1 class="post-title-main">{{ .Title }}</h1>
-
-    {{ if $authors }}
-    <a id="rss-button" href="/authors/{{ $first }}/feed.xml" title="RSS フィードを購読">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6.18,15.64A2.18,2.18 0 0,1 8.36,17.82C8.36,19 7.38,20 6.18,20C5,20 4,19 4,17.82A2.18,2.18 0 0,1 6.18,15.64M4,4.44A15.56,15.56 0 0,1 19.56,20H16.73A12.73,12.73 0 0,0 4,7.27V4.44M4,10.1A9.9,9.9 0 0,1 13.9,20H11.07A7.07,7.07 0 0,0 4,12.93V10.1Z" /></svg>
-        <span>{{ $first }} の RSS を購読</span>
-    </a>
-    {{ end }}
-
-    <hr class="pixel-hr">
-
-    <div class="コンテンツ post-body">
+    {{ with .Params.en }}<div class="enb" lang="en"><small>IN ENGLISH</small>{{ . }}</div>{{ end }}
+    <div class="post-body">
         {{ replaceRE `\[([^\]]*)\]{[^\}]*}` `$1` .Content | safeHTML }}
     </div>
-
     {{- partial "reactions.html" . -}}
-
-    {{- /* prev / journal / next */ -}}
-    <div class="post-nav">
-        {{ with .PrevInSection }}<a href="{{ .RelPermalink }}">◀ {{ .LinkTitle | truncate 22 }}</a>
-        {{ else }}<span class="disabled">◀ 最初の記事</span>{{ end }}
-        <a href="/#journal" class="to-journal">≡ JOURNAL</a>
-        {{ with .NextInSection }}<a href="{{ .RelPermalink }}">{{ .LinkTitle | truncate 22 }} ▶</a>
-        {{ else }}<span class="disabled">最新の記事 ▶</span>{{ end }}
-    </div>
+    <nav class="pn">
+        {{ with .PrevInSection }}<a href="{{ .RelPermalink }}">← {{ .LinkTitle | truncate 18 }}</a>{{ else }}<span></span>{{ end }}
+        {{ with .NextInSection }}<a href="{{ .RelPermalink }}">{{ .LinkTitle | truncate 18 }} →</a>{{ end }}
+    </nav>
 </article>
 {{ end }}

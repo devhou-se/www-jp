@@ -2,147 +2,17 @@
 <html lang="ja">
 {{- partial "head.html" . -}}
 <body>
-<div class="crt"></div>
-
-<header class="hud">{{- partial "hud.html" . -}}</header>
-
-<div class="stage">
+<header class="mast">
+    <a class="logo" href="/">devhou.se</a>
+    <nav>
+        <a href="/"{{ if .IsHome }} aria-current="page"{{ end }}>記事</a>
+        <a href="/gallery/">写真</a>
+        <a href="/authors/">メンバー</a>
+        <a href="https://game.devhou.se">ゲーム</a>
+    </nav>
+</header>
+<main>
     {{- block "main" . }}{{- end }}
-</div>
-
-<nav class="actionbar">{{- partial "actionbar.html" . -}}</nav>
-
-{{- partial "menu.html" . -}}
-
-<script>
-(function () {
-    // ---- theme (day / night) ------------------------------------------------
-    function applyTheme(theme) {
-        var d = document.getElementById('theme-dark'), l = document.getElementById('theme-light');
-        if (d && l) { d.disabled = (theme !== 'dark'); l.disabled = (theme === 'dark'); }
-    }
-    function pref() {
-        var t = localStorage.getItem('theme');
-        if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        return t;
-    }
-    function toggleTheme() {
-        var next = pref() === 'dark' ? 'light' : 'dark';
-        localStorage.setItem('theme', next); applyTheme(next);
-    }
-    applyTheme(pref());
-
-    // ---- in-game MENU overlay ----------------------------------------------
-    var overlay = document.getElementById('menu-overlay');
-    var menuItems = overlay ? Array.prototype.slice.call(overlay.querySelectorAll('li')) : [];
-    var menuSel = 0;
-    var stage = document.querySelector('.stage');
-    function paintMenu() { menuItems.forEach(function (li, i) { li.classList.toggle('sel', i === menuSel); }); }
-    function openMenu() {
-        if (!overlay) return;
-        overlay.classList.add('open'); menuSel = 0; paintMenu();
-        if (stage) stage.inert = true;                 // keep background out of the tab order
-        var f = overlay.querySelector('li a'); if (f) f.focus();
-    }
-    function closeMenu() {
-        if (overlay) overlay.classList.remove('open');
-        if (stage) stage.inert = false;
-    }
-    function menuOpen() { return overlay && overlay.classList.contains('open'); }
-    function actMenu() {
-        var li = menuItems[menuSel]; if (!li) return;
-        if (li.dataset.action === 'theme') { toggleTheme(); return; }
-        if (li.dataset.action === 'close') { closeMenu(); return; }
-        var a = li.querySelector('a'); if (a && a.getAttribute('href')) window.location.href = a.getAttribute('href');
-    }
-    document.querySelectorAll('[data-menu-open]').forEach(function (b) {
-        b.addEventListener('click', function (e) { e.preventDefault(); menuOpen() ? closeMenu() : openMenu(); });
-    });
-    if (overlay) {
-        overlay.addEventListener('click', function (e) { if (e.target === overlay) closeMenu(); });
-        menuItems.forEach(function (li, i) {
-            li.addEventListener('mouseenter', function () { menuSel = i; paintMenu(); });
-            var a = li.querySelector('a');
-            if (a) a.addEventListener('click', function (e) {
-                if (li.dataset.action) { e.preventDefault(); menuSel = i; actMenu(); }
-            });
-        });
-    }
-
-    // ---- on-page cursor over selectable rows (start menu + journal) ---------
-    function items() {
-        return Array.prototype.slice.call(document.querySelectorAll('.js-nav-item'))
-            .filter(function (el) { return el.offsetParent !== null; });
-    }
-    var sel = -1;
-    function paint() {
-        var list = items();
-        list.forEach(function (el, i) { el.classList.toggle('sel', i === sel); });
-        if (sel >= 0 && list[sel]) list[sel].scrollIntoView({ block: 'nearest' });
-    }
-    function move(d) {
-        var n = items().length; if (!n) return;
-        sel = sel < 0 ? (d > 0 ? 0 : n - 1) : Math.max(0, Math.min(n - 1, sel + d));
-        paint();
-    }
-    function act() {
-        var list = items(); if (sel < 0 || !list[sel]) return;
-        var href = list[sel].getAttribute('href'); if (href) window.location.href = href;
-    }
-    items().forEach(function (el) {
-        el.addEventListener('mouseenter', function () {
-            var list = items(); sel = list.indexOf(el); list.forEach(function (x, i) { x.classList.toggle('sel', i === sel); });
-        });
-    });
-
-    // ---- keyboard -----------------------------------------------------------
-    document.addEventListener('keydown', function (e) {
-        var typing = /^(INPUT|SELECT|TEXTAREA)$/.test((e.target.tagName || ''));
-        if (menuOpen()) {
-            if (e.key === 'Escape') { closeMenu(); }
-            else if (e.key === 'ArrowDown') { menuSel = (menuSel + 1) % menuItems.length; paintMenu(); e.preventDefault(); }
-            else if (e.key === 'ArrowUp') { menuSel = (menuSel - 1 + menuItems.length) % menuItems.length; paintMenu(); e.preventDefault(); }
-            else if (e.key === 'Enter') { actMenu(); e.preventDefault(); }
-            return;
-        }
-        if (typing) return;
-        if (e.key === 'm' || e.key === 'M') { openMenu(); e.preventDefault(); }
-        else if (e.key === 't' || e.key === 'T') { toggleTheme(); }
-        else if (e.key === 'ArrowDown') { move(1); e.preventDefault(); }
-        else if (e.key === 'ArrowUp') { move(-1); e.preventDefault(); }
-        else if (e.key === 'Enter') { act(); }
-        else if (e.key === 'Escape') { sel = -1; paint(); }
-    });
-
-    // ---- misc buttons -------------------------------------------------------
-    document.querySelectorAll('[data-theme-toggle]').forEach(function (b) {
-        b.addEventListener('click', function (e) { e.preventDefault(); toggleTheme(); });
-    });
-    document.querySelectorAll('[data-scroll]').forEach(function (b) {
-        b.addEventListener('click', function (e) {
-            var t = document.querySelector(b.getAttribute('data-scroll'));
-            if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-        });
-    });
-
-    // ---- author filter (journal) -------------------------------------------
-    var af = document.getElementById('author-filter');
-    if (af) {
-        function filter(author) {
-            document.querySelectorAll('.entry').forEach(function (el) {
-                var a = el.getAttribute('data-authors') || '';
-                var show = !author || a.split(',').map(function (s) { return s.trim(); }).indexOf(author) !== -1;
-                el.classList.toggle('is-hidden', !show);
-            });
-            document.querySelectorAll('.date-group').forEach(function (g) {
-                g.classList.toggle('is-hidden', g.querySelectorAll('.entry:not(.is-hidden)').length === 0);
-            });
-        }
-        var url = new URLSearchParams(window.location.search).get('author');
-        if (url) { af.value = url; filter(url); }
-        af.addEventListener('change', function () { filter(this.value); });
-    }
-})();
-</script>
+</main>
 </body>
 </html>

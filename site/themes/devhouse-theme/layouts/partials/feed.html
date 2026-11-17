@@ -1,0 +1,7 @@
+{{ range where (.GroupByPublishDate "2006-01-02" "desc") "Key" "ne" "0001-01-01" }}
+{{ $first := index .Pages 0 }}
+<section class="day" id="d{{ .Key }}">
+    {{ partial "ticket.html" (dict "date" $first.Date "count" (len .Pages) "ticket" (index (site.Data.tickets | default dict) .Key) "serial" (printf "%s-%02d" $first.File.BaseFileName (len .Pages))) }}
+    {{ range .Pages.ByDate.Reverse }}{{ partial "entry.html" . }}{{ end }}
+</section>
+{{ end }}

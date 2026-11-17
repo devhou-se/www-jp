@@ -1,0 +1,11 @@
+{{- $a := .Param "authors" -}}
+{{- $img := "" -}}
+{{- with findRESubmatch `assets/(?:[0-9]+/)?([0-9a-f-]{36})` .RawContent 1 }}{{ $img = index (index . 0) 1 }}{{ end -}}
+<a class="entry" href="{{ .RelPermalink }}">
+    <div>
+        <div class="who">{{ with $a }}<img class="av" src="/images/avatars/{{ index . 0 }}.png" alt="" onerror="this.onerror=null;this.src='/images/game/char-james.png';"> {{ delimit . ", " }} {{ end }}{{ .Date.Format "15:04" }}</div>
+        <h3>{{ .LinkTitle }}</h3>
+        {{ with .Params.en }}<div class="en" lang="en">{{ . }}</div>{{ end }}
+    </div>
+    {{ with $img }}<img class="thumb" src="https://storage.googleapis.com/static.devh.se/images/{{ . }}_1.jpeg" alt="" loading="lazy">{{ end }}
+</a>
