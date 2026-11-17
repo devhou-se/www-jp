@@ -1,44 +1,32 @@
 .devtrain {
-    margin-bottom: -61px;
-    height: 15px;
-    width: 15px;
-    background-image: url("/images/devtrain.png");
+    height: 97px;
+    width: 1160px;
+    background-image: url("/images/devtrain-long.png");
     background-repeat: no-repeat;
     transform: scale(-1, 1);
 }
 
-.devtrain.p1 {
-    height: 153px;
-    width: 400px;
-    background-position: 0px 1px;
-}
-
+/* Enters from the left straight away, crosses in ~30s, then waits ~6s
+   off the right edge before coming round again. */
 @keyframes moveTrain {
     0% {
-        transform: translateX(-100vw);
+        transform: translateX(-100%);
     }
-    50% {
+    84% {
         transform: translateX(100vw);
-    }
-    50.01% {
-        transform: translateX(100vw);
-        display: none;
-    }
-    50.02% {
-        display: block;
-        transform: translateX(-100vw);
     }
     100% {
-        transform: translateX(-100vw);
+        transform: translateX(100vw);
     }
 }
 
 .bottom {
     position: fixed;
     bottom: 0;
+    left: 0;
     pointer-events: none;
 }
 
 .animated-train {
-    animation: moveTrain 60s linear infinite;
+    animation: moveTrain 36s linear infinite;
 }
