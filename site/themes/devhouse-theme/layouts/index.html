@@ -1,3 +1,30 @@
 {{ define "main" }}
-{{ partial "feed.html" .Site.RegularPages }}
+{{ $trips := partial "trips.html" site }}
+<div class="box">
+    <h2>■更新履歴</h2>
+    <ul class="koshinlog">
+        {{ range $i, $p := first 5 site.RegularPages.ByDate.Reverse }}
+        <li><span class="d">{{ .Date.Format "2006/01/02" }}</span> {{ with .Param "authors" }}{{ partial "name.html" (index . 0) }}が{{ end }}「<a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>」をUP{{ if lt $i 2 }}<span class="new">NEW</span>{{ end }}</li>
+        {{ end }}
+    </ul>
+</div>
+{{ with index $trips 0 }}{{ if not .pages }}
+<div class="koji"><div>🚧 {{ .name }} ❄ 雪国編 ❄ ただいま準備中！ 🚧</div></div>
+{{ end }}{{ end }}
+<div class="box" id="mokuji">
+    <h2>■旅日記 もくじ</h2>
+    {{ range $trips }}{{ if .pages }}
+    <div class="trip-h">{{ .name }}（{{ .season }}） {{ .note }}</div>
+    <ul class="koshinlog">
+        {{ range .pages.ByDate.Reverse }}
+        {{ $photos := add (len (findRE `!\[` .RawContent)) (len (findRE `lazyimage` .RawContent)) }}
+        <li><span class="d">{{ .Date.Format "2006/01/02" }}</span> <a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a> <small>{{ with .Param "authors" }}by {{ partial "name.html" (index . 0) }}{{ end }}{{ if $photos }} 📷×{{ $photos }}{{ end }}</small></li>
+        {{ end }}
+    </ul>
+    {{ end }}{{ end }}
+</div>
+<div class="box">
+    <h2>■メンバー紹介</h2>
+    {{ partial "members.html" . }}
+</div>
 {{ end }}

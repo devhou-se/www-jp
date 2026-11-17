@@ -1,18 +1,18 @@
 {{ define "main" }}
 {{ if eq .Kind "taxonomy" }}
-<section class="page">
-    <h1>メンバー</h1>
-    <ul class="roster">
-        {{ range partial "party-order.html" site }}
-        <li><a href="/authors/{{ .name }}/"><img class="av" src="/images/avatars/{{ .name }}.png" alt="" onerror="this.onerror=null;this.src='/images/game/char-james.png';"> {{ .name }}</a><span>{{ .count }}件</span></li>
+<div class="box">
+    <h2>■メンバー紹介</h2>
+    {{ partial "members.html" . }}
+</div>
+{{ else }}
+<div class="box">
+    <h2>■{{ if eq .Kind "term" }}{{ partial "name.html" .Title }}の旅日記{{ else }}{{ .Title }}{{ end }}</h2>
+    {{ if eq .Kind "term" }}<p class="who"><img class="av" src="/images/avatars/{{ .Title }}.png" alt="" onerror="this.onerror=null;this.src='/images/game/char-james.png';"> {{ .Title }} ／ {{ len .Pages }}件 ／ <a href="{{ .RelPermalink }}feed.xml">RSS</a></p>{{ end }}
+    <ul class="koshinlog">
+        {{ range .Pages.ByDate.Reverse }}
+        <li><span class="d">{{ .Date.Format "2006/01/02" }}</span> <a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></li>
         {{ end }}
     </ul>
-</section>
-{{ else }}
-<section class="page">
-    <h1>{{ if eq .Kind "term" }}<img class="av big" src="/images/avatars/{{ .Title }}.png" alt="" onerror="this.onerror=null;this.src='/images/game/char-james.png';"> {{ end }}{{ .Title }}</h1>
-    <p class="sub">{{ len .Pages }}件{{ if eq .Kind "term" }} <a href="{{ .RelPermalink }}feed.xml">RSS</a>{{ end }}</p>
-</section>
-{{ partial "feed.html" .Pages }}
+</div>
 {{ end }}
 {{ end }}

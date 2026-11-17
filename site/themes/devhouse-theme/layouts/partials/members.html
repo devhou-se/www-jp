@@ -1,0 +1,5 @@
+<div class="members">
+    {{ range partial "party-order.html" site }}{{ if ne .name "devhouse" }}
+    <a href="/authors/{{ .name }}/"><img src="/images/avatars/{{ .name }}.png" alt="" onerror="this.onerror=null;this.src='/images/game/char-james.png';"><br>{{ partial "name.html" .name }}<br><small>{{ .count }}件</small></a>
+    {{ end }}{{ end }}
+</div>
