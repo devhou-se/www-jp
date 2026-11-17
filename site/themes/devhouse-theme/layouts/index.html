@@ -1,20 +1,39 @@
 {{ define "main" }}
 {{ $trips := partial "trips.html" site }}
+<div class="box aisatsu">
+    {{ partial "h.html" (dict "n" "aisatsu" "alt" "ごあいさつ") }}
+    <p>デベーハウスのホームページです。日本各地への旅行に関するリソースが見つかります。定期的に最新情報を入手するには、当社のブログをフォローしてください。</p>
+    <p>デベーハウスの旅のパート1は東京です。私たちは3月22日から3月27日まで東京に滞在します。そこから、開発ハウスの旅のパート2を実行します。その後4月1日まで大阪に滞在します。</p>
+    <p>デベーハウスのメンバー</p>
+    <ul>
+        <li>ベイリー<img class="絵文字 絵文字-ピンク"/></li>
+        <li>ダミアン<img class="絵文字 絵文字-頭蓋骨"/></li>
+        <li>ディラン<img class="絵文字 絵文字-ピエロ"/></li>
+        <li>ジェームス<img class="絵文字 絵文字-目"/></li>
+        <li>ジュリア<img class="絵文字 絵文字-虹"/></li>
+    </ul>
+    <hr class="rainbow">
+    <p><b class="oshirase">デベーハウス2のお知らせ</b></p>
+    <p>デベーハウス2は2025年10月26日から11月17日まで行われます。今回の旅では、仙台、東京、福岡、大阪を訪れます。また、一部のメンバーは金沢にも足を運ぶ予定です。</p>
+    <p>継続メンバー：ベイリー・ダミアン・ディラン・ジュリア</p>
+    <p>🌟 新メンバー：ヤシュク・グロリア・ヴィヴ</p>
+    <p>（※ジェームスはデベーハウス2には参加しません。）</p>
+</div>
 <div class="box">
-    <h2>■更新履歴</h2>
+    {{ partial "h.html" (dict "n" "koshin" "alt" "更新履歴") }}
     <ul class="koshinlog">
         {{ range $i, $p := first 5 site.RegularPages.ByDate.Reverse }}
-        <li><span class="d">{{ .Date.Format "2006/01/02" }}</span> {{ with .Param "authors" }}{{ partial "name.html" (index . 0) }}が{{ end }}「<a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>」をUP{{ if lt $i 2 }}<span class="new">NEW</span>{{ end }}</li>
+        <li><span class="d">{{ .Date.Format "2006/01/02" }}</span> {{ with .Param "authors" }}{{ partial "name.html" (index . 0) }}が{{ end }}「<a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>」をUP{{ if lt $i 2 }} <img src="/img/heisei/new.gif" alt="NEW">{{ end }}</li>
         {{ end }}
     </ul>
 </div>
 {{ with index $trips 0 }}{{ if not .pages }}
-<div class="koji"><div>🚧 {{ .name }} ❄ 雪国編 ❄ ただいま準備中！ 🚧</div></div>
+<div class="koji"><img src="/img/heisei/koji.gif" alt="🚧 {{ .name }} {{ .note }} ただいま準備中！ 🚧"></div>
 {{ end }}{{ end }}
 <div class="box" id="mokuji">
-    <h2>■旅日記 もくじ</h2>
+    {{ partial "h.html" (dict "n" "mokuji" "alt" "旅日記 もくじ") }}
     {{ range $trips }}{{ if .pages }}
-    <div class="trip-h">{{ .name }}（{{ .season }}） {{ .note }}</div>
+    <div class="trip-h"><img src="/img/heisei/trip-{{ .name | urlize }}.gif" alt="{{ .name }}（{{ .season }}） {{ .note }}"></div>
     <ul class="koshinlog">
         {{ range .pages.ByDate.Reverse }}
         {{ $photos := add (len (findRE `!\[` .RawContent)) (len (findRE `lazyimage` .RawContent)) }}
@@ -24,7 +43,7 @@
     {{ end }}{{ end }}
 </div>
 <div class="box">
-    <h2>■メンバー紹介</h2>
+    {{ partial "h.html" (dict "n" "members" "alt" "メンバー紹介") }}
     {{ partial "members.html" . }}
 </div>
 {{ end }}

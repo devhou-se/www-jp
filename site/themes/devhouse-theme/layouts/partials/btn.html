@@ -1,0 +1,2 @@
+{{- /* Image button with a mouseover swap: {{ partial "btn.html" (dict "n" "top" "href" "/" "alt" "トップ") }} */ -}}
+<a href="{{ .href }}"><img src="/img/heisei/b-{{ .n }}.gif" onmouseover="this.src='/img/heisei/b-{{ .n }}-on.gif'" onmouseout="this.src='/img/heisei/b-{{ .n }}.gif'" alt="{{ .alt }}" border="0"></a>
