@@ -1,23 +1,21 @@
 {{ define "main" }}
-{{ $authors := .Param "authors" }}
-{{ $key := .Date.Format "2006-01-02" }}
-{{ $n := 0 }}{{ range .Site.RegularPages }}{{ if eq (.Date.Format "2006-01-02") $key }}{{ $n = add $n 1 }}{{ end }}{{ end }}
-<article class="art">
-    {{ partial "ticket.html" (dict "date" .Date "count" $n "ticket" (index (site.Data.tickets | default dict) $key) "serial" (printf "%s" .File.BaseFileName) "small" true) }}
-    <h1>{{ .Title }}</h1>
-    <div class="by">
-        {{ with $authors }}<img class="av" src="/images/avatars/{{ index . 0 }}.png" alt="" onerror="this.onerror=null;this.src='/images/game/char-james.png';">
-        {{ range $i, $a := . }}{{ if $i }}, {{ end }}<a href="/authors/{{ $a }}/">{{ $a }}</a>{{ end }}{{ end }}
-        <a href="/#d{{ $key }}">{{ .Date.Format "1月2日" }}</a> {{ .Date.Format "15:04" }}
-    </div>
-    {{ with .Params.en }}<div class="enb" lang="en"><small>IN ENGLISH</small>{{ . }}</div>{{ end }}
+{{ $trip := "" }}
+{{ range partial "trips.html" site }}{{ if in .pages $ }}{{ $trip = .name }}{{ end }}{{ end }}
+<div class="box">
+    <h2>■旅日記</h2>
+    <h1 class="post-title">{{ .Title }}</h1>
+    <div class="post-meta">{{ .Date.Format "2006年1月2日 15:04" }}{{ with .Param "authors" }} ／ 書いた人：{{ range $i, $a := . }}{{ if $i }}・{{ end }}<a href="/authors/{{ $a }}/">{{ partial "name.html" $a }}</a>{{ end }}{{ end }}{{ with $trip }} ／ {{ . }}{{ end }}</div>
+    {{ with .Params.en }}<div class="en" lang="en">{{ . }}</div>{{ end }}
+    <hr class="rainbow">
     <div class="post-body">
         {{ replaceRE `\[([^\]]*)\]{[^\}]*}` `$1` .Content | safeHTML }}
     </div>
     {{- partial "reactions.html" . -}}
-    <nav class="pn">
-        {{ with .PrevInSection }}<a href="{{ .RelPermalink }}">← {{ .LinkTitle | truncate 18 }}</a>{{ else }}<span></span>{{ end }}
-        {{ with .NextInSection }}<a href="{{ .RelPermalink }}">{{ .LinkTitle | truncate 18 }} →</a>{{ end }}
-    </nav>
-</article>
+    <hr class="rainbow">
+    <div class="pager">
+        {{ with .PrevInSection }}<a href="{{ .RelPermalink }}">≪前の日記</a>{{ else }}<span></span>{{ end }}
+        <a href="/#mokuji">もくじに戻る</a>
+        {{ with .NextInSection }}<a href="{{ .RelPermalink }}">次の日記≫</a>{{ else }}<span></span>{{ end }}
+    </div>
+</div>
 {{ end }}

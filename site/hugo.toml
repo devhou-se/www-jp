@@ -23,6 +23,31 @@ copyright = '© 2025 devhou.se'
   galleryThumbnailMinWidth = "120px"
   galleryThumbnailMinWidthMobile = "120px"
 
+  # Trips for the 旅日記 index; each owns the posts from its date until the next.
+  [[params.trips]]
+    name = "devhouse 1"
+    season = "春"
+    note = "2024.03 - 04"
+    from = "2024-01-01"
+  [[params.trips]]
+    name = "devhouse 2"
+    season = "秋"
+    note = "2025.10 - 11"
+    from = "2025-01-01"
+  [[params.trips]]
+    name = "devhouse 3"
+    season = "冬"
+    note = "雪国編"
+    from = "2026-06-01"
+
+  [params.names]
+    baely = "ベイリー"
+    damiante = "ダミアン"
+    dbut2 = "ディラン"
+    Jughents = "ジュリア"
+    yasv98 = "ヤシュク"
+    bautistv = "バウティスタ"
+
 [author]
   name = "devhou.se"
   email = "blog@devhou.se"

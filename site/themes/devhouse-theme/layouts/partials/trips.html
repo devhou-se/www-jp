@@ -1,0 +1,13 @@
+{{- /* Trips newest first, each a dict {name, season, note, pages}. A trip owns
+       every post from its `from` date until the next trip starts.
+       Call with the site: {{ partial "trips.html" site }} */ -}}
+{{- $rows := slice -}}
+{{- $until := "" -}}
+{{- range sort site.Params.trips "from" "desc" -}}
+    {{- $from := time .from -}}
+    {{- $pages := where site.RegularPages "Date" "ge" $from -}}
+    {{- with $until }}{{ $pages = where $pages "Date" "lt" . }}{{ end -}}
+    {{- $rows = $rows | append (dict "name" .name "season" .season "note" .note "pages" $pages) -}}
+    {{- $until = $from -}}
+{{- end -}}
+{{- return $rows -}}

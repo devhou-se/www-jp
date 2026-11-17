@@ -2,17 +2,53 @@
 <html lang="ja">
 {{- partial "head.html" . -}}
 <body>
-<header class="mast">
-    <a class="logo" href="/">devhou.se</a>
-    <nav>
-        <a href="/"{{ if .IsHome }} aria-current="page"{{ end }}>記事</a>
-        <a href="/gallery/">写真</a>
-        <a href="/authors/">メンバー</a>
-        <a href="https://game.devhou.se">ゲーム</a>
-    </nav>
-</header>
-<main>
-    {{- block "main" . }}{{- end }}
-</main>
+<div class="wrap" id="top">
+    <div class="marquee"><span>☆★☆ ようこそ！デブハウスのホームページへ！！ ☆★☆ devhouse 3 は冬の雪国旅行です♪ ☆ キリ番を踏んだ人は掲示板に報告してね！ ☆ リンクフリーです ☆★☆</span></div>
+    <div class="title"><a href="/">❄ デブハウス☆ホームページ ❄</a><small>～ 開発者たちの日本旅行日記 ～ since 2024.03</small></div>
+    <hr class="rainbow">
+    <table class="frame"><tr>
+        <td class="menu">
+            <div class="box">
+                <h2>■メニュー</h2>
+                <ul>
+                    <li><a href="/">トップ</a></li>
+                    <li><a href="/#mokuji">旅日記</a><span class="new blink">NEW!</span></li>
+                    <li><a href="/gallery/">写真館</a></li>
+                    <li><a href="/authors/">メンバー紹介</a></li>
+                    <li><a href="https://game.devhou.se">ゲーム</a></li>
+                    <li><a href="/feed.xml">RSS</a></li>
+                </ul>
+            </div>
+            <div class="box counter">
+                <h2>■カウンター</h2>
+                あなたは<br><span class="digits" id="digits"><b>0</b><b>0</b><b>3</b><b>1</b><b>3</b><b>3</b><b>7</b></span><br>人目のお客様です
+                <div class="kiriban blink" id="kiriban"></div>
+            </div>
+            <div class="box env">
+                <h2>■推奨環境</h2>
+                IE5.0以上<br>800×600<br>文字サイズ「中」<br>
+                <span class="badge"><b>NETSCAPE</b><i>NOW!</i></span>
+                <span class="badge"><b>雪国</b><i>RING</i></span>
+            </div>
+        </td>
+        <td class="main">
+            {{- block "main" . }}{{- end }}
+        </td>
+    </tr></table>
+    <div class="footer">
+        このホームページの無断転載を禁じます。<br>
+        Copyright (C) 2024-{{ now.Year }} devhou.se All Rights Reserved.<br>
+        <a href="#top">▲ページの先頭へ</a>
+    </div>
+</div>
+<script>
+// Hit counter: ticks once per visit, with a kiriban every so often.
+(function () {
+    var hits = 31337;
+    try { hits = +(localStorage.getItem('dh-hits') || 31336) + 1; localStorage.setItem('dh-hits', hits); } catch (_) {}
+    document.getElementById('digits').innerHTML = String(hits).padStart(7, '0').split('').map(function (d) { return '<b>' + d + '</b>'; }).join('');
+    if (hits % 10 === 0 || /(\d)\1{2,}$/.test(hits)) document.getElementById('kiriban').textContent = '★キリ番ゲット！★';
+})();
+</script>
 </body>
 </html>

@@ -1,0 +1,3 @@
+{{- /* Katakana display name for a GitHub username: {{ partial "name.html" "baely" }} */ -}}
+{{- $name := index (site.Params.names | default dict) (lower .) | default . -}}
+{{- return $name -}}

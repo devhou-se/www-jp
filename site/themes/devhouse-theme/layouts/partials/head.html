@@ -1,12 +1,13 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ if .IsHome }}devhou.se{{ else }}{{ .Title }} · devhou.se{{ end }}</title>
+    <title>{{ if .IsHome }}★デブハウスのホームページ★{{ else }}{{ .Title }} - デブハウスのホームページ{{ end }}</title>
     {{ with .Description | default .Site.Params.description }}<meta name="description" content="{{ . }}">{{ end }}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
-    <link rel="stylesheet" href="/css/ticket.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap">
+    <link rel="stylesheet" href="/css/heisei.css">
+    <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="devhou.se">
     <script src="/js/lazy.js"></script>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
