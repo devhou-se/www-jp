@@ -1,18 +1,17 @@
 .devtrain {
-    height: 97px;
-    width: 1160px;
-    background-image: url("/images/devtrain-long.png");
+    height: 96px;
+    width: 2587px;
+    background-image: url("/images/shinkansen.png");
     background-repeat: no-repeat;
-    transform: scale(-1, 1);
 }
 
-/* Enters from the left straight away, crosses in ~30s, then waits ~6s
+/* Enters from the left straight away, crosses in ~9s, then waits ~3s
    off the right edge before coming round again. */
 @keyframes moveTrain {
     0% {
         transform: translateX(-100%);
     }
-    84% {
+    75% {
         transform: translateX(100vw);
     }
     100% {
@@ -28,5 +27,5 @@
 }
 
 .animated-train {
-    animation: moveTrain 36s linear infinite;
+    animation: moveTrain 12s linear infinite;
 }
