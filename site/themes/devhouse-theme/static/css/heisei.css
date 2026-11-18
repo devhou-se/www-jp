@@ -93,3 +93,6 @@ a.reaction-badge:hover { background: #ffff00; }
     .marquee span, .blink { animation: none; }
     .marquee span { padding-left: 8px; }
 }
+
+.kira { position: absolute; pointer-events: none; z-index: 1000; line-height: 1; animation: kira .9s linear forwards; }
+@keyframes kira { from { opacity: 1; transform: translateY(0) rotate(0); } to { opacity: 0; transform: translateY(24px) rotate(180deg); } }
